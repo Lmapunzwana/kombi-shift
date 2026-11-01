@@ -1,0 +1,25 @@
+{
+    "unityVersion": "6000.6.2f1",
+    "mode": "automated prototype smoke; no human input simulated",
+    "passed": [
+        "generated player, camera and passenger",
+        "seven preallocated traffic vehicles",
+        "startup menu",
+        "begin resets state",
+        "Rigidbody advances in fixed timestep",
+        "pickup starts boarding coroutine",
+        "pause holds boarding animation",
+        "boarding completes and hides passenger",
+        "drop-off pays fare once and publishes event",
+        "excessive fare refused",
+        "damage updates condition and cost",
+        "station refills stopped vehicle",
+        "empty fuel ends shift",
+        "rain challenge starts with higher remittance",
+        "pause stops simulation",
+        "successful shift completion",
+        "replay resets economy and progress",
+        "return to menu"
+    ],
+    "failed": []
+}

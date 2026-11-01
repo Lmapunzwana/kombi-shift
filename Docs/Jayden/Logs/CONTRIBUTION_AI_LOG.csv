@@ -1,0 +1,5 @@
+date,owner,tool,purpose,output,human_review,validation
+2026-11-01,Jayden (review pending),OpenAI Codex,Read sprint plan and GitHub; prepare initial art direction and planning files,Docs/Jayden,Not yet reviewed by Jayden,Local structure and interaction checks only; no Unity import build or peer review
+2026-11-01,Jayden (review pending),OpenAI Codex,Compare supplied assessment brief with Sprint 0 art pack,Docs/Jayden/ASSESSMENT_ALIGNMENT.md,Not yet reviewed by Jayden,Read PDF text and visually inspected rubric page; implementation gates pending
+2026-11-01,Jayden (review pending),OpenAI Codex,Generate isolated Unity starter scene and procedural gameplay prototype,UnityStarter/Assets/KombiShiftJayden,Human review pending,Batch compilation passed Unity 6000.6.2f1; pinned team Editor and play/build tests pending
+2026-11-01,Jayden (review pending),OpenAI Codex,Set up complete isolated Unity preview; build run inspect and fix runtime issues; prepare repo update,UnityStarter and Run_Kombi_Shift.sh,Human review pending,Unity 6000.6.2f1 Linux build; 18 automated smoke assertions passed; native city/rain screenshots inspected; human input and team HDRP untested
