@@ -56,27 +56,49 @@ namespace KombiShift.JaydenStarter
         }
         Transform Bus(string name,Color color,Transform parent)
         {
-            var root=Group(name,parent,Vector3.zero);var body=Mat(color,.3f);var cream=Mat(C("E7E2D2"),.25f);var glass=Mat(C("142E38"),.65f);var rubber=Mat(C("182023"));var trim=Mat(C("687478"),.55f);var stripe=Mat(C("E9B746"));var red=Mat(C("B92E28"));
-            Rounded("Lower body",new Vector3(0,.7f,0),new Vector3(1.86f,1.25f,4.55f),.14f,body,root);
-            Rounded("Cream roof",new Vector3(0,1.52f,-.12f),new Vector3(1.8f,.94f,4.03f),.14f,cream,root);
+            var root=Group(name,parent,Vector3.zero);var body=Mat(color,.18f);var cream=Mat(C("D8D5C9"),.18f);var glass=Mat(C("44575D"),.25f);var rubber=Mat(C("182023"));var trim=Mat(C("687478"),.55f);var stripe=Mat(C("405D6C"));var plate=Mat(C("D3C9A3"));var red=Mat(C("B92E28"));
+            bool playerModel=name=="Player Kombi";
+            if(playerModel){
+                Rounded("Floor and sill",new Vector3(0,.25f,0),new Vector3(1.86f,.35f,4.55f),.1f,body,root);
+                Rounded("Front body",new Vector3(0,.7f,1.7f),new Vector3(1.86f,1.25f,1.15f),.12f,body,root);
+                Rounded("Rear body",new Vector3(0,.7f,-1.25f),new Vector3(1.86f,1.25f,2.05f),.12f,body,root);
+                Box("Right side",new Vector3(.86f,.76f,0),new Vector3(.14f,1.35f,4.3f),body,root);
+                Rounded("Roof",new Vector3(0,1.88f,-.12f),new Vector3(1.8f,.26f,4.03f),.1f,cream,root);
+                Box("Right cabin frame",new Vector3(.86f,1.5f,-.12f),new Vector3(.13f,.8f,3.9f),cream,root);
+                Box("Rear left frame",new Vector3(-.86f,1.5f,-1.3f),new Vector3(.13f,.8f,1.8f),cream,root);
+                Box("Front left frame",new Vector3(-.86f,1.5f,1.5f),new Vector3(.13f,.8f,.8f),cream,root);
+                Box("Rear cabin frame",new Vector3(0,1.5f,-2.11f),new Vector3(1.7f,.8f,.08f),cream,root);
+                Box("Front cabin frame",new Vector3(0,1.5f,1.86f),new Vector3(1.7f,.8f,.08f),cream,root);
+                for(int row=0;row<3;row++)Box("Passenger bench",new Vector3(.12f,.61f,-1.5f+row*.78f),new Vector3(1.15f,.24f,.55f),rubber,root);
+                slidingDoor=Group("Working sliding passenger door",root,new Vector3(0,0,.45f));
+                Box("Door lower panel",new Vector3(-.955f,.75f,0),new Vector3(.08f,1.22f,1.3f),body,slidingDoor);
+                Box("Door upper frame",new Vector3(-.91f,1.5f,0),new Vector3(.08f,.78f,1.3f),cream,slidingDoor);
+                Box("Door glass",new Vector3(-.962f,1.53f,0),new Vector3(.025f,.53f,1.13f),glass,slidingDoor);
+                Box("Door livery",new Vector3(-1.002f,.88f,0),new Vector3(.025f,.18f,1.3f),stripe,slidingDoor);
+                Box("Door handle",new Vector3(-1.015f,1.02f,.4f),new Vector3(.035f,.05f,.19f),trim,slidingDoor);
+            } else {
+                Rounded("Lower body",new Vector3(0,.7f,0),new Vector3(1.86f,1.25f,4.55f),.14f,body,root);
+                Rounded("Cream roof",new Vector3(0,1.52f,-.12f),new Vector3(1.8f,.94f,4.03f),.14f,cream,root);
+            }
             Rounded("Front windscreen",new Vector3(0,1.52f,1.905f),new Vector3(1.54f,.61f,.045f),.02f,glass,root);
             Rounded("Rear windscreen",new Vector3(0,1.54f,-2.155f),new Vector3(1.51f,.55f,.045f),.02f,glass,root);
             Box("Rear route stripe",new Vector3(0,.87f,-2.29f),new Vector3(1.74f,.18f,.035f),stripe,root);
             Box("Rear bumper",new Vector3(0,.23f,-2.34f),new Vector3(1.9f,.15f,.14f),rubber,root);
             Box("Front bumper",new Vector3(0,.23f,2.34f),new Vector3(1.9f,.15f,.14f),rubber,root);
             Box("Front grille",new Vector3(0,.53f,2.29f),new Vector3(.85f,.24f,.04f),rubber,root);
-            Box("Rear number plate",new Vector3(0,.42f,-2.29f),new Vector3(.69f,.2f,.04f),stripe,root);
+            Box("Rear number plate",new Vector3(0,.42f,-2.29f),new Vector3(.69f,.2f,.04f),plate,root);
             Label("ABX 0426",root,new Vector3(0,.42f,-2.318f),.025f,C("162C31"),Quaternion.identity);
             Label(name=="Player Kombi"?"CITYLINK":"COMMUTER",root,new Vector3(0,1.58f,-2.185f),.033f,C("F4EBD8"),Quaternion.identity);
-            Label("HARARE • CITY RANK",root,new Vector3(0,1.82f,-2.18f),.018f,C("E9B746"),Quaternion.identity);
+            Label("HARARE • CITY RANK",root,new Vector3(0,1.82f,-2.18f),.018f,C("CECDBF"),Quaternion.identity);
             for(int side=-1;side<=1;side+=2){
                 Box("Tail lights",new Vector3(side*.73f,.49f,-2.29f),new Vector3(.16f,.31f,.035f),red,root);
                 Box("Headlights",new Vector3(side*.66f,.63f,2.29f),new Vector3(.35f,.2f,.05f),cream,root);
-                Box("Livery",new Vector3(side*.94f,.88f,0),new Vector3(.024f,.18f,4.25f),stripe,root);
+                if(playerModel&&side<0){Box("Rear livery",new Vector3(-.94f,.88f,-1.25f),new Vector3(.024f,.18f,2.05f),stripe,root);Box("Front livery",new Vector3(-.94f,.88f,1.7f),new Vector3(.024f,.18f,1.15f),stripe,root);}
+                else Box("Livery",new Vector3(side*.94f,.88f,0),new Vector3(.024f,.18f,4.25f),stripe,root);
                 Box("Window rail",new Vector3(side*.912f,1.16f,-.16f),new Vector3(.022f,.04f,3.8f),rubber,root);
-                for(int i=0;i<4;i++)Rounded("Side window",new Vector3(side*.911f,1.51f,-1.55f+i*.9f),new Vector3(.035f,.54f,.75f),.015f,glass,root);
-                Box("Door seam",new Vector3(side*.944f,.7f,.95f),new Vector3(.025f,1.05f,.025f),rubber,root);
-                Box("Door handle",new Vector3(side*.963f,1.04f,.64f),new Vector3(.045f,.045f,.18f),trim,root);
+                for(int i=0;i<4;i++){if(playerModel&&side<0&&i==2)continue;float z=playerModel&&side<0&&i==3?1.45f:-1.55f+i*.9f;Rounded("Side window",new Vector3(side*.94f,1.51f,z),new Vector3(.035f,.54f,.65f),.015f,glass,root);}
+                if(!(playerModel&&side<0)){Box("Door seam",new Vector3(side*.944f,.7f,.95f),new Vector3(.025f,1.05f,.025f),rubber,root);
+                Box("Door handle",new Vector3(side*.963f,1.04f,.64f),new Vector3(.045f,.045f,.18f),trim,root);}
                 Box("Mirror arm",new Vector3(side*1.04f,1.45f,1.75f),new Vector3(.3f,.05f,.06f),trim,root);
                 Rounded("Side mirror",new Vector3(side*1.18f,1.49f,1.72f),new Vector3(.16f,.27f,.14f),.035f,rubber,root);
                 for(int axle=-1;axle<=1;axle+=2){
@@ -137,8 +159,8 @@ namespace KombiShift.JaydenStarter
         {
             world=Group("City • generated environment",transform,Vector3.zero);worldFont=Resources.GetBuiltinResource<Font>("LegacyRuntime.ttf");
             worldLabelMaterial=new Material(Resources.Load<Shader>("WorldLabel"));materials.Add(worldLabelMaterial);Font.textureRebuilt+=RefreshLabelAtlas;
-            var asphalt=Grain(Mat(C("252F35"),.12f),5,110);roadSurface=asphalt;
-            var ground=Grain(Mat(C("6A7359")),20,50);var pavement=Mat(C("ADA99C"));var curb=Mat(C("CFCBBF"));var paint=Mat(C("E8E1CB"));var metal=Mat(C("34474C"));var dark=Mat(C("28343B"));var teal=Mat(C("166774"));var bark=Mat(C("5F4D3E"));var leaves=Mat(C("405F40"));var skin=Mat(C("87563A"));var wood=Mat(C("80573C"));
+            var asphalt=Grain(Mat(C("3B3D3B"),.12f),5,110);roadSurface=asphalt;
+            var ground=Grain(Mat(C("827B68")),20,50);var pavement=Mat(C("A8A397"));var curb=Mat(C("C1BDB1"));var paint=Mat(C("E8E1CB"));var metal=Mat(C("34474C"));var dark=Mat(C("28343B"));var teal=Mat(C("4E5B5E"));var bark=Mat(C("5F4D3E"));var leaves=Mat(C("5B654E"));var skin=Mat(C("87563A"));var wood=Mat(C("80573C"));
             Box("Ground",new Vector3(0,-.55f,110),new Vector3(150,1,350),ground,world,true);
             Box("Road",new Vector3(0,-.03f,110),new Vector3(12,.1f,310),asphalt,world,true);
             for(int side=-1;side<=1;side+=2){
@@ -146,7 +168,8 @@ namespace KombiShift.JaydenStarter
                 for(int z=-40;z<266;z+=4){Box("Curb stone",new Vector3(side*6.13f,.13f,z),new Vector3(.28f,.32f,3.9f),curb,world,true);Box("Paving joint",new Vector3(side*8.3f,.22f,z),new Vector3(4.4f,.012f,.025f),dark,world);}
                 Box("Road edge",new Vector3(side*5.55f,.035f,110),new Vector3(.1f,.015f,300),paint,world);
                 for(int z=-20;z<270;z+=28){
-                    if(Mathf.Abs(z+13)>12)Tree(new Vector3(side*9.4f,.22f,z+13),bark,leaves);
+                    bool clearRank=false;foreach(var rank in stops)if(Mathf.Abs(z+13-rank.z)<15)clearRank=true;
+                    if(Mathf.Abs(z+13)>12&&!clearRank)Tree(new Vector3(side*9.4f,.22f,z+13),bark,leaves);
                     var lamp=Group("Street light",world,new Vector3(side*6.8f,.22f,z));
                     Shape("Pole",PrimitiveType.Cylinder,new Vector3(0,2.7f,0),new Vector3(.095f,2.7f,.095f),metal,lamp,false);
                     Box("Arm",new Vector3(-side*.55f,5.35f,0),new Vector3(1.2f,.1f,.1f),metal,lamp);
@@ -155,8 +178,8 @@ namespace KombiShift.JaydenStarter
             }
             for(int z=-35;z<263;z+=7)Box("Centre dash",new Vector3(0,.035f,z),new Vector3(.15f,.012f,3),paint,world);
             for(int crossing=0;crossing<3;crossing++)for(int i=0;i<9;i++)Box("Pedestrian crossing",new Vector3(-5+i*1.25f,.04f,55+crossing*70),new Vector3(.62f,.015f,3.5f),paint,world);
-            Material[] facades={Mat(C("B3A58E")),Mat(C("9D6F59")),Mat(C("8B9A98")),Mat(C("C0B59C"))};
-            var shopGlass=Mat(C("233F4A"),.45f);var shopRed=Mat(C("88513B"));
+            Material[] facades={Mat(C("B5AD9B")),Mat(C("A38C79")),Mat(C("92978F")),Mat(C("BEB9AD"))};
+            var shopGlass=Mat(C("233F4A"),.45f);var shopRed=Mat(C("76675B"));
             for(int side=-1;side<=1;side+=2)for(int i=0;i<12;i++)Building(side,i,facades[(i+(side>0?1:0))%4],dark,curb,shopGlass,i%2==0?teal:shopRed);
             for(int i=0;i<stops.Length;i++){
                 var stop=Group("Rank • "+stopNames[i],world,stops[i]);
@@ -168,7 +191,7 @@ namespace KombiShift.JaydenStarter
                 Box("Bench",new Vector3(-3.3f,.7f,3.2f),new Vector3(.5f,.13f,3.5f),wood,stop);
                 Box("Bench back",new Vector3(-3.58f,1,3.2f),new Vector3(.12f,.6f,3.5f),wood,stop);
                 for(int j=-1;j<=1;j+=2)Box("Bench leg",new Vector3(-3.3f,.4f,3.2f+j*1.3f),new Vector3(.3f,.6f,.12f),metal,stop);
-                Shape("Litter bin",PrimitiveType.Cylinder,new Vector3(-2.8f,.65f,-3),new Vector3(.55f,.45f,.55f),metal,stop,false);
+                Shape("Litter bin",PrimitiveType.Cylinder,new Vector3(-4.6f,.65f,-3),new Vector3(.55f,.45f,.55f),metal,stop,false);
                 Person("Waiting pedestrian",stops[i]+new Vector3(-3,.22f,4.2f),C(i%2==0?"C3A04C":"4C687E"),skin);
             }
             var station=Group("CITY FUEL",world,new Vector3(11,0,110));
@@ -181,48 +204,48 @@ namespace KombiShift.JaydenStarter
             for(int i=0;i<2;i++){float z=i==0?-27:252;Shape("Turning apron",PrimitiveType.Cylinder,new Vector3(0,-.025f,z),new Vector3(25,.045f,25),asphalt,world,true);Box("Turn sign",new Vector3(-7,2.2f,z),new Vector3(2.7f,.65f,.15f),teal,world);Label("TURN AROUND",world,new Vector3(-7,2.2f,z-.09f),.065f,paper,Quaternion.identity);}
             var batchable=new List<GameObject>();foreach(var rendererToBatch in world.GetComponentsInChildren<MeshRenderer>())if(rendererToBatch.GetComponent<TextMesh>()==null)batchable.Add(rendererToBatch.gameObject);
             StaticBatchingUtility.Combine(batchable.ToArray(),world.gameObject);
-            var player=Bus("Player Kombi",C("1A6973"),world);player.position=new Vector3(-3,.34f,0);
+            var player=Bus("Player Kombi",C("D5D4C9"),world);player.position=new Vector3(-3,.34f,0);
             var collider=player.gameObject.AddComponent<BoxCollider>();collider.center=new Vector3(0,.79f,0);collider.size=new Vector3(1.86f,1.98f,4.55f);
             player.gameObject.AddComponent<Rigidbody>();driver=player.gameObject.AddComponent<KombiDriver>();driver.game=this;
-            rider=Person("Passenger",stops[0]+Vector3.left*2,C("B65F40"),skin);
-            stopMarker=Group("Pickup / drop-off ring",world,Vector3.zero);BuildRing(stopMarker,Mat(C("E5B746")),2.6f,2.4f);
+            rider=Person("Passenger",stops[0]+Vector3.left*2,C("746A5D"),skin);
+            departingRider=Person("Alighting passenger",Vector3.zero,C("746A5D"),skin);departingRider.gameObject.SetActive(false);
+            CreateHwindi(skin);
+            stopMarker=Group("Pickup / drop-off ring",world,Vector3.zero);BuildRing(stopMarker,Mat(C("C5C0AE")),2.6f,2.4f);
             var cameraObject=Group("Chase Camera",world,player.position-Vector3.forward*8.8f+Vector3.up*4.1f).gameObject;
             chase=cameraObject.AddComponent<Camera>();cameraObject.AddComponent<AudioListener>();chase.fieldOfView=58;chase.nearClipPlane=.2f;chase.farClipPlane=330;chase.clearFlags=CameraClearFlags.SolidColor;chase.backgroundColor=C("8CAEB7");chase.allowHDR=true;
-            var lightObject=Group("Afternoon sun",world,Vector3.zero).gameObject;sun=lightObject.AddComponent<Light>();sun.type=LightType.Directional;sun.intensity=1.1f;sun.shadows=LightShadows.Soft;sun.shadowStrength=.65f;sun.shadowBias=.045f;sun.transform.rotation=Quaternion.Euler(42,-32,0);
-            QualitySettings.shadowDistance=70;QualitySettings.shadows=ShadowQuality.All;QualitySettings.antiAliasing=4;
-            RenderSettings.ambientMode=AmbientMode.Flat;RenderSettings.ambientLight=C("697B80")*.55f;RenderSettings.fog=true;RenderSettings.fogMode=FogMode.Linear;RenderSettings.fogStartDistance=55;RenderSettings.fogEndDistance=245;
+            var lightObject=Group("Afternoon sun",world,Vector3.zero).gameObject;sun=lightObject.AddComponent<Light>();sun.type=LightType.Directional;sun.intensity=1.1f;sun.shadows=LightShadows.None;sun.transform.rotation=Quaternion.Euler(42,-32,0);
+            QualitySettings.shadowDistance=0;QualitySettings.shadows=ShadowQuality.Disable;QualitySettings.antiAliasing=4;
+            RenderSettings.ambientMode=AmbientMode.Flat;RenderSettings.ambientLight=C("9A9B97")*.65f;RenderSettings.fog=true;RenderSettings.fogMode=FogMode.Linear;RenderSettings.fogStartDistance=55;RenderSettings.fogEndDistance=245;
             for(int i=0;i<7;i++){
-                var car=Bus(i==0?"Rival Kombi":"Traffic "+i,C(i==0?"A34C38":i%2==0?"ACAD9A":"587384"),world);var c=car.gameObject.AddComponent<BoxCollider>();c.center=new Vector3(0,.79f,0);c.size=new Vector3(1.86f,1.98f,4.55f);
+                var car=Bus(i==0?"Rival Kombi":"Traffic "+i,C(i==0?"C7C6BA":i%2==0?"D6D4CA":"AEB1AD"),world);var c=car.gameObject.AddComponent<BoxCollider>();c.center=new Vector3(0,.79f,0);c.size=new Vector3(1.86f,1.98f,4.55f);
                 var rb=car.gameObject.AddComponent<Rigidbody>();rb.isKinematic=true;rb.interpolation=RigidbodyInterpolation.Interpolate;traffic.Add(new Traffic{transform=car,body=rb,speed=5+i*.5f,rival=i==0});
             }
             var rainObject=Group("Rain streaks",world,Vector3.zero).gameObject;rain=rainObject.AddComponent<ParticleSystem>();rain.Stop(true,ParticleSystemStopBehavior.StopEmittingAndClear);
             var main=rain.main;main.startLifetime=1;main.startSpeed=20;main.startSize=.025f;main.maxParticles=1000;main.simulationSpace=ParticleSystemSimulationSpace.World;main.startColor=new Color(.65f,.78f,.84f,.45f);
             var emission=rain.emission;emission.rateOverTime=650;var shape=rain.shape;shape.shapeType=ParticleSystemShapeType.Box;shape.scale=new Vector3(26,1,30);rainObject.transform.rotation=Quaternion.Euler(90,0,0);
             var renderer=rain.GetComponent<ParticleSystemRenderer>();renderer.sharedMaterial=Mat(C("9DB7C3"));renderer.renderMode=ParticleSystemRenderMode.Stretch;renderer.lengthScale=9;renderer.velocityScale=.08f;
-            effects=gameObject.AddComponent<AudioSource>();music=gameObject.AddComponent<AudioSource>();engine=gameObject.AddComponent<AudioSource>();effects.spatialBlend=music.spatialBlend=engine.spatialBlend=0;
-            cue=Tone("Fare cue",660,.13f);warning=Tone("Warning",150,.2f);musicClip=AmbientLoop();music.clip=musicClip;music.loop=true;music.volume=musicVolume*.4f;music.Play();
-            engine.clip=Tone("Engine",70,1);engine.loop=true;engine.volume=0;engine.Play();
-            screen=Screen.Menu;Time.timeScale=0;ResetTraffic();PositionPassenger();ApplyWeather();
+            InitializeWorkingAudio();
+            screen=Screen.Menu;Time.timeScale=0;ResetTraffic();PositionPassenger();ResetHwindi();ApplyWeather();
         }
         void RefreshLabelAtlas(Font font){if(font==worldFont&&worldLabelMaterial!=null)worldLabelMaterial.mainTexture=worldFont.material.mainTexture;}
         void BuildRing(Transform parent,Material material,float outer,float inner)
         {
-            const int segments=64;var v=new Vector3[(segments+1)*2];var tris=new int[segments*6];
-            for(int i=0;i<=segments;i++){float a=i*Mathf.PI*2/segments;v[i*2]=new Vector3(Mathf.Cos(a)*outer,0,Mathf.Sin(a)*outer);v[i*2+1]=new Vector3(Mathf.Cos(a)*inner,0,Mathf.Sin(a)*inner);if(i<segments){int k=i*6;tris[k]=i*2;tris[k+1]=i*2+1;tris[k+2]=i*2+2;tris[k+3]=i*2+1;tris[k+4]=i*2+3;tris[k+5]=i*2+2;}}
-            var mesh=new Mesh{name="Destination ring"};mesh.vertices=v;mesh.triangles=tris;mesh.RecalculateNormals();mesh.RecalculateBounds();generatedMeshes.Add(mesh);parent.gameObject.AddComponent<MeshFilter>().sharedMesh=mesh;parent.gameObject.AddComponent<MeshRenderer>().sharedMaterial=material;
+            Box("Stop bay left",new Vector3(-1.1f,0,0),new Vector3(.06f,.015f,6.4f),material,parent);
+            Box("Stop bay right",new Vector3(1.1f,0,0),new Vector3(.06f,.015f,6.4f),material,parent);
+            Box("Stop bay front",new Vector3(0,0,3.2f),new Vector3(2.2f,.015f,.06f),material,parent);
+            Box("Stop bay rear",new Vector3(0,0,-3.2f),new Vector3(2.2f,.015f,.06f),material,parent);
         }
         void AnimateObjective()
         {
-            if(stopMarker!=null){stopMarker.localScale=Vector3.one*(1+Mathf.Sin(Time.unscaledTime*2)*.025f);}
+            if(stopMarker!=null)stopMarker.localScale=Vector3.one;
             if(boarding&&passengerArmL!=null){passengerArmL.localRotation=Quaternion.Euler(Mathf.Sin(Time.time*10)*25,0,0);passengerArmR.localRotation=Quaternion.Euler(-Mathf.Sin(Time.time*10)*25,0,0);}
         }
         void ApplyWeather()
         {
-            sun.color=Rainy?C("C2D3DC"):C("FFE9C7");sun.intensity=Rainy?.7f:1.1f;
-            chase.backgroundColor=Rainy?C("6F8996"):C("8CAEB7");RenderSettings.fogColor=chase.backgroundColor;RenderSettings.fogEndDistance=Rainy?160:245;
+            sun.color=Rainy?C("D4D7D8"):C("F0EDE4");sun.intensity=Rainy?.62f:.85f;
+            chase.backgroundColor=Rainy?C("929A9D"):C("B3BAB9");RenderSettings.fogColor=chase.backgroundColor;RenderSettings.fogEndDistance=Rainy?160:245;
             if(roadSurface.HasProperty("_Glossiness"))roadSurface.SetFloat("_Glossiness",Rainy?.65f:.12f);
         }
-        void UpdateEngineSound(){engine.volume=IsPlaying?effectsVolume*(.06f+driver.Speed*.003f):0;engine.pitch=.75f+driver.Speed*.045f+Mathf.Abs(driver.Throttle)*.18f;}
         AudioClip AmbientLoop()
         {
             const int rate=22050;const int seconds=8;var samples=new float[rate*seconds];float[] notes={220,277.18f,329.63f,277.18f,196,246.94f,293.66f,246.94f};

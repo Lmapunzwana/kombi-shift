@@ -1,30 +1,32 @@
-# Controls and presentation validation — 1 November 2026
+# Operational validation — 1 November 2026
 
-Environment: Unity 6000.6.2f1, Linux x86_64, Built-In rendering; isolated preview, not an upgrade of the team foundation.
+Environment: Unity 6000.6.2f1, Linux x86_64, Built-In renderer. The team foundation project was not upgraded.
 
-## Verified
+## Passed
 
-- Linux release player build and custom world-label shader compilation: passed.
-- 22 control-to-physics/gameplay regression assertions: passed, no failures (`smoke-results.json`). These now accelerate from rest through the controller, steer, brake and reverse; they no longer use a direct Rigidbody velocity assignment as proof of driving input.
-- Native X11 keyboard event probe: W and D produced throttle/steering, S produced reverse, Space was sent for braking, and Escape paused/resumed. Recorded maximum speed 4.42 m/s and movement 4.06 m in this short automated probe (`native-input-results.json`). This proves event delivery and movement, not performance or balance. Probe ran before the final signage-only adjustments; the control/input sources were unchanged by those adjustments.
-- Final menu, city HUD and rainy city screenshots inspected at 1280 x 800. Fixed oversized/always-on-top world lettering, foreground camera obstruction and text readability issues.
-- Player logs checked for runtime exceptions during capture and regression: none found.
+- Linux release build, scripts, custom world-label shader and imported audio assets.
+- **32 regression assertions**, no failures: acceleration/steering/braking/reverse; stop held after brake release; parked resistance to horizontal pushes; service motion lock; visible hired hwindi and sliding door; boarding across pause; animated alighting before a single fare payout; fare refusal; damage/refuelling/end states/replay; other kombis waiting at ranks and departing; audio asset loading and requested shadow disabling.
+- Native X11 keyboard event sequence (W/D/Space/S/Escape): forward, steering, reverse, pause/resume registered. Maximum speed **18.20 m/s**, maximum displacement **28.06 m**. See `native-input-results.json`. This is automated input, not a human playtest.
+- Native audio output sampled at **48 kHz** with nonzero RMS, recorded engine loaded/playing, and all hwindi speech clips loaded. See `audio-proof.json`. This verifies the game mixer produces signal; it does not prove the listener's physical speaker routing or perceived loudness. System speaker volume was read as unmuted and was not changed.
+- Menu/city/rain and hwindi calling/boarding/alighting captures inspected at 1280x800; no runtime exceptions found in those runs.
 
-## Changes prompted by validation
+## Relevant corrections
 
-- Shared direct-key input avoids axis configuration dependency; GUI key-state fallback and mouse-held driving buttons are present.
-- Zero-friction body contact plus explicit tyre grip and non-alloc ground detection excluding the player's own body allow acceleration from rest.
-- Background/focus behavior is explicit. Normal sessions pause on focus loss; the menu says to click the game window. Keyboard testing targets the actual client window, not a window-manager frame with the same title.
-- Added detailed facades/street furniture and rounded kombi geometry. World text uses depth testing and stays outside static batches so dynamic font atlas changes do not corrupt signs.
+- Raw W/S polling disagreed with logical events on this environment. The shared input path now combines polling with bounded event-held state, explicit key-up/focus clearing, and deduplicated action edges. Mouse drive values require an actual held mouse button; steering alone does not apply throttle.
+- A stop request completes braking and latches parking constraints. Keeping an old accelerator held cannot launch the vehicle after stopping; neutral plus deliberate acceleration releases it. Service and door closure interlocks also prevent departure.
+- Hwindi is enabled by default, has visible gestures/calls and a working sliding doorway, guides boarding, collects fare and signals readiness. Passenger alighting completes before payment. Other kombis approach rank bays, dwell and rejoin their lanes with forward obstacle checks.
+- Decorative arrows and cast shadows are removed. Colours are muted off-white/blue-grey, concrete, faded plaster and asphalt, with painted stop bays.
 
 ## Reproduce
 
-Build with `KombiShift.JaydenStarter.Editor.StarterBuild.Linux`. For regression launch with `--kombi-smoke --kombi-exit --kombi-report=/absolute/path/report.json`.
+Build with `KombiShift.JaydenStarter.Editor.StarterBuild.Linux`. Run regression with `--kombi-smoke --kombi-exit --kombi-report=/absolute/path/report.json`.
 
-For native input, close other preview windows, launch the graphical player with `--kombi-input-probe --kombi-exit`, then run `python3 UnityStarter/Validation/native_keyboard_probe.py` on the same X11 display. It focuses the owned game client and sends the native key sequence. Read `Builds/input-probe.json` after the player exits. This is automated testing, not an authentic human playtest.
+For native input, close other preview windows; launch with `--kombi-input-probe --kombi-exit`, then run `python3 UnityStarter/Validation/native_keyboard_probe.py` on the same X11 display. Read `Builds/input-probe.json` after exit.
 
-## Still unverified
+For visual/audio evidence, launch with `--kombi-capture-dir=/absolute/path/captures`. It runs a clearly automated menu/city/rain/service demonstration and saves captures plus `audio-proof.json`, then returns to menu. Normal play should be launched without diagnostic arguments.
 
-Human playtesting/handling preference, long-session traffic/camera edge cases, gamepad/touch controls, profiler comparisons, team-pinned Unity/HDRP/URP, Windows and Android/Web builds. The new label shader targets Built-In; another pipeline needs its own compatible label material. Art, animation and audio are procedural rather than final external production assets.
+## Limits
 
-Generated signing/passcode/certificate-password fields are cleared before repository export. Binaries, caches and machine logs are not committed.
+Procedural low-poly art and simplified arcade service/traffic; not a full transport simulation. Hwindi speech is a temporary synthesized English placeholder, not a real recorded conductor; recorded engine source/licence and all preparation are in `Resources/Audio/CREDITS.md`. Human playtesting, long sessions, gamepad/touch controls, profiler comparisons, team-pinned Unity/HDRP/URP and Windows/Android/Web remain unverified.
+
+Generated signing/passcode/password fields are cleared before repository export. Caches, binaries and raw machine logs are not committed.

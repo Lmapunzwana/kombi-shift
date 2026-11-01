@@ -4,7 +4,7 @@
 
 This folder now includes Packages and ProjectSettings for an isolated **Unity 6000.6.2f1 Built-In preview**. Add this folder to Unity Hub to open it directly. Open `Assets/KombiShiftJayden/Generated/KombiShiftStarter.unity` and press Play. The local Linux build can be launched with `../Run_Kombi_Shift.sh`.
 
-Validation: Linux player build succeeded and **22 control-to-physics and gameplay checks passed**, plus a native keyboard-event test. See `Validation/RESULTS.md`. Native city/rain screenshots were inspected. No human playtest, team-version or HDRP validation is claimed.
+Validation: Linux player build succeeded and **32 control-to-physics and gameplay checks passed**, plus a native keyboard-event test. See `Validation/RESULTS.md`. Native city/rain screenshots were inspected. No human playtest, team-version or HDRP validation is claimed.
 
 ## Import scripts into an existing project
 
@@ -17,7 +17,18 @@ Validation: Linux player build succeeded and **22 control-to-physics and gamepla
 
 For the simplest isolated demo use Unity's Built-In 3D template. The scene builder also selects HDRP/Lit or URP/Lit when the project already has that pipeline configured. It does not install or configure a render pipeline. In HDRP, complete HDRP Wizard setup and supply the project's normal global exposure/sky Volume; if the scene appears dark, tune the main directional light and exposure in your look-development setup. The generated Sun uses ordinary Unity intensity defaults, not a calibrated HDRP physical-light setup. No cross-platform/HDRP compatibility is claimed without testing.
 
-## Presentation and control revision
+## Latest operational revision
+
+- Decorative arrows and cast shadows removed; off-white/blue-grey kombis, faded plaster, concrete/asphalt and muted foliage replace the teal/gold scheme.
+- **Space or STOP requests a full stop and brake hold.** The vehicle stays parked after brake release; release the accelerator before deliberately accelerating again. Merely steering does not apply throttle. Parking holds resist traffic pushes.
+- Hwindi is hired by default ($3). At a stop he comes to the sliding door, waves/calls, helps boarding, collects fare and signals readiness. The door closes before departure. Disable hiring through Route & Difficulty if desired.
+- Passengers visibly alight before payout; duplicate interaction is blocked during boarding/alighting. Driver motion is locked during service.
+- Other kombis pull towards ranks, wait for a short dwell and rejoin their lane, with forward obstacle checks.
+- Real CC0 bus-idle recording, engine pitch response, horn (H), door/latch, brake and coin sounds. Menu **TEST SOUND** checks output. Music is off by default; effects default to 75% in this revised audio profile.
+- Hwindi call-outs are temporary synthesized English speech, **not real recorded conductor voices**. [Sources and preparation](Assets/KombiShiftJayden/Resources/Audio/CREDITS.md).
+- Native key events supplement raw polling with key-up/focus clearing and bounded leases, addressing logical/physical-key mapping disagreements without an indefinitely latched fallback.
+
+## Earlier presentation and control revision
 
 The preview now uses rounded vehicle geometry, 24 detailed shop blocks with windows/awnings/fascias, pavements, road markings, street trees/lights, rank shelters, benches, fuel pumps, textured asphalt, shadows and weather fog. Menus and HUD use a dedicated layout with route diagram, speed, fare buttons, status bars, contextual boarding action and mouse-held drive buttons.
 
@@ -31,14 +42,15 @@ The updated world-label shader is authored for this Built-In preview. HDRP/URP i
 |---|---|
 | W/S or up/down | Accelerate / reverse |
 | A/D or left/right | Steer while moving |
-| Space | Brake |
+| Space | Stop and engage brake hold |
+| H | Horn |
 | E, while stopped | Board at yellow marker; drop off at next marker; refuel near station |
 | R | Recover to road, $1 cost |
 | Escape | Pause/resume |
 | Mouse | Menus, fare −/+ buttons, boarding action, held drive buttons, volume settings |
 | Enter | Start driving from menu/selection |
 
-Supports direct keyboard input through Unity Input System when enabled, otherwise the legacy Input Manager, with GUI key-state fallback and window-focus feedback. No Input Actions asset required. Keyboard/mouse desktop controls only; no touch or controller UI. Menus use a custom IMGUI layout and Unity’s bundled runtime font to avoid additional package/font setup. These remain procedural prototype assets for human review.
+Supports direct keyboard input through Unity Input System when enabled, otherwise the legacy Input Manager, with guarded GUI key events and window-focus feedback. No Input Actions asset required. Keyboard/mouse desktop controls only; no touch or controller UI. Menus use a custom IMGUI layout and Unity’s bundled runtime font to avoid additional package/font setup. These remain procedural prototype assets for human review.
 
 ## Generated content
 
@@ -51,7 +63,7 @@ Supports direct keyboard input through Unity Input System when enabled, otherwis
 - Menu, instructions, challenge/hwindi selection, HUD, pause/settings, statement, replay, return and exit.
 - Fuel, damage, repair/recovery costs, remittance, hwindi cost and take-home; persistent sound volume settings.
 
-Everything is generated using Unity primitives and original procedural tones. There are no external models, textures, music downloads or fonts to import. Professional models, recorded audio, baked lighting, authored animation clips/Animator transitions and HDRP VolumeProfiles remain production work.
+Geometry and procedural textures are generated locally. The credited bus recording and temporary synthesized speech are included as WAV assets; no extra runtime downloads or TTS installation are needed. Unity’s bundled runtime font is used. Professional models, recorded audio, baked lighting, authored animation clips/Animator transitions and HDRP VolumeProfiles remain production work.
 
 ## Gameplay rules and tuning
 
@@ -68,6 +80,7 @@ Change `shiftSeconds` in the root component Inspector. Vehicle acceleration, max
 - `Runtime/ShiftGame.World.cs`: detailed environment, rounded vehicles, signage, weather and sound generation.
 - `Runtime/ShiftGame.UI.cs`: menus, HUD, route map and mouse controls.
 - `Runtime/ShiftGame.Diagnostics.cs`: regression, native-event telemetry and capture harness.
+- `Runtime/ShiftGame.HwindiAudio.cs`: visible conductor state/gestures, sliding-door timing, recorded engine/call playback and audio metering.
 - `Resources/WorldLabel.shader`: depth-tested label rendering for Built-In.
 - `Validation/native_keyboard_probe.py`: reproducible Linux/X11 native keyboard regression helper.
 

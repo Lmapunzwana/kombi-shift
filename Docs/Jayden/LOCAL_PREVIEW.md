@@ -17,3 +17,7 @@ Automated smoke mode: launch the Linux player with `--kombi-smoke --kombi-exit -
 Click the preview window and press Enter or Start Driving. WASD/arrows drive; Space brakes; E interacts; Escape pauses. Mouse-held A/W/S/D/brake buttons are provided. The player pauses automatically on focus loss in a normal session. Native W/D/Space/S/Escape events were delivered to the game’s actual X11 client window and movement/steering/pause telemetry was recorded; this is automated evidence, not human playtesting.
 
 The visual revision adds detailed city facades, street furniture, a rounded kombi, shadows/fog, depth-tested signs and a redesigned HUD. See the updated Validation folder for precise results and limitations.
+
+## Operational behaviour revision
+
+Brake hold is now latched and prevents creeping/pushes until deliberate acceleration. Hwindi is enabled by default and visibly calls/gestures, assists through a moving sliding door, handles alighting/fare collection and signals departure. H sounds the horn; Menu > Test Sound plays an output check. A CC0 bus-engine recording and temporary synthesized English conductor calls are included and credited. Other buses pull into ranks, dwell and depart. Decorative arrows and projected shadows are removed; the runtime palette is muted off-white/blue-grey/concrete.

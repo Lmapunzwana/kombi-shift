@@ -25,3 +25,10 @@
 - Added full control-to-physics regression plus native keyboard-event telemetry.
 - Added detailed shopfronts, windows, awnings, street furniture, ranks, rounded kombi, road texture, shadows, weather fog, custom menus/HUD and depth-tested signage.
 - Switched preview packaging to a Linux release build.
+
+## 2026-11-01 — stable stops, visible conductor and operational sound
+- Removed decorative arrows/projected shadows; changed to muted commuter colours and painted stop bays.
+- Added persistent stop/hold, neutral release guard, push resistance, mouse-input gating and bounded event-key fallback.
+- Added visible hwindi gestures, real sliding doorway, departure interlock, passenger alighting and fare timing.
+- Other kombis pull into ranks, dwell and depart.
+- Added credited CC0 bus audio, temporary synthesized conductor calls, horn, door/brake/coin effects and audio metering.
