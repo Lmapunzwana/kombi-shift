@@ -1,12 +1,16 @@
 {
     "unityVersion": "6000.6.2f1",
-    "mode": "automated prototype smoke; no human input simulated",
+    "mode": "automated control-to-physics and gameplay regression; injected control commands, not human playtesting",
     "passed": [
         "generated player, camera and passenger",
         "seven preallocated traffic vehicles",
         "startup menu",
         "begin resets state",
-        "Rigidbody advances in fixed timestep",
+        "ground detection excludes own collider",
+        "throttle command accelerates stationary kombi through controller",
+        "steering command rotates moving vehicle",
+        "brake command stops vehicle",
+        "reverse command drives backwards",
         "pickup starts boarding coroutine",
         "pause holds boarding animation",
         "boarding completes and hides passenger",

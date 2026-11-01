@@ -3,6 +3,7 @@ set -euo pipefail
 preview_root="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd)"
 preview_binary="$preview_root/Builds/Linux/KombiShift.x86_64"
 if [[ -x "$preview_binary" ]]; then
+  if [[ -n "${DISPLAY:-}" && -z "${SDL_VIDEODRIVER:-}" ]]; then export SDL_VIDEODRIVER=x11; fi
   exec "$preview_binary" -screen-fullscreen 0 -screen-width 1280 -screen-height 800 "$@"
 fi
 if command -v unity >/dev/null 2>&1; then

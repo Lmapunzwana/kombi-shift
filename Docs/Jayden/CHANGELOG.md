@@ -19,3 +19,9 @@
 - Created complete isolated Unity 6000.6.2f1 Built-In project and Linux development build.
 - Added automated smoke and screenshot capture controls; 18 checks pass after fixing coroutine cancellation and vertical-speed boarding rejection.
 - Opened native preview and inspected city/rain captures. Added launcher, ignored caches/build outputs and recorded validation limits.
+
+## 2026-11-01 — controls and presentation revision
+- Replaced axis-dependent driving reads with shared direct-key and mouse-held input; added ground filtering, low-friction contact, controlled grip, input feedback and focus handling.
+- Added full control-to-physics regression plus native keyboard-event telemetry.
+- Added detailed shopfronts, windows, awnings, street furniture, ranks, rounded kombi, road texture, shadows, weather fog, custom menus/HUD and depth-tested signage.
+- Switched preview packaging to a Linux release build.

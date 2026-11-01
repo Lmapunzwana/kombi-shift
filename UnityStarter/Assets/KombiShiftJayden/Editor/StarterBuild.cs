@@ -14,7 +14,7 @@ namespace KombiShift.JaydenStarter.Editor
             PlayerSettings.defaultScreenWidth=1280;PlayerSettings.defaultScreenHeight=800;PlayerSettings.fullScreenMode=FullScreenMode.Windowed;
             string output=Path.GetFullPath(Path.Combine(Application.dataPath,"../../Builds/Linux/KombiShift.x86_64"));
             Directory.CreateDirectory(Path.GetDirectoryName(output));
-            var report=BuildPipeline.BuildPlayer(new[]{scene},output,BuildTarget.StandaloneLinux64,BuildOptions.Development);
+            var report=BuildPipeline.BuildPlayer(new[]{scene},output,BuildTarget.StandaloneLinux64,BuildOptions.None);
             if(report.summary.result!=BuildResult.Succeeded)throw new Exception("Starter build failed: "+report.summary.result);
             Debug.Log("KOMBI_BUILD_SUCCESS "+output);
         }

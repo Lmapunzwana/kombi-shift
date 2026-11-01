@@ -1,0 +1,15 @@
+{
+    "test": "native keyboard event probe",
+    "maximumThrottle": 1.0,
+    "maximumSteering": 1.0,
+    "minimumThrottle": -1.0,
+    "maximumSpeed": 4.420000076293945,
+    "distance": 4.056538105010986,
+    "sawPause": true,
+    "sawResume": true,
+    "grounded": true,
+    "backend": "Legacy direct keys + GUI event fallback",
+    "focusedFrames": 25,
+    "guiKeyEvents": 76,
+    "anyKeyFrames": 5
+}
