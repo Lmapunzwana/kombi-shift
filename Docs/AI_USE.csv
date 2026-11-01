@@ -1,3 +1,4 @@
 date,member,tool,purpose,reviewed_or_changed
 2026-11-01,Leroy,ChatGPT,Generated initial Sprint 0 scaffold and documentation,Pending manual review and Unity validation
 2026-11-01,Leroy,ChatGPT Work,Repository setup and scaffold review; screen flow and status documentation,Source inspected; static event reset added; no Unity compilation or human review claimed
+2026-11-01,Leroy,ChatGPT Work,Unity project seed and verification tooling,Static review only; Editor execution and teammate review pending

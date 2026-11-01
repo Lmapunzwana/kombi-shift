@@ -36,4 +36,4 @@ One scene per owner; shared prefabs and pure C# event contracts. Bootstrap GameM
 Maintain asset attribution and daily AI assistance logs.
 
 ## Open decisions
-Unity exact editor version, HDRP package version, second platform, scene ownership names, economy balance, target FPS and lowest-spec machine.
+Second platform, economy balance, target FPS and lowest-spec machine. Editor selected: 6000.3.27f2; HDRP: 17.3.0; actual import/package lock pending. Scene ownership: Bootstrap (Leroy), Environment (Jayden), VehicleTest (Euclide), TrafficTest (Tendai), PassengerUITest (Tadiwa).

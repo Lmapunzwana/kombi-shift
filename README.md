@@ -1,18 +1,11 @@
-# Kombi Shift — Sprint 0 scaffold
+# Kombi Shift
 
-This is a **partial Unity Assets scaffold**, not yet a complete or runnable Unity project. It deliberately does not fabricate `ProjectVersion.txt`, `manifest.json`, HDRP package versions or `.unity` scenes.
+HAI311 Unity 3D kombi driving project. Private repository; integration branch `main`; Sprint 0 work is in `sprint/0-foundation` and draft PR #1.
 
-## Bootstrap in Unity
-1. Agree on and install the **same Unity Editor version** on every machine.
-2. Create a new Unity HDRP project using that version.
-3. Copy this scaffold's `Assets/Scripts` and `Docs` into the project, plus `.gitignore` and `.gitattributes` at repository root.
-4. Commit Unity-generated `Assets`, `Packages`, and `ProjectSettings` including `ProjectSettings/ProjectVersion.txt` and `Packages/manifest.json`. Commit `.meta` files.
-5. Run `git lfs install`; configure one-reviewer PR protection when supported. The private remote repository already exists.
-6. Create a Bootstrap scene and add one GameManager component. Create one EconomyManager object in the gameplay scene.
-7. Test state transitions, passenger/fare events and the build on every workstation.
+Editor pinned to **6000.3.27f2**; HDRP dependency **17.3.0**. Open the repository root with this exact Editor. Follow [Unity setup](Docs/UNITY_SETUP.md) to resolve packages, configure HDRP, open Bootstrap and run smoke checks/builds.
 
-## Ownership
-Leroy: integration/core. Jayden: art/HDRP. Euclide: vehicle. Tendai: AI/traffic. Tadiwa: passengers/HUD.
+Included: project seed, Bootstrap scene with runtime integration harness, GameManager, typed events, economy contract, asset .meta identities, Windows build method, Git LFS rules and design documents.
 
-## Important
-The Unity version is **not specified in the source sprint plan**. Do not invent a version lock. Economy values are placeholders and must be balanced against gameplay tests.
+**Not yet Editor-validated.** Package lock, complete generated project settings and HDRP pipeline assets must come from an actual import. No successful compilation or build is claimed.
+
+Owners: Leroy — core/integration; Jayden — art/HDRP; Euclide — vehicle; Tendai — traffic/AI; Tadiwa — passengers/HUD.
