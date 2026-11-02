@@ -1,0 +1,2 @@
+date,member,task,commit_or_pr,reviewer,verification
+2026-11-01,Leroy,AI-assisted Sprint 0 project seed and repository setup,PR #1,Pending,Static validation only; Unity and independent review pending

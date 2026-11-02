@@ -1,0 +1,13 @@
+ID,Requirement,Owner,Sprint,Verification,Status
+KS-001,Project opens on all machines,Leroy,0,Each member launches project,Pending
+KS-002,Platform decision recorded,Leroy,0,Written exception or URP fallback decision,Pending
+KS-003,GDD skeleton and screen flow,Leroy/Tadiwa,0,Documents reviewed,In progress
+KS-004,Vehicle drivable,Euclide,1,Drive and steer in build,Pending
+KS-005,Pickup and drop-off,Tadiwa,1,Complete one passenger trip,Pending
+KS-006,Fare fuel and remittance,Leroy,1,Shift balance test,Pending
+KS-007,Rival and traffic,Tendai,1-3,Waypoint movement and AI state inspection,Pending
+KS-008,Shift-end and outcome screens,Leroy,2,Statement matches economy values,Pending
+KS-009,Playtest and retest,Tadiwa/Leroy,2-3,Records and three fixes verified,Pending
+KS-010,Profiler comparison,Tendai,2-3,Before and after captures,Pending
+KS-011,PC and second build or exception,Leroy,4,Build test and evidence,Pending
+KS-012,Submission package,Leroy,4,ZIP clean-machine check,Pending
