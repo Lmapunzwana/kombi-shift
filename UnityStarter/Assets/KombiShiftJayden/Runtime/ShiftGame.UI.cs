@@ -89,6 +89,7 @@ namespace KombiShift.JaydenStarter
             Panel(new Rect(1090,32,470,116));float remaining=Mathf.Max(0,shiftSeconds-elapsed);Write(new Rect(1114,50,200,24),"SHIFT REMAINING",16,uiMuted);Write(new Rect(1114,83,200,50),((int)remaining/60).ToString("00")+":"+((int)remaining%60).ToString("00"),34,paper,FontStyle.Bold);
             Write(new Rect(1333,51,200,24),"FUEL  "+Fuel.ToString("F0")+"%",17,Fuel<20?uiAccent:paper);Meter(new Rect(1333,82,200,6),Fuel/100,uiTeal);Write(new Rect(1333,101,200,24),"CONDITION  "+Condition.ToString("F0")+"%",17,paper);Meter(new Rect(1333,129,200,4),Condition/100,Condition<35?uiAccent:uiTeal);
             if(Action(new Rect(728,32,110,42),"PAUSE"))Pause(true);if(Action(new Rect(850,32,195,42),"NEAREST STOP"))stopIndex=BestStop();
+            Panel(new Rect(728,86,317,62));Write(new Rect(746,94,282,24),"RIVAL / "+rival.DebugLabel,15,uiTeal,FontStyle.Bold);Write(new Rect(746,119,90,20),"HEALTH",13,uiMuted);Meter(new Rect(827,125,200,7),rival.Health/100,uiTeal);
             if(Time.unscaledTime<messageUntil){Panel(new Rect(40,169,800,57));Write(new Rect(60,181,760,40),message,21,paper);}
             DrawStopMap();
             DrawManifest();

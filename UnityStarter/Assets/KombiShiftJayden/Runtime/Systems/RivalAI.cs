@@ -5,7 +5,7 @@ namespace KombiShift.JaydenStarter
     public sealed class RivalAI:MonoBehaviour
     {
         public enum State{Cruise,ChasePassenger,Block,Flee}
-        public State Current{get;private set;}public float Health{get;private set;}=100;
+        public State Current{get;private set;}public string DebugLabel=>Current==State.ChasePassenger?"CHASE PASSENGER":Current.ToString().ToUpperInvariant();public float Health{get;private set;}=100;
         ShiftGame game;RoadGraph roads;Rigidbody body;List<Vector3> path=new List<Vector3>();int waypoint;float decisionAt,blockedFor,aggression,blockUntil,nextBlock;PassengerAI prey;Vector3 lastPlayer;bool highway;
         public void Configure(ShiftGame owner,RoadGraph graph,float factor,bool wet){game=owner;roads=graph;aggression=factor;highway=wet;body=GetComponent<Rigidbody>();Health=100;Current=State.Cruise;decisionAt=blockedFor=blockUntil=nextBlock=0;Plan(roads.nodes[roads.nodes.Count-1]);}
         void Plan(Vector3 target){path=roads.Path(body.position,target);waypoint=0;while(waypoint<path.Count-1&&Vector3.Distance(body.position,path[waypoint])<6)waypoint++;}

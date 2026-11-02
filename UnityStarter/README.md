@@ -16,11 +16,13 @@ CBD has six stops on connected streets, shorter routes, 100 starting fuel and an
 
 The rival follows road waypoints and competes for waiting passengers through Cruise, Chase Passenger, Block and Flee states, with front obstacle casts and its own damage response. Three traffic vehicle types, waiting pedestrians and potholes are reused through pools.
 
+The in-game HUD exposes the rival's current AI state and health for debugging. Tendai's AI and optimisation report, state transitions, and evidence limitations are documented in `../Docs/Tendai/AI_OPTIMISATION_REPORT.md`.
+
 ## Source
 
 `Runtime/Systems` contains GameManager, VehicleController, PassengerStop, PassengerAI, RivalAI, FuelSystem, SpawnManager, UIManager, AudioManager, RoadGraph and level definitions. GameManager publishes OnFareEarned, OnFuelChanged, OnVehicleDamaged and OnShiftEnded. `KombiDriver` is the compatibility bridge to VehicleController. ShiftGame partial files assemble the procedural environment, UI, conductor/audio, gameplay and diagnostics.
 
-`Editor/StarterBuild.cs` exposes Linux, Windows, Web and Profile build entry points under `KombiShift.JaydenStarter.Editor.StarterBuild`. `link.xml` preserves components created at runtime for IL2CPP. The scene generator is available through Kombi Shift > Jayden > Create Starter Scene.
+`Editor/StarterBuild.cs` exposes Linux, Windows, Windows development-profile, Web and Linux Profile build entry points under `KombiShift.JaydenStarter.Editor.StarterBuild`. Use `WindowsProfile` for local Profiler capture; non-development player builds do not support the Profiler. Launch that development player with `--kombi-profile` to write the baseline/pooled `.raw`, CSV and JSON files under `Builds/ProfilingEvidence`. Use `--kombi-capture-dir=<path> --kombi-exit` to save runtime UI screenshots. `link.xml` preserves components created at runtime for IL2CPP. The scene generator is available through Kombi Shift > Jayden > Create Starter Scene.
 
 ## Presentation and limits
 

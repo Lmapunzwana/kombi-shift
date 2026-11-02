@@ -10,7 +10,7 @@ namespace KombiShift.JaydenStarter
 {
     public sealed partial class ShiftGame
     {
-        [Serializable] sealed class PerfResult{public string mode;public int samples,traffic,passengers,hazards;public float meanFrameMs,p95FrameMs,meanMainThreadMs,meanGCBytes;public bool gcCounterValid,threadCounterValid;public string route="CBD x=-3 z=0..100, fixed 60 Hz simulation; identical traffic density";}
+        [Serializable] sealed class PerfResult{public string mode;public int samples,traffic,passengers,hazards;public float meanFrameMs,p95FrameMs,meanMainThreadMs,meanGCBytes;public bool gcCounterValid,threadCounterValid;public string route="CBD x=-3 z=0..100, fixed 60 Hz simulation; identical traffic density";public string hardware="Intel UHD Graphics 620; Windows 11; Unity 6000.6.2f1; development player";}
         IEnumerator RunPerformanceComparison()
         {
             string dir=Path.GetFullPath(Path.Combine(Application.dataPath,"../../../Builds/ProfilingEvidence"));Directory.CreateDirectory(dir);var summaries=new List<PerfResult>();Time.captureFramerate=60;

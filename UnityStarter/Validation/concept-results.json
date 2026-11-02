@@ -36,9 +36,10 @@
         "highway has a separate long-route environment",
         "highway changes fuel economy target grip and aggression",
         "highway activates pooled hazards and rain",
-        "rival pursues nearest waiting passenger",
-        "damaged rival retreats",
-        "nearby rival attempts bounded blocking",
+        "rival exposes a readable cruise debug label",
+        "rival pursues nearest waiting passenger and updates its debug label",
+        "damaged rival retreats and updates its debug label",
+        "nearby rival attempts bounded blocking and updates its debug label",
         "prior no-shadow preference preserved",
         "recorded engine and conductor calls load",
         "replay and return to menu"

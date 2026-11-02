@@ -19,6 +19,7 @@ namespace KombiShift.JaydenStarter.Editor
         public static void Linux()=>Build(BuildTarget.StandaloneLinux64,"Linux/KombiShift.x86_64",BuildOptions.None);
         public static void Profile()=>Build(BuildTarget.StandaloneLinux64,"Profiling/KombiShift.x86_64",BuildOptions.Development);
         public static void Windows()=>Build(BuildTarget.StandaloneWindows64,"Windows/KombiShift.exe",BuildOptions.None);
+        public static void WindowsProfile()=>Build(BuildTarget.StandaloneWindows64,"Windows-Profile/KombiShift.exe",BuildOptions.Development);
         public static void Web()=>Build(BuildTarget.WebGL,"Web",BuildOptions.None);
     }
 }
