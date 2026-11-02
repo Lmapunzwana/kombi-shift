@@ -1,105 +1,29 @@
-# Kombi Shift — Jayden standalone Unity starter
+# Kombi Shift — playable 3D concept adaptation
 
-## Open the complete local project
+Open this folder in Unity 6000.6.2f1, open `Assets/KombiShiftJayden/Generated/KombiShiftStarter.unity`, and press Play. The world is generated at runtime. This is an isolated Built-In project; do not upgrade or overwrite the team foundation project to import it.
 
-This folder now includes Packages and ProjectSettings for an isolated **Unity 6000.6.2f1 Built-In preview**. Add this folder to Unity Hub to open it directly. Open `Assets/KombiShiftJayden/Generated/KombiShiftStarter.unity` and press Play. The local Linux build can be launched with `../Run_Kombi_Shift.sh`.
+## Play
 
-Validation: Linux player build succeeded and **32 control-to-physics and gameplay checks passed**, plus a native keyboard-event test. See `Validation/RESULTS.md`. Native city/rain screenshots were inspected. No human playtest, team-version or HDRP validation is claimed.
+Run `../Run_Kombi_Shift.sh` on Linux. Windows output is `../Builds/Windows/KombiShift.exe`. Serve `../Builds/Web` over HTTP for WebGL; do not open its HTML through file://.
 
-## Import scripts into an existing project
+W/S accelerate/reverse, A/D steer, Space brakes and holds, E services the selected stop or nearby fuel station, H horns, R recovers for $1, Escape pauses. Click stop markers on the map to select a stop. Touch steering and brake controls can be enabled in pause/settings. HUD text scale and separate sound volumes persist.
 
-1. Use a Unity 6 project. For the shared game use the exact Editor version pinned by Leroy (foundation PR reported 6000.3.27f2). Do not upgrade the team project just for this pack. Back up/branch the project before importing.
-2. Copy the **KombiShiftJayden** folder inside this pack's **Assets** folder into your project's **Assets** folder. Keep Runtime and Editor subfolders intact. Do not copy this README into a C# script.
-3. A pre-generated Built-In scene is included at `Assets/KombiShiftJayden/Generated/KombiShiftStarter.unity`; double-click it for the Built-In demo. For HDRP/URP or a fresh scene, wait for Unity to compile. Open **Kombi Shift > Jayden > Create Starter Scene** in the top menu. Save any current scene when asked.
-4. The command creates a new isolated scene in `Assets/KombiShiftJayden/Generated`, a persistent material and a root object. Press **Play**. The world and interface appear at runtime.
-5. Click **HOW TO PLAY**, or **START SHIFT**, select the challenge and optionally hire a hwindi, then **DRIVE**. Click inside the Game view for keyboard focus.
-6. To build: add the generated scene to a separate Build Profile's scene list and make it the first scene. Build a desktop standalone player with your installed target module. Test the built executable. This tool does not modify the team's build scene list.
+## Implemented loop
 
-For the simplest isolated demo use Unity's Built-In 3D template. The scene builder also selects HDRP/Lit or URP/Lit when the project already has that pipeline configured. It does not install or configure a render pipeline. In HDRP, complete HDRP Wizard setup and supply the project's normal global exposure/sky Volume; if the scene appears dark, tune the main directional light and exposure in your look-development setup. The generated Sun uses ordinary Unity intensity defaults, not a calibrated HDRP physical-light setup. No cross-platform/HDRP compatibility is claimed without testing.
+Choose CBD morning or rainy highway and optionally hire a visible hwindi. Stop inside a pickup trigger and board up to six individual passengers. Each has a destination, quoted fare and patience timer. Deliver matching passengers promptly for fares and tips; late passengers pay nothing. Fare quotes use route distance and lock when boarded. A higher fare multiplier can discourage boarding. Fuel is purchased from cash at a station. Collisions and potholes reduce health. Earn the target before time, fuel or health runs out; a clean shift earns a score bonus.
 
-## Latest operational revision
+CBD has six stops on connected streets, shorter routes, 100 starting fuel and an $18 target. Highway has four widely spaced stops, wet grip, more potholes, 45 starting fuel, higher fuel consumption and a $28 target. Both shifts last 300 seconds. These are initial balance values, not human-tested findings.
 
-- Decorative arrows and cast shadows removed; off-white/blue-grey kombis, faded plaster, concrete/asphalt and muted foliage replace the teal/gold scheme.
-- **Space or STOP requests a full stop and brake hold.** The vehicle stays parked after brake release; release the accelerator before deliberately accelerating again. Merely steering does not apply throttle. Parking holds resist traffic pushes.
-- Hwindi is hired by default ($3). At a stop he comes to the sliding door, waves/calls, helps boarding, collects fare and signals readiness. The door closes before departure. Disable hiring through Route & Difficulty if desired.
-- Passengers visibly alight before payout; duplicate interaction is blocked during boarding/alighting. Driver motion is locked during service.
-- Other kombis pull towards ranks, wait for a short dwell and rejoin their lane, with forward obstacle checks.
-- Real CC0 bus-idle recording, engine pitch response, horn (H), door/latch, brake and coin sounds. Menu **TEST SOUND** checks output. Music is off by default; effects default to 75% in this revised audio profile.
-- Hwindi call-outs are temporary synthesized English speech, **not real recorded conductor voices**. [Sources and preparation](Assets/KombiShiftJayden/Resources/Audio/CREDITS.md).
-- Native key events supplement raw polling with key-up/focus clearing and bounded leases, addressing logical/physical-key mapping disagreements without an indefinitely latched fallback.
+The rival follows road waypoints and competes for waiting passengers through Cruise, Chase Passenger, Block and Flee states, with front obstacle casts and its own damage response. Three traffic vehicle types, waiting pedestrians and potholes are reused through pools.
 
-## Earlier presentation and control revision
+## Source
 
-The preview now uses rounded vehicle geometry, 24 detailed shop blocks with windows/awnings/fascias, pavements, road markings, street trees/lights, rank shelters, benches, fuel pumps, textured asphalt, shadows and weather fog. Menus and HUD use a dedicated layout with route diagram, speed, fare buttons, status bars, contextual boarding action and mouse-held drive buttons.
+`Runtime/Systems` contains GameManager, VehicleController, PassengerStop, PassengerAI, RivalAI, FuelSystem, SpawnManager, UIManager, AudioManager, RoadGraph and level definitions. GameManager publishes OnFareEarned, OnFuelChanged, OnVehicleDamaged and OnShiftEnded. `KombiDriver` is the compatibility bridge to VehicleController. ShiftGame partial files assemble the procedural environment, UI, conductor/audio, gameplay and diagnostics.
 
-**Click the game window, then press ENTER or START DRIVING.** Keyboard controls use direct keys without requiring axis mappings. A zero-friction body contact with controlled tyre grip and explicit ground filtering lets the vehicle accelerate from rest reliably. Switching to another app automatically pauses a normal play session; return and click Resume or press Escape. The background setting keeps captures/diagnostics responsive, not gameplay running unattended.
+`Editor/StarterBuild.cs` exposes Linux, Windows, Web and Profile build entry points under `KombiShift.JaydenStarter.Editor.StarterBuild`. `link.xml` preserves components created at runtime for IL2CPP. The scene generator is available through Kombi Shift > Jayden > Create Starter Scene.
 
-The updated world-label shader is authored for this Built-In preview. HDRP/URP import requires an equivalent pipeline-compatible label material and normal lighting validation; it is not a verified pipeline conversion.
+## Presentation and limits
 
-## Controls
+The user chose to keep 3D and use map/stop markers without a guidance arrow. Cast shadows remain disabled by request. Procedural vehicles, buildings and characters are prototype art, not attributed sprite packs or finished production models. Engine audio includes an attributed bus recording; hwindi lines are temporary synthesized English speech, not a recorded Shona performance. Audio credits and preparation scripts are included. An original generated percussion/marimba-style loop and rain accompany the effects.
 
-| Input | Action |
-|---|---|
-| W/S or up/down | Accelerate / reverse |
-| A/D or left/right | Steer while moving |
-| Space | Stop and engage brake hold |
-| H | Horn |
-| E, while stopped | Board at yellow marker; drop off at next marker; refuel near station |
-| R | Recover to road, $1 cost |
-| Escape | Pause/resume |
-| Mouse | Menus, fare −/+ buttons, boarding action, held drive buttons, volume settings |
-| Enter | Start driving from menu/selection |
-
-Supports direct keyboard input through Unity Input System when enabled, otherwise the legacy Input Manager, with guarded GUI key events and window-focus feedback. No Input Actions asset required. Keyboard/mouse desktop controls only; no touch or controller UI. Menus use a custom IMGUI layout and Unity’s bundled runtime font to avoid additional package/font setup. These remain procedural prototype assets for human review.
-
-## Generated content
-
-- Teal/yellow minibus with separate window, stripe and wheel primitives; Rigidbody arcade driving and collisions.
-- Road, lane markings, city blocks, rank signs, pothole markers, fuel station and a chase camera.
-- Passenger placeholder with timed walk-to-door boarding; pickup, drop-off, patience and fare refusal.
-- Two challenge settings on the same route: daytime city and rainy lower-grip driving with higher remittance/fuel use.
-- Seven preallocated traffic vehicles reused around the route; one rival with visible Cruise, ChasePassenger, Block and Flee states. Chase shifts toward pickup lane, Block towards player lane, Flee speeds away when player condition is low. This is simple prototype AI, not obstacle-aware navigation.
-- Rain particles, procedural wheel movement, generated audio cues, engine response and an original ambient loop.
-- Menu, instructions, challenge/hwindi selection, HUD, pause/settings, statement, replay, return and exit.
-- Fuel, damage, repair/recovery costs, remittance, hwindi cost and take-home; persistent sound volume settings.
-
-Geometry and procedural textures are generated locally. The credited bus recording and temporary synthesized speech are included as WAV assets; no extra runtime downloads or TTS installation are needed. Unity’s bundled runtime font is used. Professional models, recorded audio, baked lighting, authored animation clips/Animator transitions and HDRP VolumeProfiles remain production work.
-
-## Gameplay rules and tuning
-
-Default shift is 240 seconds. Win at time expiry with at least three completed trips and non-negative take-home. Empty fuel or zero condition ends the shift early. Each completed passenger pays selected fare x6. Fare greater than $1.60 or condition below 20% is refused. Passengers leave after 60 seconds. Stop within 7m, speed below 1.2m/s and press E; boarding lasts 2.8s, or 1.3s with the $3 hwindi. Remittance is $8 city/$12 rain. Fuel cost accrues as fuel is consumed at $0.08 per unit; refilling restores the tank without a second charge. Collision damage costs $0.04 per condition point. Recovery costs $1. These are starter balance values, not measured or team-approved economy numbers.
-
-Change `shiftSeconds` in the root component Inspector. Vehicle acceleration, maximum speed and steering are public Inspector fields on the runtime vehicle; for persistent defaults edit KombiDriver.cs. Other starting values are clearly named in ShiftGame.cs. Runtime-generated objects reset on leaving Play Mode; change the generator to keep edits across runs.
-
-## Files and ownership
-
-- `Editor/StarterSceneBuilder.cs`: new scene and shader material asset creation; protects unsaved current work.
-- `Runtime/ShiftGame.cs`: world construction, menus, state/economy/passenger/traffic/weather/audio prototype.
-- `Runtime/KombiDriver.cs`: contact/grip physics, ground filtering, acceleration, steering, braking and collision damage.
-- `Runtime/ShiftInput.cs`: shared direct-key / mouse drive input.
-- `Runtime/ShiftGame.World.cs`: detailed environment, rounded vehicles, signage, weather and sound generation.
-- `Runtime/ShiftGame.UI.cs`: menus, HUD, route map and mouse controls.
-- `Runtime/ShiftGame.Diagnostics.cs`: regression, native-event telemetry and capture harness.
-- `Runtime/ShiftGame.HwindiAudio.cs`: visible conductor state/gestures, sliding-door timing, recorded engine/call playback and audio metering.
-- `Resources/WorldLabel.shader`: depth-tested label rendering for Built-In.
-- `Validation/native_keyboard_probe.py`: reproducible Linux/X11 native keyboard regression helper.
-
-Namespace `KombiShift.JaydenStarter` keeps this separate from production classes. Run only one ShiftGame instance and no other gameplay manager, camera or AudioListener in this isolated scene. It does not subscribe to Leroy's event contracts or replace teammates' assigned work. `FareEarned` is a local integration event; reconcile data contracts before production integration. This prototype deliberately groups systems to simplify importing; production integration should move gameplay logic to the responsible team owners and retain Jayden's art generators/assets.
-
-## Review and evidence
-
-AI-assisted code prepared with OpenAI Codex, 1 November 2026. Jayden must review and understand it before claiming it. The Linux release build and automated smoke sequence are verified; no human playtest results, performance measurements, independent review, team-version import or other-platform build is asserted.
-
-Before handoff: check Console, drive both modes, board/cancel/drop off, change fare, miss a passenger, collide, refuel, pause mid-boarding, change audio, restart, recover, test each end condition and replay; verify one AudioListener, material colours, visibility and camera. Record real observations and fixes. Capture before/after measurements if using traffic reuse as the assessed optimisation. A profiler marker or reused objects alone is not measurement evidence.
-
-Known limits: no real WheelColliders/suspension, traffic avoidance or full city route network; no gamepad/touch support; no production prefabs, Animator controllers, polished UI, measured balancing or baked lighting. Both challenge settings reuse the same map. HDRP appearance and particle materials require project-specific verification. Exit works in a built player, not as an Editor stop button.
-
-## API references
-
-Unity's Rigidbody API: https://docs.unity.com/en-us/engine/6000.7/script-reference/unityengine/rigidbody/linearvelocity
-
-Unity Input System setup: https://learn.unity.com/tutorial/6712ae08edbc2a05a71b5446
-
-HDRP material implementation reference: https://github.com/Unity-Technologies/Graphics/blob/master/Packages/com.unity.render-pipelines.high-definition/Documentation~/Customizing-HDRP-materials-with-Shader-Graph.md
-
-These references informed API use, not a claim of runtime validation on every version.
+Linux and Windows-under-Wine automated checks pass 40/40. WebGL builds successfully and its final browser scene/menu renders. This is not a native Windows hardware test or phone test. See Validation for measured pooling evidence and the exact test scope. Human playtesting, balancing, production art/voice work, team HDRP integration and panel preparation remain. AI-assisted implementation must be reviewed and understood by Jayden before claiming personal authorship.

@@ -1,3 +1,5 @@
+> Updated playable implementation: see [concept mapping](CONCEPT_IMPLEMENTATION.md), [current Unity guide](../../UnityStarter/README.md) and [validation](../../UnityStarter/Validation/RESULTS.md). The earlier design/preview notes below are historical and may describe superseded mechanics.
+
 # Jayden — Sprint 0 art direction pack
 
 Prepared 1 November 2026. Tracks GitHub issue #7. Art direction remains a draft for Jayden to review. An isolated Unity preview now has a passing Linux build and 18 automated smoke checks; independent review remains pending.

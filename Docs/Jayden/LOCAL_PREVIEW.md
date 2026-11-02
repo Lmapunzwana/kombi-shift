@@ -1,3 +1,5 @@
+> Updated playable implementation: see [concept mapping](CONCEPT_IMPLEMENTATION.md), [current Unity guide](../../UnityStarter/README.md) and [validation](../../UnityStarter/Validation/RESULTS.md). The earlier design/preview notes below are historical and may describe superseded mechanics.
+
 # Local Unity preview
 
 The `UnityStarter` directory is an isolated, complete Unity 6000.6.2f1 Built-In project for previewing Jayden's generated prototype. It does not change the team foundation's 6000.3.27f2/HDRP settings. From the repository, add `UnityStarter` in Unity Hub, open the generated scene and press Play. A local Linux release binary, when built, lives under ignored `Builds/Linux` and can be opened through `Run_Kombi_Shift.sh`.

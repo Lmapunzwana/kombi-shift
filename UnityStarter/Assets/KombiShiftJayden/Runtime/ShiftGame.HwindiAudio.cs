@@ -7,7 +7,7 @@ namespace KombiShift.JaydenStarter
         enum HwindiState{NotHired,Riding,Calling,Boarding,TakingFare,Signalling,Entering}
         Transform hwindiActor,hwindiLeftArm,hwindiRightArm,hwindiLeftHand,hwindiRightHand,departingRider,slidingDoor;
         HwindiState hwindiState;float hwindiReadyAt,doorAmount,nextHwindiCall;bool hwindiDepartureRequested,hwindiCollecting;
-        AudioSource hwindiVoice;AudioClip idleRecording,hornClip,doorClip,brakeClip,fareClip,callClip,readyClip,fareVoiceClip;
+        AudioSource rainAmbience,hwindiVoice;AudioClip idleRecording,hornClip,doorClip,brakeClip,fareClip,callClip,readyClip,fareVoiceClip;
         bool wasBraking;readonly float[] audioMeterSamples=new float[512];float outputRms,peakOutputRms;
         string HwindiDescription=>hwindiState==HwindiState.NotHired?"Not hired":hwindiState==HwindiState.Calling?"Calling passengers":hwindiState==HwindiState.Boarding?"Helping boarding":hwindiState==HwindiState.TakingFare?"Collecting fare":hwindiState==HwindiState.Signalling?"Signalling ready":hwindiState==HwindiState.Entering?"Closing door":"On board";
         void CreateHwindi(Material skin)
@@ -39,7 +39,7 @@ namespace KombiShift.JaydenStarter
             if((boarding||unloading))hwindiDepartureRequested=false;
 
             bool settling=Time.time<hwindiReadyAt;
-            bool calling=hwindi&&!aboard&&!boarding&&!unloading&&!settling&&!hwindiDepartureRequested&&driver.IsParked&&Vector3.Distance(driver.transform.position,Target)<16;
+            bool calling=hwindi&&manifest.Count<Capacity&&HasWaitingAt(stopIndex)&&!boarding&&!unloading&&!settling&&!hwindiDepartureRequested&&driver.IsParked&&Vector3.Distance(driver.transform.position,Target)<16;
             bool outside=boarding||unloading||calling||(settling&&hwindiReadyAt-Time.time>.35f);
             float doorTarget=outside?1:0;
             float previousDoor=doorAmount;doorAmount=Mathf.MoveTowards(doorAmount,doorTarget,Time.deltaTime*2.7f);if(previousDoor>.04f&&doorAmount<=.04f)PlayDoor();
@@ -76,22 +76,27 @@ namespace KombiShift.JaydenStarter
             cue=fareClip;warning=MakeEffect("Vehicle warning",.18f,(t,n)=>Mathf.Sin(t*2*Mathf.PI*210)*.3f*Mathf.Sin(t*Mathf.PI/.18f));
             musicClip=AmbientLoop();music.clip=musicClip;music.loop=true;music.volume=musicVolume*.4f;music.Play();
             engine.clip=idleRecording!=null?idleRecording:MakeEffect("Diesel fallback",1,(t,n)=>(Mathf.Sin(t*2*Mathf.PI*70)*.25f+n*.08f)*(1+.25f*Mathf.Sin(t*2*Mathf.PI*28)));
+            rainAmbience=gameObject.AddComponent<AudioSource>();rainAmbience.clip=MakeEffect("Rain ambience",2,(t,n)=>n*.12f*(.8f+.2f*Mathf.Sin(t*Mathf.PI)));rainAmbience.loop=true;rainAmbience.volume=0;rainAmbience.Play();
             engine.loop=true;engine.volume=0;engine.Play();hwindiVoice.volume=effectsVolume*.65f;hwindiVoice.priority=32;
             foreach(var car in traffic){car.sound=car.transform.gameObject.AddComponent<AudioSource>();car.sound.clip=engine.clip;car.sound.loop=true;car.sound.spatialBlend=1;car.sound.minDistance=3;car.sound.maxDistance=32;car.sound.rolloffMode=AudioRolloffMode.Linear;car.sound.volume=0;car.sound.Play();}
         }
-        public void PlayHorn(){if(effects!=null&&hornClip!=null)effects.PlayOneShot(hornClip,Mathf.Max(.25f,effectsVolume)*.65f);}
+        public void PlayHorn(bool test=false){if(effects!=null&&hornClip!=null)effects.PlayOneShot(hornClip,(test?Mathf.Max(.25f,effectsVolume):effectsVolume)*.65f);}
         void PlayDoor(){effects.PlayOneShot(doorClip,effectsVolume*.6f);}
         void PlayFare(){effects.PlayOneShot(fareClip,effectsVolume*.6f);}
         void PlayCollectionVoice(){if(hwindi&&fareVoiceClip!=null){hwindiVoice.Stop();hwindiVoice.PlayOneShot(fareVoiceClip,.7f);}}
         void PlayReady(){if(readyClip!=null){hwindiVoice.Stop();hwindiVoice.PlayOneShot(readyClip,.7f);}}
         void UpdateEngineSound()
         {
+            if(audioManager!=null)audioManager.SetMix(musicVolume,effectsVolume);
             engine.volume=IsPlaying?effectsVolume*(.25f+Mathf.Abs(driver.Throttle)*.08f+driver.Speed*.003f):0;
             engine.pitch=Mathf.Lerp(engine.pitch,.9f+driver.Speed*.035f+Mathf.Abs(driver.Throttle)*.18f,Time.unscaledDeltaTime*6);
+            if(rainAmbience!=null)rainAmbience.volume=IsPlaying&&Rainy?effectsVolume*.18f:0;
             hwindiVoice.volume=effectsVolume*.65f;
             if(ShiftInput.Brake&&!wasBraking&&driver.Speed>1)effects.PlayOneShot(brakeClip,effectsVolume*.7f);wasBraking=ShiftInput.Brake;
             foreach(var car in traffic)if(car.sound!=null){car.sound.volume=IsPlaying?effectsVolume*.15f:0;car.sound.pitch=car.atStop?.9f:1.08f;}
+#if !UNITY_WEBGL || UNITY_EDITOR
             AudioListener.GetOutputData(audioMeterSamples,0);float sum=0;foreach(float value in audioMeterSamples)sum+=value*value;outputRms=Mathf.Sqrt(sum/audioMeterSamples.Length);peakOutputRms=Mathf.Max(peakOutputRms,outputRms);
+#endif
         }
     }
 }

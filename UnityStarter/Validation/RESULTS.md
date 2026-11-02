@@ -1,32 +1,17 @@
-# Operational validation — 1 November 2026
+# Verification — 2 November 2026
 
-Environment: Unity 6000.6.2f1, Linux x86_64, Built-In renderer. The team foundation project was not upgraded.
+Unity 6000.6.2f1 Built-In standalone concept adaptation.
 
-## Passed
+- Linux automated concept regression: **40 passed, 0 failed**; report `concept-results.json`.
+- Windows x64 Mono executable: **40 passed, 0 failed under Wine 11.20**. Native Windows hardware remains untested.
+- Checks cover managers, destinations, pickup bounds, stable braking, multiple boarding, pause, onboard patience, locked fares, matching drops, tips, late passengers, paid fuel, pool reuse, target/timeout/fuel/health outcomes, highway economy and weather, rival states, audio and replay.
+- WebGL build succeeds. The final browser player renders the city, HUD, passenger manifest and menus; the previous blank-world failure is corrected by preserving runtime-created components. Browser automation observed movement and service outcomes, but is not a full keyboard/touch-device certification.
+- Earlier native keyboard checks established acceleration, movement and braking. Automated tests are not human usability or balance tests.
 
-- Linux release build, scripts, custom world-label shader and imported audio assets.
-- **32 regression assertions**, no failures: acceleration/steering/braking/reverse; stop held after brake release; parked resistance to horizontal pushes; service motion lock; visible hired hwindi and sliding door; boarding across pause; animated alighting before a single fare payout; fare refusal; damage/refuelling/end states/replay; other kombis waiting at ranks and departing; audio asset loading and requested shadow disabling.
-- Native X11 keyboard event sequence (W/D/Space/S/Escape): forward, steering, reverse, pause/resume registered. Maximum speed **18.20 m/s**, maximum displacement **28.06 m**. See `native-input-results.json`. This is automated input, not a human playtest.
-- Native audio output sampled at **48 kHz** with nonzero RMS, recorded engine loaded/playing, and all hwindi speech clips loaded. See `audio-proof.json`. This verifies the game mixer produces signal; it does not prove the listener's physical speaker routing or perceived loudness. System speaker volume was read as unmuted and was not changed.
-- Menu/city/rain and hwindi calling/boarding/alighting captures inspected at 1280x800; no runtime exceptions found in those runs.
+## Controlled pooling measurement
 
-## Relevant corrections
+Development player; 240 sampled frames per mode after warm-up, identical CBD route x=-3/z=0..100, fixed 60 Hz simulation, nine traffic vehicles plus one rival, twelve pedestrians and six hazards. One pedestrian and hazard recycle per frame. Baseline creates/destroys those objects; pooled mode reuses them. Traffic stays pooled in both modes to isolate this change. This is a controlled headless churn fixture, not a full human-driven route benchmark.
 
-- Raw W/S polling disagreed with logical events on this environment. The shared input path now combines polling with bounded event-held state, explicit key-up/focus clearing, and deduplicated action edges. Mouse drive values require an actual held mouse button; steering alone does not apply throttle.
-- A stop request completes braking and latches parking constraints. Keeping an old accelerator held cannot launch the vehicle after stopping; neutral plus deliberate acceleration releases it. Service and door closure interlocks also prevent departure.
-- Hwindi is enabled by default, has visible gestures/calls and a working sliding doorway, guides boarding, collects fare and signals readiness. Passenger alighting completes before payment. Other kombis approach rank bays, dwell and rejoin their lanes with forward obstacle checks.
-- Decorative arrows and cast shadows are removed. Colours are muted off-white/blue-grey, concrete, faded plaster and asphalt, with painted stop bays.
+Mean GC allocated per frame: baseline 916.63 bytes, pooled 445.50 bytes (about 51.4% lower). Mean wall frame time: 16.73 ms versus 16.67 ms; p95 18.16 ms versus 17.97 ms. Frame timings include the frame cap, so these numbers do not establish a general FPS improvement. Profiler counters were valid. JSON and frame CSVs are retained here; local binary captures are in Builds/ProfilingEvidence/baseline.raw and pooled.raw.
 
-## Reproduce
-
-Build with `KombiShift.JaydenStarter.Editor.StarterBuild.Linux`. Run regression with `--kombi-smoke --kombi-exit --kombi-report=/absolute/path/report.json`.
-
-For native input, close other preview windows; launch with `--kombi-input-probe --kombi-exit`, then run `python3 UnityStarter/Validation/native_keyboard_probe.py` on the same X11 display. Read `Builds/input-probe.json` after exit.
-
-For visual/audio evidence, launch with `--kombi-capture-dir=/absolute/path/captures`. It runs a clearly automated menu/city/rain/service demonstration and saves captures plus `audio-proof.json`, then returns to menu. Normal play should be launched without diagnostic arguments.
-
-## Limits
-
-Procedural low-poly art and simplified arcade service/traffic; not a full transport simulation. Hwindi speech is a temporary synthesized English placeholder, not a real recorded conductor; recorded engine source/licence and all preparation are in `Resources/Audio/CREDITS.md`. Human playtesting, long sessions, gamepad/touch controls, profiler comparisons, team-pinned Unity/HDRP/URP and Windows/Android/Web remain unverified.
-
-Generated signing/passcode/password fields are cleared before repository export. Caches, binaries and raw machine logs are not committed.
+Human tests, Android/phone testing and foundation HDRP integration are not claimed. Audio uses credited recording plus temporary synthesized lines; replace with reviewed local voice recordings for production.

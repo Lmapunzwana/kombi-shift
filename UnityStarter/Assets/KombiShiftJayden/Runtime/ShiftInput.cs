@@ -13,11 +13,12 @@ namespace KombiShift.JaydenStarter
         static readonly Dictionary<KeyCode,float> heldAt=new Dictionary<KeyCode,float>();
         static readonly Dictionary<KeyCode,int> queuedDown=new Dictionary<KeyCode,int>();
         static readonly Dictionary<KeyCode,int> deliveredDown=new Dictionary<KeyCode,int>();
+        static float touchThrottle,touchTurn;static bool touchBrake;static int touchFrame=-10;
         static float virtualThrottle,virtualTurn;static bool virtualBrake;static int virtualFrame=-10;
         public static bool testOverride;public static float testThrottle,testTurn;public static bool testBrake;
-        public static float Throttle=>testOverride?testThrottle:Mathf.Clamp((Held(KeyCode.W)||Held(KeyCode.UpArrow)?1:0)-(Held(KeyCode.S)||Held(KeyCode.DownArrow)?1:0)+(VirtualFresh?virtualThrottle:0),-1,1);
-        public static float Turn=>testOverride?testTurn:Mathf.Clamp((Held(KeyCode.D)||Held(KeyCode.RightArrow)?1:0)-(Held(KeyCode.A)||Held(KeyCode.LeftArrow)?1:0)+(VirtualFresh?virtualTurn:0),-1,1);
-        public static bool Brake=>testOverride?testBrake:Held(KeyCode.Space)||(VirtualFresh&&virtualBrake);
+        public static float Throttle=>testOverride?testThrottle:Mathf.Clamp((Held(KeyCode.W)||Held(KeyCode.UpArrow)?1:0)-(Held(KeyCode.S)||Held(KeyCode.DownArrow)?1:0)+(VirtualFresh?virtualThrottle:0)+(Time.frameCount-touchFrame<=1?touchThrottle:0),-1,1);
+        public static float Turn=>testOverride?testTurn:Mathf.Clamp((Held(KeyCode.D)||Held(KeyCode.RightArrow)?1:0)-(Held(KeyCode.A)||Held(KeyCode.LeftArrow)?1:0)+(VirtualFresh?virtualTurn:0)+(Time.frameCount-touchFrame<=1?touchTurn:0),-1,1);
+        public static bool Brake=>testOverride?testBrake:Held(KeyCode.Space)||(VirtualFresh&&virtualBrake)||(Time.frameCount-touchFrame<=1&&touchBrake);
         static bool VirtualFresh=>Time.frameCount-virtualFrame<=1&&MouseHeld;
         static bool MouseHeld {
             get {
@@ -79,6 +80,7 @@ namespace KombiShift.JaydenStarter
         {
             virtualThrottle=MouseHeld?throttle:0;virtualTurn=MouseHeld?turn:0;virtualBrake=MouseHeld&&brake;virtualFrame=Time.frameCount;
         }
-        public static void Clear(){heldAt.Clear();queuedDown.Clear();virtualThrottle=virtualTurn=0;virtualBrake=false;virtualFrame=-10;}
+        public static void Touch(float throttle,float turn,bool brake){touchThrottle=throttle;touchTurn=turn;touchBrake=brake;touchFrame=Time.frameCount;}
+        public static void Clear(){touchThrottle=touchTurn=0;touchBrake=false;touchFrame=-10;heldAt.Clear();queuedDown.Clear();virtualThrottle=virtualTurn=0;virtualBrake=false;virtualFrame=-10;}
     }
 }

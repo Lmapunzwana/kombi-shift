@@ -8,7 +8,7 @@ namespace KombiShift.JaydenStarter
         readonly List<Mesh> generatedMeshes=new List<Mesh>();
         readonly List<Texture2D> generatedTextures=new List<Texture2D>();
         readonly Dictionary<string,Mesh> roundedMeshes=new Dictionary<string,Mesh>();
-        readonly string[] stopNames={"Market Square","Central Avenue","Mbare Link","Eastgate Rank"};
+        string[] stopNames=LevelDefinition.City().names;
         Font worldFont; Material worldLabelMaterial; AudioSource engine; Transform passengerArmL,passengerArmR; Material roadSurface;
         Color C(string hex){ColorUtility.TryParseHtmlString("#"+hex,out var c);return c;}
         Transform Group(string name,Transform parent,Vector3 position){var t=new GameObject(name).transform;t.SetParent(parent,false);t.localPosition=position;return t;}
@@ -109,9 +109,9 @@ namespace KombiShift.JaydenStarter
             }
             return root;
         }
-        void Building(int side,int index,Material facade,Material dark,Material trim,Material glass,Material awning)
+        void Building(int side,int index,Material facade,Material dark,Material trim,Material glass,Material awning,float offset=0)
         {
-            float z=-18+index*24;float height=5+(index%4)*2.6f;var block=Group("Shop block "+side+" "+index,world,new Vector3(side*16,0,z));
+            float z=-18+index*24;float height=5+(index%4)*2.6f;var block=Group("Shop block "+side+" "+index,world,new Vector3(side*16+offset,0,z));
             Box("Masonry",new Vector3(0,height/2,0),new Vector3(10,height,18),facade,block,true);
             Box("Roof cornice",new Vector3(0,height-.08f,0),new Vector3(10.35f,.28f,18.35f),trim,block);
             Box("Roof",new Vector3(0,height+.1f,0),new Vector3(9.6f,.15f,17.5f),dark,block);
@@ -164,10 +164,10 @@ namespace KombiShift.JaydenStarter
             Box("Ground",new Vector3(0,-.55f,110),new Vector3(150,1,350),ground,world,true);
             Box("Road",new Vector3(0,-.03f,110),new Vector3(12,.1f,310),asphalt,world,true);
             for(int side=-1;side<=1;side+=2){
-                Box("Pavement",new Vector3(side*8.3f,.09f,110),new Vector3(4.5f,.25f,310),pavement,world,true);
-                for(int z=-40;z<266;z+=4){Box("Curb stone",new Vector3(side*6.13f,.13f,z),new Vector3(.28f,.32f,3.9f),curb,world,true);Box("Paving joint",new Vector3(side*8.3f,.22f,z),new Vector3(4.4f,.012f,.025f),dark,world);}
+                foreach(var segment in new[]{new Vector2(-45,19),new Vector2(31,79),new Vector2(91,139),new Vector2(151,199),new Vector2(211,265)})Box("Pavement",new Vector3(side*8.3f,.09f,(segment.x+segment.y)/2),new Vector3(4.5f,.25f,segment.y-segment.x),pavement,world,true);
+                for(int z=-40;z<266;z+=4){if(NearJunction(z,8))continue;Box("Curb stone",new Vector3(side*6.13f,.13f,z),new Vector3(.28f,.32f,3.9f),curb,world,true);Box("Paving joint",new Vector3(side*8.3f,.22f,z),new Vector3(4.4f,.012f,.025f),dark,world);}
                 Box("Road edge",new Vector3(side*5.55f,.035f,110),new Vector3(.1f,.015f,300),paint,world);
-                for(int z=-20;z<270;z+=28){
+                for(int z=-20;z<270;z+=28){if(NearJunction(z,8))continue;
                     bool clearRank=false;foreach(var rank in stops)if(Mathf.Abs(z+13-rank.z)<15)clearRank=true;
                     if(Mathf.Abs(z+13)>12&&!clearRank)Tree(new Vector3(side*9.4f,.22f,z+13),bark,leaves);
                     var lamp=Group("Street light",world,new Vector3(side*6.8f,.22f,z));
@@ -180,7 +180,8 @@ namespace KombiShift.JaydenStarter
             for(int crossing=0;crossing<3;crossing++)for(int i=0;i<9;i++)Box("Pedestrian crossing",new Vector3(-5+i*1.25f,.04f,55+crossing*70),new Vector3(.62f,.015f,3.5f),paint,world);
             Material[] facades={Mat(C("B5AD9B")),Mat(C("A38C79")),Mat(C("92978F")),Mat(C("BEB9AD"))};
             var shopGlass=Mat(C("233F4A"),.45f);var shopRed=Mat(C("76675B"));
-            for(int side=-1;side<=1;side+=2)for(int i=0;i<12;i++)Building(side,i,facades[(i+(side>0?1:0))%4],dark,curb,shopGlass,i%2==0?teal:shopRed);
+            for(int side=-1;side<=1;side+=2)for(int i=0;i<12;i++)if(!NearJunction(-18+i*24,15))Building(side,i,facades[(i+(side>0?1:0))%4],dark,curb,shopGlass,i%2==0?teal:shopRed);
+            BuildCityConnections(asphalt,ground,pavement,paint,curb,facades,dark,shopGlass,teal);
             for(int i=0;i<stops.Length;i++){
                 var stop=Group("Rank • "+stopNames[i],world,stops[i]);
                 Box("Stop sign pole",new Vector3(-2,1.65f,0),new Vector3(.1f,3.3f,.1f),metal,stop);
@@ -192,18 +193,18 @@ namespace KombiShift.JaydenStarter
                 Box("Bench back",new Vector3(-3.58f,1,3.2f),new Vector3(.12f,.6f,3.5f),wood,stop);
                 for(int j=-1;j<=1;j+=2)Box("Bench leg",new Vector3(-3.3f,.4f,3.2f+j*1.3f),new Vector3(.3f,.6f,.12f),metal,stop);
                 Shape("Litter bin",PrimitiveType.Cylinder,new Vector3(-4.6f,.65f,-3),new Vector3(.55f,.45f,.55f),metal,stop,false);
-                Person("Waiting pedestrian",stops[i]+new Vector3(-3,.22f,4.2f),C(i%2==0?"C3A04C":"4C687E"),skin);
+
             }
             var station=Group("CITY FUEL",world,new Vector3(11,0,110));
             Box("Station canopy",new Vector3(0,4.1f,0),new Vector3(9,.4f,11),teal,station);
             Box("Station fascia",new Vector3(0,4.15f,-5.6f),new Vector3(9,.7f,.2f),teal,station);
             Label("CITY FUEL",station,new Vector3(0,4.2f,-5.72f),.12f,paper,Quaternion.identity);
             for(int j=-1;j<=1;j+=2){Box("Canopy column",new Vector3(2,2,j*4),new Vector3(.25f,4,.25f),curb,station);Rounded("Fuel pump",new Vector3(-2,.9f,j*2.7f),new Vector3(.75f,1.6f,.75f),.06f,curb,station);Box("Pump screen",new Vector3(-2,1.2f,j*2.7f-.39f),new Vector3(.5f,.4f,.025f),dark,station);}
-            for(int i=0;i<5;i++){var hole=Shape("Pothole",PrimitiveType.Cylinder,new Vector3(i%2==0?-2:2,.035f,50+i*34),new Vector3(1.25f,.012f,1.7f),dark,world,false);for(int j=0;j<4;j++)Shape("Broken asphalt",PrimitiveType.Cube,hole.transform.position+new Vector3(Mathf.Cos(j*1.6f)*.8f,.02f,Mathf.Sin(j*1.6f)),new Vector3(.16f,.08f,.25f),asphalt,world,false);}
             // Wide end plazas provide room to turn around for the return journey.
             for(int i=0;i<2;i++){float z=i==0?-27:252;Shape("Turning apron",PrimitiveType.Cylinder,new Vector3(0,-.025f,z),new Vector3(25,.045f,25),asphalt,world,true);Box("Turn sign",new Vector3(-7,2.2f,z),new Vector3(2.7f,.65f,.15f),teal,world);Label("TURN AROUND",world,new Vector3(-7,2.2f,z-.09f),.065f,paper,Quaternion.identity);}
             var batchable=new List<GameObject>();foreach(var rendererToBatch in world.GetComponentsInChildren<MeshRenderer>())if(rendererToBatch.GetComponent<TextMesh>()==null)batchable.Add(rendererToBatch.gameObject);
             StaticBatchingUtility.Combine(batchable.ToArray(),world.gameObject);
+            cityEnvironment=world;world=Group("Runtime actors",transform,Vector3.zero);cityEnvironment.SetParent(world,false);
             var player=Bus("Player Kombi",C("D5D4C9"),world);player.position=new Vector3(-3,.34f,0);
             var collider=player.gameObject.AddComponent<BoxCollider>();collider.center=new Vector3(0,.79f,0);collider.size=new Vector3(1.86f,1.98f,4.55f);
             player.gameObject.AddComponent<Rigidbody>();driver=player.gameObject.AddComponent<KombiDriver>();driver.game=this;
@@ -216,8 +217,8 @@ namespace KombiShift.JaydenStarter
             var lightObject=Group("Afternoon sun",world,Vector3.zero).gameObject;sun=lightObject.AddComponent<Light>();sun.type=LightType.Directional;sun.intensity=1.1f;sun.shadows=LightShadows.None;sun.transform.rotation=Quaternion.Euler(42,-32,0);
             QualitySettings.shadowDistance=0;QualitySettings.shadows=ShadowQuality.Disable;QualitySettings.antiAliasing=4;
             RenderSettings.ambientMode=AmbientMode.Flat;RenderSettings.ambientLight=C("9A9B97")*.65f;RenderSettings.fog=true;RenderSettings.fogMode=FogMode.Linear;RenderSettings.fogStartDistance=55;RenderSettings.fogEndDistance=245;
-            for(int i=0;i<7;i++){
-                var car=Bus(i==0?"Rival Kombi":"Traffic "+i,C(i==0?"C7C6BA":i%2==0?"D6D4CA":"AEB1AD"),world);var c=car.gameObject.AddComponent<BoxCollider>();c.center=new Vector3(0,.79f,0);c.size=new Vector3(1.86f,1.98f,4.55f);
+            for(int i=0;i<10;i++){
+                var car=i==0?Bus("Rival Kombi",C("B7B5AA"),world):TrafficVehicle(i,world);var c=car.gameObject.AddComponent<BoxCollider>();c.center=new Vector3(0,.79f,0);c.size=new Vector3(1.86f,1.98f,4.55f);
                 var rb=car.gameObject.AddComponent<Rigidbody>();rb.isKinematic=true;rb.interpolation=RigidbodyInterpolation.Interpolate;traffic.Add(new Traffic{transform=car,body=rb,speed=5+i*.5f,rival=i==0});
             }
             var rainObject=Group("Rain streaks",world,Vector3.zero).gameObject;rain=rainObject.AddComponent<ParticleSystem>();rain.Stop(true,ParticleSystemStopBehavior.StopEmittingAndClear);
@@ -244,12 +245,12 @@ namespace KombiShift.JaydenStarter
         {
             sun.color=Rainy?C("D4D7D8"):C("F0EDE4");sun.intensity=Rainy?.62f:.85f;
             chase.backgroundColor=Rainy?C("929A9D"):C("B3BAB9");RenderSettings.fogColor=chase.backgroundColor;RenderSettings.fogEndDistance=Rainy?160:245;
-            if(roadSurface.HasProperty("_Glossiness"))roadSurface.SetFloat("_Glossiness",Rainy?.65f:.12f);
+            if(roadSurface.HasProperty("_Glossiness"))roadSurface.SetFloat("_Glossiness",Rainy?.65f:.12f);if(highwayRoad!=null&&highwayRoad.HasProperty("_Glossiness"))highwayRoad.SetFloat("_Glossiness",.6f);
         }
         AudioClip AmbientLoop()
         {
-            const int rate=22050;const int seconds=8;var samples=new float[rate*seconds];float[] notes={220,277.18f,329.63f,277.18f,196,246.94f,293.66f,246.94f};
-            for(int i=0;i<samples.Length;i++){float t=(float)i/rate,phase=t%1;float envelope=Mathf.Sin(phase*Mathf.PI);samples[i]=(Mathf.Sin(t*notes[(int)t]*Mathf.PI*2)+.3f*Mathf.Sin(t*notes[(int)t]*Mathf.PI*4))*.035f*envelope;}
+            const int rate=22050;const int seconds=8;var samples=new float[rate*seconds];float[] notes={261.63f,329.63f,392,440,392,329.63f,293.66f,329.63f,261.63f,392,440,523.25f,440,392,329.63f,293.66f};
+            for(int i=0;i<samples.Length;i++){float t=(float)i/rate,phase=t%.5f;float f=notes[(int)(t*2)];float envelope=Mathf.Exp(-phase*12);samples[i]=(Mathf.Sin(t*f*Mathf.PI*2)+.35f*Mathf.Sin(t*f*Mathf.PI*5.52f))*.22f*envelope;}
             var clip=AudioClip.Create("Original shift theme",samples.Length,1,rate,false);clip.SetData(samples,0);clips.Add(clip);return clip;
         }
     }

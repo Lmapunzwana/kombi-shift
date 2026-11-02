@@ -1,3 +1,5 @@
+> Updated playable implementation: see [concept mapping](CONCEPT_IMPLEMENTATION.md), [current Unity guide](../../UnityStarter/README.md) and [validation](../../UnityStarter/Validation/RESULTS.md). The earlier design/preview notes below are historical and may describe superseded mechanics.
+
 # Jayden — assessment alignment and gaps
 
 Source reviewed: Game Development Final Project.pdf supplied by Jayden, 1 November 2026. This maps assessment requirements to proposed work; it is not proof that the game meets them. Team ownership follows the sprint plan, not assignments invented from the assessment brief.
