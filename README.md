@@ -9,3 +9,6 @@ Included: project seed, Bootstrap scene with runtime integration harness, GameMa
 **Not yet Editor-validated.** Package lock, complete generated project settings and HDRP pipeline assets must come from an actual import. No successful compilation or build is claimed.
 
 Owners: Leroy — core/integration; Jayden — art/HDRP; Euclide — vehicle; Tendai — traffic/AI; Tadiwa — passengers/HUD.
+
+## Playable prototype
+Jayden's isolated Built-In preview is in `UnityStarter/` (Unity 6000.6.2f1). See [preview setup](PREVIEW.md). Open it as a separate project; do not mix its managers/settings with this root HDRP foundation without integration.
