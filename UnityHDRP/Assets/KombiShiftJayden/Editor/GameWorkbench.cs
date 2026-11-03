@@ -9,7 +9,7 @@ namespace KombiShift.JaydenStarter.Editor {
   Vector2 scroll;
   [MenuItem("Kombi Shift/Open Game Workbench")]
   public static void Open()=>GetWindow<GameWorkbench>("Kombi Shift");
-  public static void OpenProject(){EditorSceneManager.OpenScene("Assets/KombiShiftJayden/Generated/KombiShiftStarter.unity");Open();Debug.Log("KOMBI_EDITOR_READY: Game scene and workbench open. Press Play.");}
+  public static void OpenProject(){EditorSceneManager.OpenScene("Assets/KombiShiftJayden/Generated/KombiShiftStarter.unity");Open();var root=UnityEngine.Object.FindFirstObjectByType<ShiftGame>();if(root!=null)Selection.activeGameObject=root.gameObject;Debug.Log("KOMBI_EDITOR_READY: Game scene and workbench open. Press Play.");}
   void OnInspectorUpdate()=>Repaint();
   void OnGUI(){scroll=EditorGUILayout.BeginScrollView(scroll);GUILayout.Label("KOMBI SHIFT | PLAY, INSPECT, LEARN",EditorStyles.boldLabel);
    EditorGUILayout.HelpBox("Open the Game scene, press Play, then use these tools to inspect live systems. Stop Play before saving asset changes. Test actions below are Editor-only controls.",MessageType.Info);
