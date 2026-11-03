@@ -31,17 +31,18 @@ namespace KombiShift.JaydenStarter
             int count=Physics.RaycastNonAlloc(Body.position+Vector3.up*2.5f,Vector3.down,groundHits,4f,~0,QueryTriggerInteraction.Ignore);
             for(int i=0;i<count;i++)if(groundHits[i].rigidbody!=Body&&groundHits[i].normal.y>.5f){Grounded=true;break;}
             if(!Grounded)return;
-            float command=ShiftInput.Throttle;
+            float command=ShiftInput.Throttle;var wear=game.Wear;float brakeStrength=wear==null?1:wear.BrakeStrength,grip=wear==null?1:wear.GripStrength;
             if(game.DriveBlocked){ParkNow();return;}
             if(IsParked&&Mathf.Abs(command)<.05f)requireNeutral=false;
             if(IsParked&&Mathf.Abs(command)>.05f&&!ShiftInput.Brake&&!requireNeutral){if(!game.RequestDeparture())return;IsParked=false;stopRequested=false;Body.constraints=DrivingConstraints;Body.WakeUp();}
             if(IsParked){Body.linearVelocity=new Vector3(0,Body.linearVelocity.y,0);Body.angularVelocity=Vector3.zero;return;}
             Vector3 v=transform.InverseTransformDirection(Body.linearVelocity);
-            v.x=Mathf.MoveTowards(v.x,0,(stopRequested||ShiftInput.Brake?35:game.Rainy?3:12)*Time.fixedDeltaTime);
+            v.x=Mathf.MoveTowards(v.x,0,(stopRequested||ShiftInput.Brake?35:(game.Rainy?3:12)*grip)*Time.fixedDeltaTime);
             // Direct input only: releasing a key cannot fall back to a stale GUI-held key.
             bool stopping=ShiftInput.Brake||stopRequested||command*v.z<-.1f;
-            v.z=Mathf.MoveTowards(v.z,0,(stopping?38:command==0?7f:0)*Time.fixedDeltaTime);
+            v.z=Mathf.MoveTowards(v.z,0,(stopping?38*brakeStrength:command==0?7f:0)*Time.fixedDeltaTime);
             if((stopping||Mathf.Abs(command)<.05f)&&new Vector2(v.x,v.z).magnitude<.16f){ParkNow();return;}
+            if(stopping&&wear!=null)wear.Brake(Mathf.Abs(v.z),Time.fixedDeltaTime);
             if(!stopping)v.z+=command*acceleration*Mathf.Lerp(.6f,1,game.Condition/100)*Time.fixedDeltaTime;
             v.z=Mathf.Clamp(v.z,-7,maximumSpeed);Body.linearVelocity=transform.TransformDirection(v);Body.angularVelocity=Vector3.zero;
             float speedFactor=Mathf.Clamp(v.z/5,-1,1);float angle=ShiftInput.Turn*steering*speedFactor*Time.fixedDeltaTime;
@@ -59,7 +60,7 @@ namespace KombiShift.JaydenStarter
         {
             if(game==null||!game.IsPlaying||Time.time<nextCollision||hit.contactCount==0||hit.relativeVelocity.magnitude<3)return;
             if(hit.GetContact(0).normal.y>.6f)return;
-            nextCollision=Time.time+1;game.Damage(hit.relativeVelocity.magnitude*1.2f);
+            nextCollision=Time.time+1.5f;game.Damage(Mathf.Min(12,hit.relativeVelocity.magnitude*.65f));
         }
         protected virtual void OnDestroy(){if(contactMaterial!=null)Destroy(contactMaterial);}
     }

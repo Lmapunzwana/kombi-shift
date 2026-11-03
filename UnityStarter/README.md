@@ -1,3 +1,5 @@
+> Complete project update, 3 November: see [root guide](../README.md) and [Editor walkthrough](../Docs/Team/EDITOR_WALKTHROUGH.md). Separate wear/paid repairs, Inspector tuning/audio, prefab-backed passengers, real Animator transitions and an Art Workshop are now included. HDRP desktop lives in ../UnityHDRP.
+
 # Kombi Shift — playable 3D concept adaptation
 
 Open this folder in Unity 6000.6.2f1, open `Assets/KombiShiftJayden/Generated/KombiShiftStarter.unity`, and press Play. The world is generated at runtime. This is an isolated Built-In project; do not upgrade or overwrite the team foundation project to import it.

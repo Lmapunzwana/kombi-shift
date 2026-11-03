@@ -1,0 +1,11 @@
+case_id,task,expected,participant_id,date,build,machine,observed,severity,fix_commit,retest_result
+PT01,Start CBD and find controls,Player can explain goal and controls,,,,,,,,
+PT02,Drive brake release and wait,Vehicle stays stopped until deliberate acceleration,,,,,,,,
+PT03,Board at Market Square,Door and hwindi service visible with manifest updates,,,,,,,,
+PT04,Deliver matching passenger,Fare and tips paid once after alighting,,,,,,,,
+PT05,Try high fare,Some passengers reject based on patience tolerance and health,,,,,,,,
+PT06,Buy fuel and repair at station,Cash debited and resources restored,,,,,,,,
+PT07,Pause mid boarding and resume,Timer and sequence pause and resume correctly,,,,,,,,
+PT08,Play rainy highway,Grip fuel distance hazards differ from CBD,,,,,,,,
+PT09,Reach target or lose and restart,Clear statement with correct result and fresh resources,,,,,,,,
+PT10,Change HUD and audio settings,Settings persist and remain usable,,,,,,,,

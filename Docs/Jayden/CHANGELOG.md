@@ -32,3 +32,11 @@
 - Added visible hwindi gestures, real sliding doorway, departure interlock, passenger alighting and fare timing.
 - Other kombis pull into ranks, dwell and depart.
 - Added credited CC0 bus audio, temporary synthesized conductor calls, horn, door/brake/coin effects and audio metering.
+
+## 2026-11-03 - complete local Editor project
+- Added persistent tuning and audio references, brake/suspension wear and paid workshop repairs.
+- Added individual fare reactions, actual Animator states, passenger clothing variants, reusable prefabs and an Art Workshop.
+- Added Editor workbench, actual Play Mode verification and source walkthrough.
+- Added separate HDRP17.6 project with real settings/VolumeProfiles, compatible labels, corrected exposure/sky and desktop rendering.
+- Added report/deck drafts, complete task matrix and honest blank human test/contribution records.
+- Human playtests, individual review, lecturer decisions and native Windows/weakest-laptop evidence remain open.

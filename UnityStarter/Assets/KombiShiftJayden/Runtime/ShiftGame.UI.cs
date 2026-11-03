@@ -8,19 +8,19 @@ namespace KombiShift.JaydenStarter
         GUIStyle actionStyle,quietStyle,mapStyle;bool mouseControls=true,touchControls;float hudTextScale=1;
         readonly Color uiInk=new Color(.075f,.08f,.08f,.96f),uiMuted=new Color(.68f,.69f,.67f),uiAccent=new Color(.74f,.78f,.77f),uiTeal=new Color(.71f,.76f,.76f);
         float ScreenWidth=>UnityEngine.Screen.width;float ScreenHeight=>UnityEngine.Screen.height;
-        void Fill(Rect r,Color color){Color old=GUI.color;GUI.color=color;GUI.DrawTexture(r,Texture2D.whiteTexture);GUI.color=old;}
+        void Fill(Rect r,Color color){Color old=GUI.color;GUI.color=QualitySettings.activeColorSpace==ColorSpace.Linear?color.linear:color;GUI.DrawTexture(r,Texture2D.whiteTexture);GUI.color=old;}
         void Panel(Rect r){Fill(r,uiInk);Fill(new Rect(r.x,r.y,r.width,1),new Color(.5f,.7f,.7f,.18f));}
         void Write(Rect r,string text,int size,Color color,FontStyle weight=FontStyle.Normal,TextAnchor align=TextAnchor.UpperLeft)
         {
             size=Mathf.RoundToInt(size*(screen==Screen.Playing?hudTextScale:1));int key=size*100+(int)weight*10+(int)align;
             if(!uiStyles.TryGetValue(key,out var style)){style=new GUIStyle{font=worldFont,fontSize=size,fontStyle=weight,alignment=align,wordWrap=true};uiStyles[key]=style;}
-            style.normal.textColor=color;GUI.Label(r,text,style);
+            style.normal.textColor=QualitySettings.activeColorSpace==ColorSpace.Linear?color.linear:color;GUI.Label(r,text,style);
         }
         bool Action(Rect r,string value,bool primary=false)
         {
             if(actionStyle==null){actionStyle=new GUIStyle{font=worldFont,fontSize=22,fontStyle=FontStyle.Bold,alignment=TextAnchor.MiddleCenter};actionStyle.normal.textColor=paper;quietStyle=new GUIStyle(actionStyle);}
             Color bg=primary?uiAccent:new Color(.22f,.25f,.25f);if(r.Contains(Event.current.mousePosition))bg=primary?new Color(.85f,.87f,.86f):new Color(.3f,.33f,.33f);
-            Fill(r,bg);actionStyle.normal.textColor=primary?ink:paper;return GUI.Button(r,value,actionStyle);
+            Fill(r,bg);actionStyle.normal.textColor=QualitySettings.activeColorSpace==ColorSpace.Linear?(primary?ink.linear:paper.linear):(primary?ink:paper);return GUI.Button(r,value,actionStyle);
         }
         void Meter(Rect r,float fraction,Color color){Fill(r,new Color(.2f,.28f,.3f));Fill(new Rect(r.x,r.y,r.width*Mathf.Clamp01(fraction),r.height),color);}
         void OnGUI()
@@ -43,7 +43,7 @@ namespace KombiShift.JaydenStarter
                 if(Action(new Rect(470,641,174,52),"EXIT"))Application.Quit();
                 if(Action(new Rect(104,710,200,38),"TEST SOUND"))PlayHorn(true);
                 Write(new Rect(106,765,500,58),"ENTER to drive  •  WASD / arrows to steer\nClick the game window to give it keyboard focus.",18,uiMuted);
-                Panel(new Rect(1120,700,416,130));Write(new Rect(1146,723,360,24),"YOUR NEXT SHIFT",16,uiTeal,FontStyle.Bold);
+                Panel(new Rect(1120,700,416,130));Write(new Rect(1146,723,360,24),"NEXT SHIFT / BEST "+PlayerPrefs.GetFloat("Kombi.Best."+(Rainy?"Highway":"City"),0).ToString("F1"),16,uiTeal,FontStyle.Bold);
                 Write(new Rect(1146,758,360,36),Rainy?"02  /  RAINY HIGHWAY":"01  /  CBD MORNING",25,paper,FontStyle.Bold);
                 return;
             }
@@ -89,13 +89,16 @@ namespace KombiShift.JaydenStarter
             Panel(new Rect(1090,32,470,116));float remaining=Mathf.Max(0,shiftSeconds-elapsed);Write(new Rect(1114,50,200,24),"SHIFT REMAINING",16,uiMuted);Write(new Rect(1114,83,200,50),((int)remaining/60).ToString("00")+":"+((int)remaining%60).ToString("00"),34,paper,FontStyle.Bold);
             Write(new Rect(1333,51,200,24),"FUEL  "+Fuel.ToString("F0")+"%",17,Fuel<20?uiAccent:paper);Meter(new Rect(1333,82,200,6),Fuel/100,uiTeal);Write(new Rect(1333,101,200,24),"CONDITION  "+Condition.ToString("F0")+"%",17,paper);Meter(new Rect(1333,129,200,4),Condition/100,Condition<35?uiAccent:uiTeal);
             if(Action(new Rect(728,32,110,42),"PAUSE"))Pause(true);if(Action(new Rect(850,32,195,42),"NEAREST STOP"))stopIndex=BestStop();
+            if(AtFuel&&Action(new Rect(1090,185,220,42),"REPAIR  $3"))RepairAtStation();
             if(Time.unscaledTime<messageUntil){Panel(new Rect(40,169,800,57));Write(new Rect(60,181,760,40),message,21,paper);}
             DrawStopMap();
             DrawManifest();
+            Panel(new Rect(1090,153,470,28));Write(new Rect(1102,156,445,22),"BRAKES "+Wear.brakes.ToString("F0")+"%   SUSPENSION "+Wear.suspension.ToString("F0")+"%",14,uiMuted);
             Write(new Rect(1340,535,200,22),"HWINDI",15,uiMuted);Write(new Rect(1340,562,200,27),hwindi?HwindiDescription:"Not hired",17,paper);
             Panel(new Rect(40,671,360,187));Write(new Rect(62,691,316,25),"FARE MULTIPLIER",16,uiMuted,FontStyle.Bold);Write(new Rect(62,728,205,52),fare.ToString("F1")+"x",36,paper,FontStyle.Bold);
             if(Action(new Rect(231,723,64,52),"−"))fare=Mathf.Max(.5f,Mathf.Round((fare-.1f)*10)/10);if(Action(new Rect(306,723,64,52),"+"))fare=Mathf.Min(2,Mathf.Round((fare+.1f)*10)/10);
-            Write(new Rect(62,802,316,35),fare>1.6f?"Too expensive — passengers will refuse":"Fares scale with distance + delivery speed",18,fare>1.6f?uiAccent:uiMuted);
+            fare=Mathf.Round(GUI.HorizontalSlider(new Rect(62,784,308,18),fare,.5f,2)*10)/10;
+            Write(new Rect(62,810,316,35),fare>1.6f?"Premium fare - some passengers refuse":"Fare tolerance varies by passenger",18,fare>1.6f?uiAccent:uiMuted);
             Panel(new Rect(430,671,740,132));Write(new Rect(453,689,692,23),unloading?"PASSENGER ALIGHTING":boarding?"PASSENGER BOARDING":HasDropoff()?"NEXT DESTINATION":"NEXT PICKUP",15,uiTeal,FontStyle.Bold);
             float distance=Vector3.Distance(driver.transform.position,Target);Vector3 direction=(Target-driver.transform.position).normalized;bool behind=Vector3.Dot(driver.transform.forward,direction)<-.2f;
             Write(new Rect(453,725,474,41),stopNames[stopIndex],30,paper,FontStyle.Bold);Write(new Rect(453,770,450,24),unloading?"Keep stopped · passenger alighting":boarding?"Brake held · boarding in progress":distance.ToString("F0")+" m  ·  "+(behind?"Turn around safely":aboard?"Follow the route":"Passenger waiting · "+Mathf.Max(0,patience).ToString("F0")+"s"),17,uiMuted);
@@ -108,7 +111,7 @@ namespace KombiShift.JaydenStarter
                 bool left=Hold(new Rect(634,815,63,43),"A",ShiftInput.Turn<0),forward=Hold(new Rect(705,815,63,43),"W",ShiftInput.Throttle>0),back=Hold(new Rect(776,815,63,43),"S",ShiftInput.Throttle<0),right=Hold(new Rect(847,815,63,43),"D",ShiftInput.Turn>0),brake=Hold(new Rect(918,815,122,43),"STOP",ShiftInput.Brake||driver.IsParked);
                 ShiftInput.Virtual(forward?1:back?-1:0,left?-1:right?1:0,brake);
             }
-            if(!Application.isFocused){Panel(new Rect(490,382,620,112));Write(new Rect(516,404,568,66),"CLICK THE GAME WINDOW\nThen use WASD or the drive buttons.",25,paper,FontStyle.Bold,TextAnchor.MiddleCenter);}
+            if(!Application.isFocused&&!diagnosticSession){Panel(new Rect(490,382,620,112));Write(new Rect(516,404,568,66),"CLICK THE GAME WINDOW\nThen use WASD or the drive buttons.",25,paper,FontStyle.Bold,TextAnchor.MiddleCenter);}
             else Write(new Rect(40,876,1500,22),"WASD / ARROWS  DRIVE     SPACE  STOP / HOLD     H  HORN     E  INTERACT     ESC  PAUSE     R  RECOVER ($1)",13,uiMuted,FontStyle.Normal,TextAnchor.MiddleCenter);
         }
         bool HasDropoff(){foreach(var p in manifest)if(p.destination==stopIndex||p.state==PassengerState.Expired)return true;return false;}

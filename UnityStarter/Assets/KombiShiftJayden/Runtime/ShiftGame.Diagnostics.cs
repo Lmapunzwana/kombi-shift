@@ -74,6 +74,7 @@ namespace KombiShift.JaydenStarter
             Rainy=false;Menu();
             rain.Stop(true,ParticleSystemStopBehavior.StopEmittingAndClear);
             Debug.Log("KOMBI_PREVIEW_CAPTURED "+directory);
+            if(Array.IndexOf(Environment.GetCommandLineArgs(),"--kombi-exit")>=0&&!Application.isEditor)Application.Quit();
         }
         void IsolateTraffic(){rival.enabled=false;foreach(var car in traffic)car.transform.gameObject.SetActive(false);}
         IEnumerator RunSmokeCheck()
@@ -83,7 +84,7 @@ namespace KombiShift.JaydenStarter
             Rainy=false;Begin();IsolateTraffic();
             check(gameManager!=null&&fuelSystem!=null&&spawnManager!=null&&uiManager!=null&&audioManager!=null,"modular managers initialized");
             check(stops.Length==6&&cityEnvironment.gameObject.activeSelf&&!highwayEnvironment.gameObject.activeSelf,"CBD is six stops on a road network");
-            check(waiting.Count==12&&manifest.Count==0,"individual waiting passengers spawned from pool");
+            check(waiting.Count==12&&manifest.Count==0&&passengerPrefab!=null,"individual waiting passengers spawned from pool");
             check(waiting[0].destination!=waiting[1].destination&&waiting[0].baseFare!=waiting[1].baseFare,"passengers have different destinations and distance fares");
             yield return new WaitForSeconds(.5f);check(driver.Grounded,"grounded body");
             ShiftInput.testOverride=true;ShiftInput.testThrottle=1;ShiftInput.testTurn=0;ShiftInput.testBrake=false;float startZ=driver.Body.position.z;
@@ -111,7 +112,16 @@ namespace KombiShift.JaydenStarter
             Rainy=false;Begin();IsolateTraffic();rival.gameObject.SetActive(true);rival.enabled=true;driver.Body.position=new Vector3(40,.3f,220);rival.GetComponent<Rigidbody>().position=new Vector3(0,.225f,-15);rival.Configure(this,roadGraph,1,false);yield return new WaitForSeconds(.5f);check(rival.Current==RivalAI.State.ChasePassenger,"rival pursues nearest waiting passenger");
             rival.ApplyDamage(90);yield return new WaitForSeconds(.5f);check(rival.Current==RivalAI.State.Flee,"damaged rival retreats");rival.Configure(this,roadGraph,1,false);driver.Body.position=rival.transform.position+Vector3.forward*9;yield return new WaitForSeconds(.5f);check(rival.Current==RivalAI.State.Block,"nearby rival attempts bounded blocking");
             rival.enabled=false;check(sun.shadows==LightShadows.None&&QualitySettings.shadows==ShadowQuality.Disable,"prior no-shadow preference preserved");check(idleRecording!=null&&callClip!=null,"recorded engine and conductor calls load");
-            Rainy=false;Begin();IsolateTraffic();Menu();check(screen==Screen.Menu,"replay and return to menu");
+            Rainy=false;Begin();IsolateTraffic();
+            float freshStopping=0,wornStopping=0;
+            for(int sample=0;sample<2;sample++){Wear.brakes=sample==0?100:0;driver.Body.position=new Vector3(-3,.34f,0);driver.ParkNow();ShiftInput.testOverride=true;ShiftInput.testThrottle=1;ShiftInput.testBrake=false;yield return new WaitForSeconds(.7f);driver.Body.linearVelocity=Vector3.forward*12;ShiftInput.testThrottle=0;ShiftInput.testBrake=true;float brakeStartZ=driver.Body.position.z;yield return new WaitForSeconds(1);float travelled=driver.Body.position.z-brakeStartZ;if(sample==0)freshStopping=travelled;else wornStopping=travelled;}
+            check(wornStopping>freshStopping*1.2f,"worn brakes measurably increase stopping distance");ShiftInput.testOverride=false;ShiftInput.testThrottle=0;ShiftInput.testBrake=false;
+            Wear.ResetWear();Damage(10);check(Wear.suspension<100&&Condition<100,"impacts damage suspension and vehicle health");Begin();IsolateTraffic();check(Wear.brakes==100&&Wear.suspension==100,"restart restores brakes and suspension");
+            Pause(true);check(gameManager.State==GameManager.ShiftState.Paused,"manager publishes paused state");Pause(false);check(gameManager.State==GameManager.ShiftState.Playing,"manager resumes playing state");
+            check(waiting[0].Accepts(1,100)&&!waiting[0].Accepts(2,100),"passengers accept affordable fares and reject excessive fares");
+            var animator=waiting[0].GetComponent<Animator>();waiting[0].state=PassengerState.Boarding;yield return new WaitForSeconds(.3f);check(animator!=null&&animator.runtimeAnimatorController!=null&&animator.GetBool("Walking"),"boarding drives real Animator walking transition");waiting[0].state=PassengerState.Waiting;
+            driver.Body.position=level.station+Vector3.up*.3f;driver.ParkNow();wallet=8;Wear.brakes=20;Condition=50;RepairAtStation();check(wallet==5&&Wear.brakes==55&&Condition==80,"station repairs cost cash and restore condition and wear");driver.Body.position=stops[0]+Vector3.up*.3f;RepairAtStation();check(wallet==5,"workshop service is restricted to station");
+            Menu();check(screen==Screen.Menu&&gameManager.State==GameManager.ShiftState.Menu,"replay and return to menu");
             string path=Path.GetFullPath(System.IO.Path.Combine(Application.dataPath,Application.isEditor?"../../Builds/concept-results.json":"../../concept-results.json"));foreach(var arg in Environment.GetCommandLineArgs())if(arg.StartsWith("--kombi-report="))path=arg.Substring("--kombi-report=".Length);Directory.CreateDirectory(Path.GetDirectoryName(path));File.WriteAllText(path,JsonUtility.ToJson(report,true));Debug.Log("KOMBI_SMOKE_COMPLETE "+report.passed.Count+" passed; "+report.failed.Count+" failed; "+path);
             if(Array.IndexOf(Environment.GetCommandLineArgs(),"--kombi-exit")>=0)Application.Quit(report.failed.Count==0?0:1);
         }
