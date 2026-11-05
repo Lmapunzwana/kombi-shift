@@ -122,8 +122,11 @@ Potential free sources include:
 - Sketchfab CC BY models
 - Sketchfab CC BY-NC models
 - OpenGameArt
-- Kenney
 - Other clearly licensed educational assets
+
+Low-poly Kenney packs were evaluated during prototyping but removed when the
+team selected the realistic PBR direction. They should not be reintroduced as
+final road, vehicle or character artwork.
 
 We should avoid ripped models from commercial games or models uploaded without download and reuse permission. When attribution is required, we will list the creator, model and licence in the project documentation.
 
