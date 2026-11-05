@@ -72,6 +72,12 @@ namespace KombiShift2.Editor
                 string mesh = filter != null && filter.sharedMesh != null
                     ? $" mesh={filter.sharedMesh.name} vertices={filter.sharedMesh.vertexCount}"
                     : string.Empty;
+                if (renderer is SkinnedMeshRenderer skinned && skinned.sharedMesh != null)
+                {
+                    string rootBone = skinned.rootBone != null ? skinned.rootBone.name : "<null>";
+                    string bones = string.Join(", ", System.Array.ConvertAll(skinned.bones, bone => bone != null ? bone.name : "<null>"));
+                    mesh = $" skinnedMesh={skinned.sharedMesh.name} vertices={skinned.sharedMesh.vertexCount} localBoundsCenter={Format(skinned.localBounds.center)} localBoundsSize={Format(skinned.localBounds.size)} rootBone={rootBone} bones=[{bones}]";
+                }
                 string materialNames = string.Empty;
                 if (renderer != null)
                 {
