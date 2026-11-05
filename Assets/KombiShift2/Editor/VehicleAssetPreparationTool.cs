@@ -17,12 +17,37 @@ namespace KombiShift2.Editor
         {
             GameObject source = Selection.activeObject as GameObject;
             if (source == null) return;
+            PrepareSource(source, true);
+        }
+
+        public static void PrepareImportedHiace()
+        {
+            const string sourcePath = "Assets/KombiShift2/ThirdParty/Hiace2005/source/Hiace.glb";
+            GameObject source = AssetDatabase.LoadAssetAtPath<GameObject>(sourcePath);
+            if (source == null)
+            {
+                Debug.LogError($"KOMBI_ASSETS Could not load the imported Hiace at {sourcePath}.");
+                return;
+            }
+            PrepareSource(source, false);
+        }
+
+        private static void PrepareSource(GameObject source, bool selectResult)
+        {
             EnsureOutputFolder();
 
             GameObject root = new(source.name + "_Gameplay");
             GameObject visual = (GameObject)PrefabUtility.InstantiatePrefab(source);
             visual.name = "Visual";
             visual.transform.SetParent(root.transform, false);
+
+            // A number of marketplace models use X as the vehicle's longitudinal
+            // axis. KombiVehicleController consistently treats local Z as forward.
+            Bounds sourceBounds = CalculateLocalBounds(root, visual);
+            if (sourceBounds.size.x > sourceBounds.size.z * 1.2f)
+            {
+                visual.transform.localRotation = Quaternion.Euler(0f, -90f, 0f);
+            }
 
             Bounds bounds = CalculateLocalBounds(root, visual);
             Rigidbody body = root.AddComponent<Rigidbody>();
@@ -60,8 +85,11 @@ namespace KombiShift2.Editor
             string path = AssetDatabase.GenerateUniqueAssetPath($"{OutputFolder}/{source.name}_Gameplay.prefab");
             GameObject prefab = PrefabUtility.SaveAsPrefabAsset(root, path);
             Object.DestroyImmediate(root);
-            Selection.activeObject = prefab;
-            EditorGUIUtility.PingObject(prefab);
+            if (selectResult)
+            {
+                Selection.activeObject = prefab;
+                EditorGUIUtility.PingObject(prefab);
+            }
             Debug.Log($"KOMBI_ASSETS Prepared vehicle wrapper at {path}. Assign the imported wheel meshes to the axle visual fields after verifying their pivots.");
         }
 
