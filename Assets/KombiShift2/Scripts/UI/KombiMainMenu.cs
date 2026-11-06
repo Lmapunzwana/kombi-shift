@@ -127,6 +127,6 @@ namespace KombiShift2.UI
             Texture2D texture = new(1, 1); texture.SetPixel(0, 0, colour); texture.Apply(); return texture;
         }
 
-        private static void StartGame() => SceneManager.LoadScene("KombiDrive");
+        private static void StartGame() => SceneManager.LoadScene("KombiShift_FirstShift");
     }
 }

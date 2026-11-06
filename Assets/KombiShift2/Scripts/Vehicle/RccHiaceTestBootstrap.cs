@@ -10,6 +10,9 @@ namespace KombiShift2.Vehicle
         [SerializeField, Range(0.1f, 1f)] private float smokeTestThrottle = 0.65f;
 
         private bool interactiveInputEnabled;
+        private float smoothedSteering;
+        private float smoothedThrottle;
+        private float smoothedBrake;
 
         private IEnumerator Start()
         {
@@ -108,17 +111,22 @@ namespace KombiShift2.Vehicle
                 return;
             }
 
-            float throttle = Input.GetKey(KeyCode.W) || Input.GetKey(KeyCode.UpArrow) ? 1f : 0f;
-            float brake = Input.GetKey(KeyCode.S) || Input.GetKey(KeyCode.DownArrow) ? 1f : 0f;
-            float steer = 0f;
-            if (Input.GetKey(KeyCode.A) || Input.GetKey(KeyCode.LeftArrow)) steer -= 1f;
-            if (Input.GetKey(KeyCode.D) || Input.GetKey(KeyCode.RightArrow)) steer += 1f;
+            float requestedThrottle = Input.GetKey(KeyCode.W) || Input.GetKey(KeyCode.UpArrow) ? 1f : 0f;
+            float requestedBrake = Input.GetKey(KeyCode.S) || Input.GetKey(KeyCode.DownArrow) ? 1f : 0f;
+            smoothedThrottle = Mathf.MoveTowards(smoothedThrottle, requestedThrottle, Time.deltaTime * (requestedThrottle > smoothedThrottle ? 1.2f : 2.2f));
+            smoothedBrake = Mathf.MoveTowards(smoothedBrake, requestedBrake, Time.deltaTime * (requestedBrake > smoothedBrake ? 2.2f : 3.5f));
+            float requestedSteering = 0f;
+            if (Input.GetKey(KeyCode.A) || Input.GetKey(KeyCode.LeftArrow)) requestedSteering -= 1f;
+            if (Input.GetKey(KeyCode.D) || Input.GetKey(KeyCode.RightArrow)) requestedSteering += 1f;
+            float speedSteeringLimit = Mathf.Lerp(1f, .28f, Mathf.InverseLerp(15f, 120f, vehicle.absoluteSpeed));
+            float steeringRate = requestedSteering == 0f ? 1.9f : Mathf.Lerp(1.65f, .78f, Mathf.InverseLerp(0f, 100f, vehicle.absoluteSpeed));
+            smoothedSteering = Mathf.MoveTowards(smoothedSteering, requestedSteering * speedSteeringLimit, Time.deltaTime * steeringRate);
 
             RCCP_Inputs inputs = new()
             {
-                throttleInput = throttle,
-                steerInput = steer,
-                brakeInput = brake,
+                throttleInput = smoothedThrottle,
+                steerInput = smoothedSteering,
+                brakeInput = smoothedBrake,
                 handbrakeInput = Input.GetKey(KeyCode.Space) ? 1f : 0f
             };
             vehicle.Inputs.OverrideInputs(inputs);
