@@ -1,6 +1,6 @@
 # Kombi Shift: project guide
 
-Open `BranchProjects/KombiShift2` in Unity 6000.6.2f1. This is the local cleaned version of `feat/kombishift2-unity6`, based on revision `ddd18ae`. The current local changes have not been pushed.
+Open `BranchProjects/KombiShift2` in Unity 6000.6.2f1. This is the cleaned version of `feat/kombishift2-unity6`, based on revision `ddd18ae`. Updates are maintained on `feat/kombishift2-unity6`.
 
 ## Open and play
 

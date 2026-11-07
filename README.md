@@ -1,6 +1,6 @@
 # Kombi Shift — current Unity project
 
-Open this folder in Unity **6000.6.2f1**. This local cleaned project is based on `feat/kombishift2-unity6` revision `ddd18ae`.
+Open this folder in Unity **6000.6.2f1**. This cleaned project is based on `feat/kombishift2-unity6` revision `ddd18ae`.
 
 Choose **Kombi Shift > Project Tour** for a guided explanation of the folders. Start with **Kombi Shift > Open Main Menu**, then Play and Start Shift.
 
@@ -8,7 +8,7 @@ Only two active scenes remain: `KombiMainMenu` and `KombiShift_FirstShift`. Earl
 
 Read [the project guide](Docs/PROJECT_GUIDE.md) for controls, the folder map, system connections, known unfinished work and archive recovery. See [cleanup validation](Docs/CLEANUP_VALIDATION.txt) for the Unity checks.
 
-The cleanup is local; it has not been pushed to GitHub. Asset imports and original licence/attribution requirements remain relevant; see Docs/ASSET_REGISTER.csv and the source packs.
+The cleanup and gameplay updates are maintained on `feat/kombishift2-unity6`. Asset imports and original licence/attribution requirements remain relevant; see Docs/ASSET_REGISTER.csv and the source packs.
 
 The current First Shift includes seated station queues, visible walk-in boarding, two rival kombis competing for those queues, a circular minimap and a compact speed/gear display. Stop below 2 km/h and hold Space while boarding. See Docs/PROJECT_GUIDE.md for the new components and remaining persona economy limitations.
 
