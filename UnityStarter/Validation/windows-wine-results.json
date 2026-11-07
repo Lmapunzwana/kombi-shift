@@ -41,6 +41,15 @@
         "nearby rival attempts bounded blocking",
         "prior no-shadow preference preserved",
         "recorded engine and conductor calls load",
+        "worn brakes measurably increase stopping distance",
+        "impacts damage suspension and vehicle health",
+        "restart restores brakes and suspension",
+        "manager publishes paused state",
+        "manager resumes playing state",
+        "passengers accept affordable fares and reject excessive fares",
+        "boarding drives real Animator walking transition",
+        "station repairs cost cash and restore condition and wear",
+        "workshop service is restricted to station",
         "replay and return to menu"
     ],
     "failed": []

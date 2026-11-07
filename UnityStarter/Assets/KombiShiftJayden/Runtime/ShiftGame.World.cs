@@ -143,6 +143,7 @@ namespace KombiShift.JaydenStarter
         }
         Transform Person(string name,Vector3 position,Color shirt,Material skin)
         {
+            if(name=="Passenger"&&passengerPrefab!=null){var instance=Instantiate(passengerPrefab,world);instance.name=name;instance.transform.localPosition=position;passengerArmL=instance.transform.Find("Arm L");passengerArmR=instance.transform.Find("Arm R");return instance.transform;}
             var p=Group(name,world,position);var clothes=Mat(shirt);var trousers=Mat(C("283744"));var shoe=Mat(C("242629"));
             Shape("Torso",PrimitiveType.Capsule,new Vector3(0,1.04f,0),new Vector3(.42f,.34f,.3f),clothes,p,false);
             Shape("Head",PrimitiveType.Sphere,new Vector3(0,1.64f,0),new Vector3(.3f,.36f,.3f),skin,p,false);
@@ -150,7 +151,7 @@ namespace KombiShift.JaydenStarter
             for(int side=-1;side<=1;side+=2){
                 Shape("Leg",PrimitiveType.Capsule,new Vector3(side*.115f,.42f,0),new Vector3(.14f,.34f,.16f),trousers,p,false);
                 Box("Shoe",new Vector3(side*.115f,.08f,.05f),new Vector3(.17f,.12f,.32f),shoe,p);
-                var arm=Shape("Arm",PrimitiveType.Capsule,new Vector3(side*.29f,1,0),new Vector3(.13f,.28f,.13f),clothes,p,false);
+                var arm=Shape(side<0?"Arm L":"Arm R",PrimitiveType.Capsule,new Vector3(side*.29f,1,0),new Vector3(.13f,.28f,.13f),clothes,p,false);
                 if(name=="Passenger"){if(side<0)passengerArmL=arm.transform;else passengerArmR=arm.transform;}
             }
             return p;
@@ -158,7 +159,7 @@ namespace KombiShift.JaydenStarter
         void BuildWorld()
         {
             world=Group("City • generated environment",transform,Vector3.zero);worldFont=Resources.GetBuiltinResource<Font>("LegacyRuntime.ttf");
-            worldLabelMaterial=new Material(Resources.Load<Shader>("WorldLabel"));materials.Add(worldLabelMaterial);Font.textureRebuilt+=RefreshLabelAtlas;
+            worldLabelMaterial=new Material(Resources.Load<Shader>(UnityEngine.Rendering.GraphicsSettings.currentRenderPipeline!=null&&UnityEngine.Rendering.GraphicsSettings.currentRenderPipeline.GetType().Name.Contains("HDRender")?"HDRPWorldLabel":"WorldLabel"));materials.Add(worldLabelMaterial);Font.textureRebuilt+=RefreshLabelAtlas;
             var asphalt=Grain(Mat(C("3B3D3B"),.12f),5,110);roadSurface=asphalt;
             var ground=Grain(Mat(C("827B68")),20,50);var pavement=Mat(C("A8A397"));var curb=Mat(C("C1BDB1"));var paint=Mat(C("E8E1CB"));var metal=Mat(C("34474C"));var dark=Mat(C("28343B"));var teal=Mat(C("4E5B5E"));var bark=Mat(C("5F4D3E"));var leaves=Mat(C("5B654E"));var skin=Mat(C("87563A"));var wood=Mat(C("80573C"));
             Box("Ground",new Vector3(0,-.55f,110),new Vector3(150,1,350),ground,world,true);
@@ -245,6 +246,8 @@ namespace KombiShift.JaydenStarter
         {
             sun.color=Rainy?C("D4D7D8"):C("F0EDE4");sun.intensity=Rainy?.62f:.85f;
             chase.backgroundColor=Rainy?C("929A9D"):C("B3BAB9");RenderSettings.fogColor=chase.backgroundColor;RenderSettings.fogEndDistance=Rainy?160:245;
+            WeatherChanged?.Invoke(Rainy);
+            if(roadSurface.HasProperty("_Smoothness"))roadSurface.SetFloat("_Smoothness",Rainy?.65f:.12f);if(highwayRoad!=null&&highwayRoad.HasProperty("_Smoothness"))highwayRoad.SetFloat("_Smoothness",.6f);
             if(roadSurface.HasProperty("_Glossiness"))roadSurface.SetFloat("_Glossiness",Rainy?.65f:.12f);if(highwayRoad!=null&&highwayRoad.HasProperty("_Glossiness"))highwayRoad.SetFloat("_Glossiness",.6f);
         }
         AudioClip AmbientLoop()

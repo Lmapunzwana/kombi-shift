@@ -1,0 +1,13 @@
+KOMBI SHIFT - HAI311
+Prepared 3 November 2026. Review package; human evidence outstanding.
+Group number: TO BE PROVIDED BY TEAM
+Jayden - registration number to be provided
+Leroy - registration number to be provided
+Euclide - registration number to be provided
+Tendai - registration number to be provided
+Tadiwa - registration number to be provided
+Unity: 6000.6.2f1. HDRP desktop project plus Built-In desktop/WebGL project.
+Startup: open the selected project, open Generated/KombiShiftStarter.unity, Play.
+Workbench: Kombi Shift > Open Game Workbench.
+Controls: WASD/arrows drive; Space stop/hold; E board/drop/refuel; H horn; R recovery ($1); Escape pause. Map stop buttons select destination. Station repair button costs $3. Optional touch controls and sound/HUD settings are in pause.
+Known issues: procedural prototype art and synthesized temporary English conductor speech; actual phone and native Windows hardware testing pending; no human playtests, lecturer exception or independent review claimed. Team's previous 6000.3/HDRP foundation is not automatically migrated or merged. Built-In and HDRP are separate projects. Catalog prefabs are reusable art assets; gameplay is generated at runtime. Settings and best scores persist locally.

@@ -5,3 +5,6 @@
 **/[Uu]ser[Ss]ettings/
 /Builds/
 *.zip
+
+/tmp/
+/Submission/02 Unity Source/

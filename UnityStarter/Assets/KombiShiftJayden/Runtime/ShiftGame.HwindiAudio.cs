@@ -13,7 +13,7 @@ namespace KombiShift.JaydenStarter
         void CreateHwindi(Material skin)
         {
             hwindiActor=Person("Hwindi",Vector3.zero,C("686453"),skin);int arm=0;
-            foreach(Transform child in hwindiActor)if(child.name=="Arm"){if(arm++==0)hwindiLeftArm=child;else hwindiRightArm=child;}
+            foreach(Transform child in hwindiActor)if(child.name.StartsWith("Arm")){if(arm++==0)hwindiLeftArm=child;else hwindiRightArm=child;}
             hwindiLeftHand=Shape("Left hand",PrimitiveType.Sphere,new Vector3(-.3f,1.3f,0),Vector3.one*.13f,skin,hwindiActor,false).transform;hwindiRightHand=Shape("Right hand",PrimitiveType.Sphere,new Vector3(.3f,1.3f,0),Vector3.one*.13f,skin,hwindiActor,false).transform;
             var cloth=Mat(C("3D423D"));var bag=Mat(C("675746"));
             Box("Conductor shoulder bag",new Vector3(.17f,.87f,.18f),new Vector3(.3f,.4f,.15f),bag,hwindiActor);
@@ -68,7 +68,7 @@ namespace KombiShift.JaydenStarter
             AudioListener.volume=1;AudioListener.pause=false;
             effects=gameObject.AddComponent<AudioSource>();music=gameObject.AddComponent<AudioSource>();engine=gameObject.AddComponent<AudioSource>();hwindiVoice=gameObject.AddComponent<AudioSource>();
             effects.spatialBlend=music.spatialBlend=engine.spatialBlend=hwindiVoice.spatialBlend=0;
-            idleRecording=Resources.Load<AudioClip>("Audio/BusIdle");callClip=Resources.Load<AudioClip>("Audio/HwindiCall");readyClip=Resources.Load<AudioClip>("Audio/HwindiReady");fareVoiceClip=Resources.Load<AudioClip>("Audio/HwindiFare");
+            idleRecording=engineRecording!=null?engineRecording:Resources.Load<AudioClip>("Audio/BusIdle");callClip=conductorCall!=null?conductorCall:Resources.Load<AudioClip>("Audio/HwindiCall");readyClip=conductorReady!=null?conductorReady:Resources.Load<AudioClip>("Audio/HwindiReady");fareVoiceClip=conductorFare!=null?conductorFare:Resources.Load<AudioClip>("Audio/HwindiFare");
             hornClip=MakeEffect("Twin tone horn",.32f,(t,n)=>(Mathf.Sin(t*2*Mathf.PI*350)+.65f*Mathf.Sin(t*2*Mathf.PI*440))*.27f*Mathf.Min(1,t*100)*Mathf.Min(1,(.32f-t)*80));
             doorClip=MakeEffect("Sliding door and latch",.6f,(t,n)=>n*.2f*Mathf.Sin(t*Mathf.PI/.6f)+n*.55f*Mathf.Exp(-Mathf.Abs(t-.51f)*110));
             brakeClip=MakeEffect("Brake stop",.3f,(t,n)=>n*.15f*Mathf.Exp(-t*14));

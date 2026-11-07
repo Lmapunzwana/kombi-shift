@@ -1,0 +1,27 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 94fedcef26c097956bcec2277b3c2994, type: 3}
+  m_Name: GameTuning
+  m_EditorClassIdentifier: Assembly-CSharp::KombiShift.JaydenStarter.GameTuning
+  acceleration: 13
+  maximumSpeed: 20
+  steering: 92
+  citySeconds: 300
+  cityTarget: 18
+  cityFuel: 100
+  cityTraffic: 9
+  highwaySeconds: 300
+  highwayTarget: 28
+  highwayFuel: 45
+  highwayTraffic: 4
+  patienceScale: 1
+  rivalAggressionScale: 1
