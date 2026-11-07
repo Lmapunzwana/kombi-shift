@@ -4,5 +4,8 @@
 EditorBuildSettings:
   m_ObjectHideFlags: 0
   serializedVersion: 2
-  m_Scenes: []
+  m_Scenes:
+  - enabled: 1
+    path: Assets/KombiShiftJayden/Generated/KombiShiftStarter.unity
+    guid: 2edaf688edf050257a3ca811bff277fa
   m_configObjects: {}

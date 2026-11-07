@@ -130,7 +130,7 @@ GameObject:
   - component: {fileID: 1779001282}
   - component: {fileID: 1779001281}
   m_Layer: 0
-  m_Name: Jayden Standalone Starter
+  m_Name: Kombi Shift - Game Root (press Play)
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -149,6 +149,12 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::KombiShift.JaydenStarter.ShiftGame
   surfaceTemplate: {fileID: 2100000, guid: 4d78d072923277e98a79ab0dcf628c32, type: 2}
+  tuning: {fileID: 11400000, guid: b05443622e6dcc4009819be4cebabc23, type: 2}
+  passengerPrefab: {fileID: 2996699345403869878, guid: fd83b0a5a05e3e1ffba294a726a92065, type: 3}
+  engineRecording: {fileID: 8300000, guid: 8b83a7fa675992771b747febb86e4d9f, type: 3}
+  conductorCall: {fileID: 8300000, guid: 1feb51780490cacbbaf1668b21658d6e, type: 3}
+  conductorReady: {fileID: 8300000, guid: 11619d4ff0426f7bf884b22c24da516f, type: 3}
+  conductorFare: {fileID: 8300000, guid: e0e901cc5c86a201ca2bd389f7f017cb, type: 3}
   shiftSeconds: 240
 --- !u!4 &1779001282
 Transform:

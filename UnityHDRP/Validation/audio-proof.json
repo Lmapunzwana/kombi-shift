@@ -1,0 +1,9 @@
+{
+    "sampleRate": 48000,
+    "peakRms": 0.0833665132522583,
+    "listenerVolume": 1.0,
+    "effectsLevel": 0.75,
+    "realEngineLoaded": true,
+    "enginePlaying": true,
+    "hwindiClipsLoaded": true
+}

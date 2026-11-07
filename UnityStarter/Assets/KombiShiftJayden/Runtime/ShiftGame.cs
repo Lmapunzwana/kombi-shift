@@ -12,6 +12,16 @@ namespace KombiShift.JaydenStarter
     public sealed partial class ShiftGame : MonoBehaviour
     {
         public Material surfaceTemplate;
+        public GameTuning tuning;
+        public GameObject passengerPrefab;
+        [Header("Replace these clips to record your own conductor")]
+        public AudioClip engineRecording,conductorCall,conductorReady,conductorFare;
+        readonly EconomyManager economy=new EconomyManager();
+        float gross{get=>economy.Gross;set=>economy.Gross=value;}
+        float fuelCost{get=>economy.FuelExpense;set=>economy.FuelExpense=value;}
+        float repairCost{get=>economy.RepairExpense;set=>economy.RepairExpense=value;}
+        public VehicleWear Wear{get;private set;}
+        public event Action<bool> WeatherChanged;
         [Min(30)] public float shiftSeconds = 240;
         public event Action<float> FareEarned;
         enum Screen { Menu, Instructions, Selection, Playing, Paused, Statement }
@@ -31,19 +41,21 @@ namespace KombiShift.JaydenStarter
         readonly List<Traffic> traffic = new List<Traffic>();
         Vector3[] stops=LevelDefinition.City().stops;
         sealed class Traffic { public Transform transform; public Rigidbody body; public float speed; public RivalState state; public bool rival; public AudioSource sound; public float dwellUntil; public int nextStop; public bool atStop; }
-        float elapsed, gross, fuelCost, repairCost, fare = 1, patience = 60, musicVolume = .15f, effectsVolume = .5f;
+        float elapsed, fare = 1, patience = 60, musicVolume = .15f, effectsVolume = .5f;
         float messageUntil, hazardAt, nextRivalDecision; int stopIndex, delivered, missed; bool aboard, boarding; bool hwindi=true; bool unloading; string message = "", outcome = "";
+        bool diagnosticSession;
         Coroutine rainRoutine;
         Coroutine boardingRoutine; float boardingProgress;
         Color ink = new Color(.14f,.15f,.15f), paper = new Color(.91f,.91f,.88f), yellow = new Color(.72f,.73f,.68f);
         float Remittance => Rainy ? 12 : 8;
-        float ConductorCost => hwindi ? 3 : 0;
-        float TakeHome => gross - fuelCost - repairCost - Remittance - ConductorCost;
+        float ConductorCost => hwindi ? ConductorModifier.DailyCost : 0;
+        float TakeHome => economy.TakeHome(Remittance,ConductorCost);
         Vector3 Target=>stops[Mathf.Clamp(stopIndex,0,stops.Length-1)];
         void Start()
         {
+            diagnosticSession=Array.Exists(Environment.GetCommandLineArgs(),a=>a.StartsWith("--kombi-"));
             musicVolume = PlayerPrefs.GetFloat("KombiJayden.Music.v2", .12f); effectsVolume = PlayerPrefs.GetFloat("KombiJayden.Effects.v2", .75f);
-            Application.runInBackground=true;BuildWorld();InitializeSystems();screen=Screen.Menu;Application.targetFrameRate=60;
+            Application.runInBackground=true;BuildWorld();InitializeSystems();screen=Screen.Menu;gameManager.SetState(GameManager.ShiftState.Menu);Time.timeScale=0;Application.targetFrameRate=60;
             if(Array.IndexOf(Environment.GetCommandLineArgs(),"--kombi-profile")>=0)StartCoroutine(RunPerformanceComparison());
             if(Array.IndexOf(Environment.GetCommandLineArgs(),"--kombi-input-probe")>=0)StartCoroutine(ProbePhysicalInput());
             if (Array.IndexOf(Environment.GetCommandLineArgs(), "--kombi-smoke") >= 0) StartCoroutine(RunSmokeCheck());
@@ -64,7 +76,7 @@ namespace KombiShift.JaydenStarter
         {
             var g = GameObject.CreatePrimitive(type); g.name = name; g.transform.SetParent(parent, false);
             g.transform.localPosition = position; g.transform.localScale = scale; g.GetComponent<Renderer>().sharedMaterial = material;
-            if (!solid) { var c = g.GetComponent<Collider>(); if(c!=null){c.enabled = false; Destroy(c);} }
+            if (!solid) { var c = g.GetComponent<Collider>(); if(c!=null){c.enabled = false;if(Application.isPlaying)Destroy(c);else DestroyImmediate(c);} }
             return g;
         }
         AudioClip Tone(string name,float frequency,float duration)
@@ -94,14 +106,14 @@ namespace KombiShift.JaydenStarter
             if(boardingRoutine!=null){StopCoroutine(boardingRoutine);boardingRoutine=null;} Time.timeScale=1; screen=Screen.Playing; Condition=Fuel=100;
             elapsed=gross=fuelCost=repairCost=0;stopIndex=delivered=missed=0;aboard=boarding=unloading=false;hwindiReadyAt=0;patience=60;hazardAt=nextRivalDecision=0;
             driver.Body.position=new Vector3(-3,.34f,0);driver.Body.rotation=Quaternion.identity;driver.Body.linearVelocity=Vector3.zero;driver.Body.angularVelocity=Vector3.zero;
-            driver.ParkNow();ConfigureLevel();ResetTraffic();rival.Configure(this,roadGraph,level.aggression,Rainy);tipsTotal=noCrashBonus=0;crashCount=0;stopIndex=BestStop();PositionPassenger();ResetHwindi();ApplyWeather();
+            driver.ParkNow();Wear.ResetWear();ConfigureLevel();ResetTraffic();rival.Configure(this,roadGraph,level.aggression,Rainy);tipsTotal=noCrashBonus=0;crashCount=0;stopIndex=BestStop();PositionPassenger();ResetHwindi();ApplyWeather();
             if(rainRoutine!=null)StopCoroutine(rainRoutine);if(Rainy)rainRoutine=StartCoroutine(StartRain());else rain.Stop(true,ParticleSystemStopBehavior.StopEmittingAndClear);
             ShiftInput.Clear();
             Notify("Pull into the stop bay. Press Space to hold, then E to board.");
         }
         IEnumerator StartRain(){rain.Play();var emission=rain.emission;for(float t=0;t<2;t+=Time.deltaTime){emission.rateOverTime=650*t/2;yield return null;}emission.rateOverTime=650;}
         void Notify(string text){message=text;messageUntil=Time.unscaledTime+5;}
-        public void Damage(float amount){crashCount++;if(gameManager!=null)gameManager.PublishDamage(amount);Condition=Mathf.Max(0,Condition-amount);repairCost+=amount*.04f;effects.PlayOneShot(warning,effectsVolume);Notify("Vehicle damaged. Slow down around hazards and traffic.");}
+        public void Damage(float amount){Wear?.Impact(amount);crashCount++;if(gameManager!=null)gameManager.PublishDamage(amount);Condition=Mathf.Max(0,Condition-amount);repairCost+=amount*.04f;effects.PlayOneShot(warning,effectsVolume);Notify("Vehicle damaged. Slow down around hazards and traffic.");}
         void Update()
         {
             bool pause=ShiftInput.Pressed(KeyCode.Escape), interact=ShiftInput.Pressed(KeyCode.E), reset=ShiftInput.Pressed(KeyCode.R);
@@ -137,7 +149,7 @@ namespace KombiShift.JaydenStarter
                 pos.x=Mathf.MoveTowards(pos.x,approaching?(direction>0?-4.55f:4.55f):baseLane,Time.fixedDeltaTime*.8f);
                 if(approaching)speed=Mathf.Min(speed,toRank<8?2.4f:4);
                 if(approaching&&toRank<.75f){car.atStop=true;car.dwellUntil=Time.time+(car.rival?4:6);if(car.sound!=null)car.sound.PlayOneShot(doorClip,.4f);continue;}
-                if(Physics.SphereCast(pos+Vector3.up*.8f+car.transform.forward*2.7f,.65f,car.transform.forward,out var obstruction,5,~0,QueryTriggerInteraction.Ignore))speed=0;
+                if(Physics.SphereCast(pos+Vector3.up*.8f+car.transform.forward*2.7f,.65f,car.transform.forward,out var obstruction,14,~0,QueryTriggerInteraction.Ignore))speed=0;
                 pos+=car.transform.forward*speed*Time.fixedDeltaTime;
                 if(pos.z>(Rainy?535:260)){pos.z=-35;car.nextStop=0;}if(pos.z< -40){pos.z=Rainy?525:255;car.nextStop=stops.Length-1;}
                 car.body.MovePosition(pos);
@@ -149,15 +161,16 @@ namespace KombiShift.JaydenStarter
             var t=driver.transform;bool cinematic=screen==Screen.Menu||screen==Screen.Selection||screen==Screen.Instructions;
             float shoulder=driver.IsParked&&Vector3.Distance(t.position,Target)<16?4f:1.1f;
             Vector3 desired=cinematic?t.position+new Vector3(-7,3.3f,-7):t.position-t.forward*8-t.right*shoulder+Vector3.up*3.6f;
+            if(!cinematic){var look=t.position+Vector3.up*1.6f;var ray=desired-look;if(Physics.SphereCast(look,.25f,ray.normalized,out var wall,ray.magnitude,~0,QueryTriggerInteraction.Ignore)&&wall.rigidbody!=driver.Body)desired=wall.point-wall.normal*.05f+Vector3.up*.5f;}
             chase.transform.position=Vector3.Lerp(chase.transform.position,desired,1-Mathf.Exp(-5*Time.unscaledDeltaTime));chase.transform.LookAt(cinematic?t.position+Vector3.left*3+Vector3.up:t.position+Vector3.up*1.2f+t.forward*3);
             rain.transform.position=t.position+Vector3.up*14;
             if(IsPlaying)foreach(var wheel in wheels)wheel.Rotate(Vector3.up,driver.SignedSpeed*180*Time.deltaTime,Space.Self);
             AnimateObjective();UpdateHwindi();
         }
-        void Pause(bool paused){screen=paused?Screen.Paused:Screen.Playing;Time.timeScale=paused?0:1;ShiftInput.Clear();if(paused&&engine!=null)engine.volume=0;if(hwindiVoice!=null){if(paused)hwindiVoice.Pause();else hwindiVoice.UnPause();}}
-        void Finish(string reason){if(gameManager!=null&&gameManager.Ended)return;noCrashBonus=crashCount==0?5:0;if(gameManager!=null)gameManager.End(reason);outcome=reason;screen=Screen.Statement;Time.timeScale=0;if(engine!=null)engine.volume=0;}
+        void Pause(bool paused){if(gameManager!=null)gameManager.SetState(paused?GameManager.ShiftState.Paused:GameManager.ShiftState.Playing);screen=paused?Screen.Paused:Screen.Playing;Time.timeScale=paused?0:1;ShiftInput.Clear();if(paused&&engine!=null)engine.volume=0;if(hwindiVoice!=null){if(paused)hwindiVoice.Pause();else hwindiVoice.UnPause();}}
+        void Finish(string reason){if(gameManager!=null&&gameManager.Ended)return;noCrashBonus=crashCount==0?5:0;if(gameManager!=null)gameManager.End(reason);PlayerPrefs.SetFloat("Kombi.Best."+(Rainy?"Highway":"City"),Mathf.Max(PlayerPrefs.GetFloat("Kombi.Best."+(Rainy?"Highway":"City"),0),gross+noCrashBonus));PlayerPrefs.Save();outcome=reason;screen=Screen.Statement;Time.timeScale=0;if(engine!=null)engine.volume=0;}
         void Recover(){driver.Body.position=new Vector3(-3,.34f,Mathf.Clamp(driver.transform.position.z,-15,Rainy?520:245));driver.Body.rotation=Quaternion.identity;driver.Body.linearVelocity=Vector3.zero;driver.Body.angularVelocity=Vector3.zero;repairCost+=1;wallet=Mathf.Max(0,wallet-1);fuelPreviousPosition=driver.transform.position;Notify("Back on the road. Recovery $1.");}
-        void Menu(){if(boardingRoutine!=null){StopCoroutine(boardingRoutine);boardingRoutine=null;}boarding=unloading=false;screen=Screen.Menu;Time.timeScale=0;if(engine!=null)engine.volume=0;}
+        void Menu(){if(boardingRoutine!=null){StopCoroutine(boardingRoutine);boardingRoutine=null;}boarding=unloading=false;gameManager?.SetState(GameManager.ShiftState.Menu);screen=Screen.Menu;Time.timeScale=0;if(engine!=null)engine.volume=0;}
         void OnApplicationFocus(bool focused)
         {
             if(focused||!IsPlaying||Application.isBatchMode)return;
