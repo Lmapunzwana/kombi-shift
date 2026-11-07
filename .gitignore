@@ -70,3 +70,6 @@ crashlytics-build.properties
 .idea/
 .DS_Store
 *.slnx
+
+# Native Unity crash dumps
+mono_crash.*

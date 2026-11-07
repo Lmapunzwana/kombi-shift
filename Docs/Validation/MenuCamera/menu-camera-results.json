@@ -1,0 +1,28 @@
+{
+    "passed": [
+        "Menu displays the actual 3D Hiace",
+        "Menu has sound feedback",
+        "Menu camera moves around the live vehicle",
+        "Menu focus animates the selected card",
+        "How to play opens from its menu action",
+        "Settings opens from its menu action",
+        "Start action plays a transition before loading",
+        "Start shift loads the playable scene",
+        "Follow camera owns the visible game view",
+        "Only the gameplay camera remains in the city scene",
+        "Camera test uses normal dynamic vehicle physics",
+        "Chase camera stays above the road with a level horizon",
+        "Dynamic kombi stays upright while parked",
+        "Orbit control moves the chase camera around the kombi",
+        "Mouse-wheel zoom changes chase distance",
+        "Camera switch opens an above-ground driver view",
+        "Camera ignores vehicle roll and pitch instead of going under the map",
+        "Kombi moves using real wheel-collider driving physics",
+        "Steering turns the dynamic kombi without rolling the camera",
+        "Handbrake stops the dynamic kombi",
+        "Chase camera remains visible after driving",
+        "Live driving does not require under-road recovery"
+    ],
+    "failed": [],
+    "physics": "engine=True; rpm=2884; gear=0; controllerEnabled=True; startY=24.44; finalY=23.55; distance=18.38; up=1.00; recoveries=0"
+}

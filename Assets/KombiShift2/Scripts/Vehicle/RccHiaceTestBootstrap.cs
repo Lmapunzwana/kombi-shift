@@ -9,6 +9,13 @@ namespace KombiShift2.Vehicle
         [SerializeField, Min(1f)] private float smokeTestDuration = 6f;
         [SerializeField, Range(0.1f, 1f)] private float smokeTestThrottle = 0.65f;
 
+#if UNITY_EDITOR
+        [System.NonSerialized] public bool verificationInput;
+        [System.NonSerialized] public float verificationThrottle;
+        [System.NonSerialized] public float verificationSteering;
+        [System.NonSerialized] public float verificationBrake;
+        [System.NonSerialized] public bool verificationPark;
+#endif
         private bool interactiveInputEnabled;
         private float smoothedSteering;
         private float smoothedThrottle;
@@ -25,6 +32,8 @@ namespace KombiShift2.Vehicle
             yield return null;
             bool automated = Application.isBatchMode;
             RCCP.RegisterPlayerVehicle(vehicle, true, true);
+            var powertrain=vehicle.GetComponent<KombiPowertrain>();
+            if(powertrain!=null)powertrain.Configure();
 
             if (!automated)
             {
@@ -113,22 +122,32 @@ namespace KombiShift2.Vehicle
 
             float requestedThrottle = Input.GetKey(KeyCode.W) || Input.GetKey(KeyCode.UpArrow) ? 1f : 0f;
             float requestedBrake = Input.GetKey(KeyCode.S) || Input.GetKey(KeyCode.DownArrow) ? 1f : 0f;
+#if UNITY_EDITOR
+            if(verificationInput){requestedThrottle=verificationThrottle;requestedBrake=verificationBrake;}
+#endif
             smoothedThrottle = Mathf.MoveTowards(smoothedThrottle, requestedThrottle, Time.deltaTime * (requestedThrottle > smoothedThrottle ? 1.2f : 2.2f));
             smoothedBrake = Mathf.MoveTowards(smoothedBrake, requestedBrake, Time.deltaTime * (requestedBrake > smoothedBrake ? 2.2f : 3.5f));
             float requestedSteering = 0f;
             if (Input.GetKey(KeyCode.A) || Input.GetKey(KeyCode.LeftArrow)) requestedSteering -= 1f;
             if (Input.GetKey(KeyCode.D) || Input.GetKey(KeyCode.RightArrow)) requestedSteering += 1f;
+#if UNITY_EDITOR
+            if(verificationInput)requestedSteering=verificationSteering;
+#endif
             float speedSteeringLimit = Mathf.Lerp(1f, .28f, Mathf.InverseLerp(15f, 120f, vehicle.absoluteSpeed));
             float steeringRate = requestedSteering == 0f ? 1.9f : Mathf.Lerp(1.65f, .78f, Mathf.InverseLerp(0f, 100f, vehicle.absoluteSpeed));
             smoothedSteering = Mathf.MoveTowards(smoothedSteering, requestedSteering * speedSteeringLimit, Time.deltaTime * steeringRate);
 
             RCCP_Inputs inputs = new()
             {
-                throttleInput = smoothedThrottle,
+                throttleInput = smoothedThrottle * KombiPowertrain.ThrottleFactor(vehicle.absoluteSpeed, vehicle.direction<0),
                 steerInput = smoothedSteering,
                 brakeInput = smoothedBrake,
                 handbrakeInput = Input.GetKey(KeyCode.Space) ? 1f : 0f
             };
+#if UNITY_EDITOR
+            if(verificationInput)inputs.handbrakeInput=verificationPark?1f:0f;
+#endif
+            if(inputs.handbrakeInput>.1f)inputs.throttleInput=0f;
             vehicle.Inputs.OverrideInputs(inputs);
         }
 
@@ -141,6 +160,7 @@ namespace KombiShift2.Vehicle
                 brakeInput = brake,
                 handbrakeInput = 0f
             };
+            if(inputs.handbrakeInput>.1f)inputs.throttleInput=0f;
             vehicle.Inputs.OverrideInputs(inputs);
         }
     }

@@ -1,3 +1,4 @@
+using System.Collections;
 using UnityEngine;
 using UnityEngine.SceneManagement;
 
@@ -5,128 +6,179 @@ namespace KombiShift2.UI
 {
     public sealed class KombiMainMenu : MonoBehaviour
     {
-        private const float W = 1600f;
-        private const float H = 900f;
-        private Texture2D hero, panelTexture, orangeTexture, greenTexture;
-        private GUIStyle logo, kicker, heading, body, button, profile;
-        private bool settingsOpen;
-        private float volume;
+        const float H=900;
+        Texture2D pixel;Font displayFont,bodyFont;
+        GUIStyle logo,section,body,cardTitle,cardDetail,tiny;
+        AudioSource audioSource;AudioClip hoverClip,clickClip;
+        readonly float[] highlights=new float[3];
+        int selected=-1;Vector3 lastMouse;float enterTime,transition,volume,sensitivity,cameraDistance;
+        bool settings,controls,starting;int lastSound=-1;
+        readonly string[] titles={"START SHIFT","HOW TO PLAY","SETTINGS"};
+        readonly string[] details={"CBD TO MBARE  /  10 MINUTES","KEYBOARD + MOUSE","AUDIO + CAMERA"};
+        public int SelectedItem=>selected;
+        public bool Starting=>starting;
+        public bool SettingsOpen=>settings;
+        public bool ControlsOpen=>controls;
+        public float TransitionProgress=>transition;
+        public void ClosePanel(){settings=controls=false;}
+        public float Highlight(int index)=>highlights[index];
+        public static Rect CardRect(int index,float width)=>new(58+index*320,H-226,304,112);
 
-        private void Awake()
+        void Awake()
         {
-            Time.timeScale = 1f;
-            hero = Resources.Load<Texture2D>("Menu/kombi-shift-hero");
-            volume = PlayerPrefs.GetFloat("KombiShift.MasterVolume", .8f);
-            AudioListener.volume = volume;
-            panelTexture = MakeTexture(new Color(.025f, .035f, .035f, .92f));
-            orangeTexture = MakeTexture(new Color(1f, .43f, .035f));
-            greenTexture = MakeTexture(new Color(.12f, .58f, .20f));
+            Time.timeScale=1;Cursor.visible=true;Cursor.lockState=CursorLockMode.None;
+            enterTime=Time.unscaledTime;lastMouse=Input.mousePosition;
+            displayFont=Resources.Load<Font>("Fonts/BarlowCondensed-ExtraBoldItalic");bodyFont=Resources.Load<Font>("Fonts/BarlowCondensed-SemiBold");
+            pixel=new Texture2D(1,1);pixel.SetPixel(0,0,Color.white);pixel.Apply();
+            audioSource=gameObject.AddComponent<AudioSource>();audioSource.spatialBlend=0;audioSource.playOnAwake=false;
+            hoverClip=Sound("Menu focus",720f,.045f);clickClip=Sound("Menu select",300f,.11f);
+            volume=PlayerPrefs.GetFloat("KombiShift.MasterVolume",.8f);AudioListener.volume=volume;
+            sensitivity=PlayerPrefs.GetFloat("Kombi.CameraSensitivity",1.6f);cameraDistance=PlayerPrefs.GetFloat("Kombi.CameraDistance",7.6f);selected=0;
         }
-
-        private void OnDestroy()
+        void Update()
         {
-            Destroy(panelTexture); Destroy(orangeTexture); Destroy(greenTexture);
+            float step=Time.unscaledDeltaTime;
+            for(int i=0;i<3;i++)highlights[i]=Mathf.MoveTowards(highlights[i],selected==i&&!settings&&!controls?1:0,step*7f);
+            if(starting)return;
+            if(Input.GetKeyDown(KeyCode.Escape)){settings=controls=false;return;}
+            if(settings||controls)return;
+            if(Input.GetKeyDown(KeyCode.RightArrow)||Input.GetKeyDown(KeyCode.Tab)||Input.GetKeyDown(KeyCode.DownArrow))Focus((selected+1)%3);
+            if(Input.GetKeyDown(KeyCode.LeftArrow)||Input.GetKeyDown(KeyCode.UpArrow))Focus((selected+2+3)%3);
+            if(Input.GetKeyDown(KeyCode.Return))Activate(selected<0?0:selected);
         }
-
-        private void Update()
+        public void Focus(int index)
         {
-            if (Input.GetKeyDown(KeyCode.Return) && !settingsOpen) StartGame();
-            if (Input.GetKeyDown(KeyCode.Escape) && settingsOpen) settingsOpen = false;
+            if(index==selected)return;selected=index;
+            if(index>=0&&lastSound!=index){audioSource.PlayOneShot(hoverClip,.16f);lastSound=index;}
         }
-
-        private void OnGUI()
+        public void Activate(int index)
         {
-            EnsureStyles();
-            float scale = Mathf.Min(Screen.width / W, Screen.height / H);
-            GUI.matrix = Matrix4x4.TRS(new Vector3((Screen.width - W * scale) * .5f, (Screen.height - H * scale) * .5f), Quaternion.identity, Vector3.one * scale);
-            DrawCover(hero, new Rect(0, 0, W, H));
-            GUI.DrawTexture(new Rect(0, 0, 540, H), panelTexture);
-            DrawGradientShade();
-            GUI.Label(new Rect(70, 54, 440, 25), "A HARARE COMMUTER STORY", kicker);
-            GUI.Label(new Rect(65, 88, 470, 105), "KOMBI", logo);
-            GUI.Label(new Rect(65, 172, 470, 105), "SHIFT", logo);
-            GUI.Label(new Rect(70, 284, 390, 58), "Own the route. Beat the clock.\nBring everyone home.", body);
-            DrawProfile();
-            if (settingsOpen) DrawSettings(); else DrawActions();
-            GUI.Label(new Rect(70, 840, 430, 28), "WASD / ARROWS   •   CONTROLLER   •   v0.3", kicker);
+            if(starting)return;audioSource.PlayOneShot(clickClip,.3f);
+            if(index==0)StartCoroutine(StartShift());
+            else if(index==1)controls=true;
+            else settings=true;
         }
-
-        private void DrawActions()
+        IEnumerator StartShift()
         {
-            GUI.Label(new Rect(70, 390, 400, 30), "NEXT SHIFT", kicker);
-            GUI.Label(new Rect(70, 422, 400, 44), "CBD → MBARE", heading);
-            if (Action(new Rect(70, 500, 390, 68), "START SHIFT", orangeTexture)) StartGame();
-            if (Action(new Rect(70, 584, 390, 58), "SETTINGS", greenTexture)) settingsOpen = true;
-            GUI.Label(new Rect(70, 674, 390, 68), "Drive the kombi yourself. No autopilot.\nEnter starts • Escape returns", body);
+            starting=true;
+            while(transition<1f){transition+=Time.unscaledDeltaTime*2.5f;yield return null;}
+            var load=SceneManager.LoadSceneAsync("KombiShift_FirstShift");
+            while(!load.isDone)yield return null;
         }
-
-        private void DrawSettings()
+        void OnGUI()
         {
-            GUI.Label(new Rect(70, 390, 390, 38), "SETTINGS", heading);
-            GUI.Label(new Rect(70, 457, 390, 28), $"MASTER VOLUME     {Mathf.RoundToInt(volume * 100)}%", kicker);
-            volume = GUI.HorizontalSlider(new Rect(70, 505, 390, 24), volume, 0f, 1f);
-            AudioListener.volume = volume;
-            if (Action(new Rect(70, 574, 185, 58), "SAVE", orangeTexture))
+            Styles();float scale=Mathf.Min(Screen.width/1280f,Screen.height/H);
+            float w=Screen.width/scale,h=Screen.height/scale;
+            var previous=GUI.matrix;GUI.matrix=Matrix4x4.Scale(Vector3.one*scale);GUI.color=Color.white;
+            float appear=Mathf.Clamp01((Time.unscaledTime-enterTime)*1.8f);
+            // Sparse race-menu framing leaves the live vehicle visible.
+            Fill(new Rect(0,0,w,6),new Color(.92f,.63f,.18f));
+            Fill(new Rect(0,6,w,88),new Color(.025f,.038f,.044f,.83f));
+            Text(new Rect(58,28,350,30),"K / S     HARARE, ZIMBABWE",section,new Color(.9f,.91f,.84f));
+            Text(new Rect(w-390,28,330,30),"01  /  MORNING SHIFT",section,new Color(.93f,.67f,.26f));
+            Text(new Rect(54,116+(1-appear)*20,600,132),"KOMBI",logo,new Color(.95f,.96f,.91f,appear));
+            Text(new Rect(54,218+(1-appear)*20,600,132),"SHIFT",logo,new Color(.95f,.66f,.22f,appear));
+            Fill(new Rect(60,372,48,4),new Color(.95f,.66f,.22f));
+            Text(new Rect(60,397,440,40),"BE FIRST AT THE RANK.",section,Color.white);
+            Text(new Rect(60,442,400,60),"Pick up the passengers. Outrun your rivals.\nBring the fares home.",body,new Color(.74f,.81f,.81f));
+            Text(new Rect(w-390,115,330,30),"TOYOTA HIACE  /  COMMUTER",tiny,new Color(.82f,.86f,.85f));
+            Text(new Rect(w-390,150,330,36),"CBD  /  MBARE",section,Color.white);
+            float rowY=h-226;
+            bool pointerMoved=(Input.mousePosition-lastMouse).sqrMagnitude>.1f;lastMouse=Input.mousePosition;
+            if(!settings&&!controls&&!starting)
             {
-                PlayerPrefs.SetFloat("KombiShift.MasterVolume", volume); PlayerPrefs.Save(); settingsOpen = false;
+                int over=-1;
+                for(int i=0;i<3;i++)
+                {
+                    Rect rect=CardRect(i,w);rect.y=rowY;
+                    if(rect.Contains(Event.current.mousePosition))over=i;
+                    DrawCard(i,rect);
+                }
+                if(pointerMoved&&over>=0)Focus(over);
             }
-            if (Action(new Rect(275, 574, 185, 58), "BACK", greenTexture)) settingsOpen = false;
-        }
-
-        private void DrawProfile()
-        {
-            GUI.DrawTexture(new Rect(1230, 42, 300, 62), panelTexture);
-            GUI.DrawTexture(new Rect(1230, 42, 7, 62), orangeTexture);
-            GUI.Label(new Rect(1255, 50, 250, 24), "DRIVER 01", profile);
-            GUI.Label(new Rect(1255, 76, 250, 20), "ROOKIE  •  $0 EARNED", kicker);
-        }
-
-        private bool Action(Rect rect, string label, Texture2D texture)
-        {
-            GUIStyle style = new(button);
-            style.normal.background = style.hover.background = style.active.background = texture;
-            return GUI.Button(rect, label + "   ›", style);
-        }
-
-        private void DrawGradientShade()
-        {
-            for (int i = 0; i < 12; i++)
+            else if(!starting){for(int i=0;i<3;i++){Rect rect=CardRect(i,w);rect.y=rowY;DrawCardBackground(i,rect,.15f);}}
+            Fill(new Rect(0,h-72,w,72),new Color(.02f,.03f,.036f,.95f));
+            Text(new Rect(58,h-55,850,30),"ENTER  SELECT      /      ARROWS  NAVIGATE      /      ESC  BACK",tiny,new Color(.72f,.79f,.79f));
+            Rect exit=new Rect(w-160,h-55,100,30);
+            GUI.color=exit.Contains(Event.current.mousePosition)?new Color(.95f,.66f,.22f):Color.white;
+            if(!starting&&GUI.Button(exit,"EXIT",tiny))Quit();GUI.color=Color.white;
+            if(settings||controls)Modal(w,h);
+            if(starting)
             {
-                Color old = GUI.color;
-                GUI.color = new Color(0, 0, 0, Mathf.Lerp(.42f, 0, i / 11f));
-                GUI.DrawTexture(new Rect(540 + i * 50, 0, 52, H), Texture2D.whiteTexture);
-                GUI.color = old;
+                Fill(new Rect(0,0,w,h),new Color(.015f,.024f,.029f,Mathf.Clamp01(transition)));
+                Text(new Rect(w*.5f-220,h*.5f-36,440,62),"STARTING YOUR SHIFT",cardTitle,Color.white);
+                Fill(new Rect(w*.5f-220,h*.5f+40,440,4),new Color(.2f,.25f,.26f));
+                Fill(new Rect(w*.5f-220,h*.5f+40,440*Mathf.Clamp01(transition),4),new Color(.95f,.66f,.22f));
+            }
+            GUI.matrix=previous;GUI.color=Color.white;
+        }
+        void DrawCard(int index,Rect rect)
+        {
+            float t=highlights[index];rect.y-=t*7;
+            DrawCardBackground(index,rect,t);
+            bool hover=rect.Contains(Event.current.mousePosition);
+            if(hover&&Event.current.type==EventType.MouseDown&&Event.current.button==0){Focus(index);Activate(index);Event.current.Use();}
+            Text(new Rect(rect.x+20,rect.y+10,250,20),"0"+(index+1)+"  /  "+(index==0?"DRIVE":index==1?"LEARN":"TUNE"),tiny,Color.Lerp(new Color(.61f,.71f,.72f),new Color(.18f,.20f,.16f),t));
+            Text(new Rect(rect.x+18,rect.y+34,270,42),titles[index],cardTitle,Color.Lerp(Color.white,new Color(.05f,.085f,.09f),t));
+            Text(new Rect(rect.x+20,rect.y+82,270,21),details[index],cardDetail,Color.Lerp(new Color(.70f,.78f,.79f),new Color(.2f,.25f,.22f),t));
+        }
+        void DrawCardBackground(int index,Rect rect,float amount)
+        {
+            Fill(rect,Color.Lerp(new Color(.035f,.058f,.067f,.97f),new Color(.97f,.70f,.30f,1),amount));
+            Fill(new Rect(rect.x,rect.y,4,rect.height),index==0||amount>.1f?new Color(.98f,.68f,.24f):new Color(.22f,.34f,.36f));
+            Fill(new Rect(rect.x+20,rect.yMax-2,Mathf.Lerp(20,rect.width-40,amount),2),new Color(.98f,.68f,.24f));
+        }
+        void Modal(float w,float h)
+        {
+            Fill(new Rect(0,0,w,h),new Color(.01f,.02f,.025f,.85f));
+            Rect panel=new(w*.5f-320,h*.5f-236,640,472);Fill(panel,new Color(.04f,.065f,.076f));
+            Fill(new Rect(panel.x,panel.y,640,4),new Color(.96f,.66f,.22f));
+            Text(new Rect(panel.x+34,panel.y+26,560,54),settings?"SETTINGS":"HOW TO PLAY",cardTitle,Color.white);
+            if(settings)
+            {
+                Slider(panel,110,"MASTER VOLUME",ref volume,0,1);AudioListener.volume=volume;
+                Slider(panel,208,"MOUSE SENSITIVITY",ref sensitivity,.5f,3f);
+                Slider(panel,306,"CHASE DISTANCE",ref cameraDistance,4.5f,12f);
+            }
+            else
+            {
+                Text(new Rect(panel.x+34,panel.y+105,565,235),"W / S     Accelerate, brake and reverse\nA / D     Steer       SPACE     Handbrake\nRMB DRAG     Orbit or look around\nMOUSE WHEEL     Zoom chase camera\nC / CAMERA BUTTON     Change view\n\nStop at a rank. Passengers board together.\nReach the stops before the rival kombis.",body,new Color(.84f,.89f,.88f));
+            }
+            Rect back=new(panel.x+34,panel.yMax-58,572,36);
+            Fill(back,back.Contains(Event.current.mousePosition)?new Color(.72f,.48f,.15f):new Color(.13f,.24f,.27f));
+            if(GUI.Button(back,settings?"SAVE & RETURN":"RETURN",section))
+            {
+                PlayerPrefs.SetFloat("KombiShift.MasterVolume",volume);PlayerPrefs.SetFloat("Kombi.CameraSensitivity",sensitivity);PlayerPrefs.SetFloat("Kombi.CameraDistance",cameraDistance);PlayerPrefs.Save();
+                audioSource.PlayOneShot(clickClip,.25f);settings=controls=false;
             }
         }
-
-        private static void DrawCover(Texture texture, Rect destination)
+        void Slider(Rect p,float y,string name,ref float value,float min,float max)
         {
-            if (texture == null) return;
-            float sourceAspect = (float)texture.width / texture.height;
-            float destinationAspect = destination.width / destination.height;
-            Rect uv = new(0, 0, 1, 1);
-            if (sourceAspect > destinationAspect) { uv.width = destinationAspect / sourceAspect; uv.x = (1 - uv.width) * .5f; }
-            else { uv.height = sourceAspect / destinationAspect; uv.y = (1 - uv.height) * .5f; }
-            GUI.DrawTextureWithTexCoords(destination, texture, uv);
+            Text(new Rect(p.x+34,p.y+y,500,30),name+"   "+(max==1?Mathf.RoundToInt(value*100)+"%":value.ToString("0.0")),tiny,new Color(.8f,.87f,.85f));
+            value=GUI.HorizontalSlider(new Rect(p.x+34,p.y+y+40,570,28),value,min,max);
         }
-
-        private void EnsureStyles()
+        void Styles()
         {
-            if (logo != null) return;
-            logo = new GUIStyle(GUI.skin.label) { fontSize = 92, fontStyle = FontStyle.Bold }; logo.normal.textColor = Color.white;
-            kicker = new GUIStyle(GUI.skin.label) { fontSize = 15, fontStyle = FontStyle.Bold }; kicker.normal.textColor = new Color(.76f, .82f, .75f);
-            heading = new GUIStyle(GUI.skin.label) { fontSize = 32, fontStyle = FontStyle.Bold }; heading.normal.textColor = Color.white;
-            body = new GUIStyle(GUI.skin.label) { fontSize = 20, wordWrap = true }; body.normal.textColor = new Color(.88f, .9f, .86f);
-            profile = new GUIStyle(GUI.skin.label) { fontSize = 19, fontStyle = FontStyle.Bold }; profile.normal.textColor = Color.white;
-            button = new GUIStyle(GUI.skin.button) { fontSize = 23, fontStyle = FontStyle.Bold, alignment = TextAnchor.MiddleLeft, padding = new RectOffset(28, 20, 0, 0) };
-            button.normal.textColor = button.hover.textColor = button.active.textColor = Color.white;
+            if(logo!=null)return;
+            logo=Style(displayFont,132);section=Style(bodyFont,27);body=Style(bodyFont,23);cardTitle=Style(displayFont,38);cardDetail=Style(bodyFont,17);tiny=Style(bodyFont,20);
         }
-
-        private static Texture2D MakeTexture(Color colour)
+        static GUIStyle Style(Font font,int size){var style=new GUIStyle(GUI.skin.label){font=font,fontSize=size,wordWrap=false};style.normal.textColor=Color.white;return style;}
+        void Text(Rect rect,string value,GUIStyle style,Color color){GUI.color=color;GUI.Label(rect,value,style);GUI.color=Color.white;}
+        void Fill(Rect rect,Color color){GUI.color=color;GUI.DrawTexture(rect,pixel);GUI.color=Color.white;}
+        static AudioClip Sound(string name,float frequency,float duration)
         {
-            Texture2D texture = new(1, 1); texture.SetPixel(0, 0, colour); texture.Apply(); return texture;
+            int count=(int)(22050*duration);var values=new float[count];
+            for(int i=0;i<count;i++){float t=i/22050f;values[i]=Mathf.Sin(t*frequency*Mathf.PI*2)*Mathf.Exp(-t/duration*8f)*.24f;}
+            var clip=AudioClip.Create(name,count,1,22050,false);clip.SetData(values,0);return clip;
         }
-
-        private static void StartGame() => SceneManager.LoadScene("KombiShift_FirstShift");
+        static void Quit()
+        {
+#if UNITY_EDITOR
+            UnityEditor.EditorApplication.isPlaying=false;
+#else
+            Application.Quit();
+#endif
+        }
+        void OnDestroy(){if(pixel!=null)Destroy(pixel);if(hoverClip!=null)Destroy(hoverClip);if(clickClip!=null)Destroy(clickClip);}
     }
 }

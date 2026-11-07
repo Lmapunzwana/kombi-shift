@@ -589,7 +589,25 @@ PlayerSettings:
   webWasm2023: 1
   webEnableSubmoduleStrippingCompatibility: 0
   webProgressiveAssetLoading: 0
-  scriptingDefineSymbols: {}
+  scriptingDefineSymbols:
+    Android: BCG_RCCP;BCG_RCCP_LITE
+    EmbeddedLinux: BCG_RCCP;BCG_RCCP_LITE
+    GameCoreScarlett: BCG_RCCP;BCG_RCCP_LITE
+    GameCoreXboxOne: BCG_RCCP;BCG_RCCP_LITE
+    Kepler: BCG_RCCP;BCG_RCCP_LITE
+    LinuxHeadlessSimulation: BCG_RCCP;BCG_RCCP_LITE
+    Nintendo Switch: BCG_RCCP;BCG_RCCP_LITE
+    Nintendo Switch 2: BCG_RCCP;BCG_RCCP_LITE
+    PS4: BCG_RCCP;BCG_RCCP_LITE
+    PS5: BCG_RCCP;BCG_RCCP_LITE
+    QNX: BCG_RCCP;BCG_RCCP_LITE
+    Standalone: BCG_RCCP;BCG_RCCP_LITE
+    VisionOS: BCG_RCCP;BCG_RCCP_LITE
+    WebGL: BCG_RCCP;BCG_RCCP_LITE
+    Windows Store Apps: BCG_RCCP;BCG_RCCP_LITE
+    XboxOne: BCG_RCCP;BCG_RCCP_LITE
+    iPhone: BCG_RCCP;BCG_RCCP_LITE
+    tvOS: BCG_RCCP;BCG_RCCP_LITE
   additionalCompilerArguments: {}
   platformArchitecture: {}
   scriptingBackend:
@@ -703,7 +721,7 @@ PlayerSettings:
   qnxGraphicConfPath: 
   apiCompatibilityLevel: 6
   captureStartupLogs: {}
-  activeInputHandler: 0
+  activeInputHandler: 2
   windowsGamepadBackendHint: 0
   enableDirectStorage: 0
   cloudProjectId: 

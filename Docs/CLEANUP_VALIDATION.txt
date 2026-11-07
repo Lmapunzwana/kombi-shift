@@ -1,0 +1,4 @@
+CLEANUP VALIDATION
+Assets/KombiShift2/Scenes/KombiMainMenu.unity: loaded; missing scripts = 0; dependencies = 21
+Assets/KombiShift2/Scenes/KombiShift_FirstShift.unity: loaded; missing scripts = 0; dependencies = 338
+Only 2 scene assets remain. Player vehicle found. Old autonomous bus not required.

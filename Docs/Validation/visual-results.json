@@ -1,0 +1,17 @@
+{
+    "passed": [
+        "Four route stations configured",
+        "Twelve real waiting passengers at three pickups",
+        "Two rival kombis present",
+        "All waiting passengers seated with valid humanoid rigs",
+        "Player can reserve a nearby waiting stop",
+        "Rival cannot reserve passengers already claimed by player",
+        "Passenger stands and walks toward the doorway",
+        "All six passengers walk toward the kombi together",
+        "Six passengers physically board before fares are credited",
+        "Boarded passenger occupies a player cabin seat",
+        "Concurrent boarding assigns six different cabin seats",
+        "Route advances after boarding completes"
+    ],
+    "failed": []
+}

@@ -1,0 +1,30 @@
+{
+    "passed": [
+        "Diesel-range rev limit and earlier automatic shifts apply after registration",
+        "Engine layers remain audible at reduced volume",
+        "Engine loop pitch cannot reach the old shrill setting",
+        "Throttle is no longer cut at 55 km/h",
+        "Higher-speed governor tapers power gradually",
+        "Real wheel-collider driving accelerates beyond 55 km/h",
+        "Automatic transmission changes through at least three gears",
+        "Passing 55 to 65 km/h stays below 4000 RPM",
+        "Higher-speed running remains within the configured engine range",
+        "Parking brake still stops the vehicle after the faster run",
+        "Higher-speed test stays upright without a recovery reset"
+    ],
+    "failed": [],
+    "maximumSpeed": 94.19049072265625,
+    "maxRpmAt55To65": 3155.8125,
+    "maxRpmAbove55": 3552.9716796875,
+    "maximumEngineVolume": 0.2800000011920929,
+    "maximumEnginePitch": 1.149999976158142,
+    "gears": [
+        0,
+        1,
+        2,
+        3,
+        4,
+        5
+    ],
+    "telemetry": "speed=0.0 gear=1 rpm=813 throttle=0.00\nspeed=7.5 gear=1 rpm=957 throttle=1.00\nspeed=23.0 gear=1 rpm=3618 throttle=0.00\nspeed=32.3 gear=2 rpm=3116 throttle=1.00\nspeed=39.3 gear=3 rpm=2768 throttle=1.00\nspeed=49.3 gear=3 rpm=3203 throttle=1.00\nspeed=54.4 gear=4 rpm=3002 throttle=1.00\nspeed=61.6 gear=4 rpm=3002 throttle=1.00\nspeed=68.5 gear=4 rpm=3324 throttle=1.00\nspeed=71.8 gear=5 rpm=3166 throttle=1.00\nspeed=77.1 gear=5 rpm=3061 throttle=1.00\nspeed=82.2 gear=5 rpm=3257 throttle=1.00\nspeed=87.1 gear=5 rpm=3464 throttle=1.00\nspeed=88.4 gear=6 rpm=3113 throttle=1.00\nspeed=92.2 gear=6 rpm=3122 throttle=1.00\n"
+}

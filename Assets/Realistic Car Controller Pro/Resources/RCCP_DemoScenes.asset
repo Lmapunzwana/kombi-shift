@@ -13,7 +13,7 @@ MonoBehaviour:
   m_Name: RCCP_DemoScenes
   m_EditorClassIdentifier: 
   instanceId: 0
-  demo_protototype: {fileID: 102900000, guid: c9065e9aaa96de74883b539dd3fb518f, type: 3}
+  demo_protototype: {fileID: 0}
   city_AIO: {fileID: 0}
   demo_City: {fileID: 0}
   demo_CarSelection: {fileID: 0}
@@ -24,7 +24,7 @@ MonoBehaviour:
   demo_OverrideInputs: {fileID: 0}
   demo_Transport: {fileID: 0}
   demo_CityWithTraffic: {fileID: 0}
-  path_demo_protototype: Assets/Realistic Car Controller Pro/Scenes/RCCP_Scene_Blank_Prototype.unity
+  path_demo_protototype: 
   path_city_AIO: 
   path_demo_City: 
   path_demo_CarSelection: 

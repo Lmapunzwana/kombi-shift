@@ -1,15 +1,15 @@
-# KombiShift2 gameplay foundation
+# Kombi Shift
 
-Initial Unity 6 components:
+Start with Scenes/KombiMainMenu.unity and press Play. Start Shift loads KombiShift_FirstShift.
 
-- `KombiMainMenu`: the first build scene, with a Fernbus-inspired (but Kombi Shift-branded) vehicle hero layout, Start Shift and working volume settings.
-- `PlayerBusController`: direct keyboard/controller driving with no automatic throttle or spline-following fallback.
-- `PlayerBusCamera`: three player-switchable chase/interior-style views.
-- `KombiVehicleController`: WheelCollider driving, braking, reverse, handbrake, wheel visuals, speed limiting and reset.
-- `VehicleCameraController`: switchable interior, dashboard, chase and orbit camera anchors.
-- `RoadSurfaceZone`: dust, gravel, mud and pothole behavior with optional particles and sound.
-- `AlternatingLaneController`: staged left/right construction closures and temporary lanes.
+- Scenes: the two active scenes.
+- Scripts: gameplay, vehicle controls, passengers, rivals, UI, weather and camera. Development contains editor-only verification harnesses.
+- Prefabs: reusable passenger and player-vehicle objects.
+- Art: current character, vehicle, road and environment assets.
+- Data: passenger persona definitions.
+- Resources: fonts and assets intentionally loaded at runtime.
+- Generated: materials and meshes referenced by the current game.
+- Editor: project tour, scene upgrade and validation tools.
+- ThirdParty: original model/texture sources and provenance notes still required by current assets.
 
-Default controls: W/S or controller vertical axis, A/D or controller horizontal axis, Space for handbrake, R to reset, C to change camera, and right mouse drag to orbit an exterior view.
-
-`KombiMainMenu` is build index 0 and loads `KombiDrive`. The original `BezierWalkerWithSpeed` component is removed from the playable bus when the generated driving scene is built, so it cannot drive itself.
+Vendor dependencies retain their original Assets paths for compatibility. Removed prototypes and unused art are outside the Unity project in ../_Archive_Structure_Cleanup. See Docs/PROJECT_GUIDE.md for the full tour.

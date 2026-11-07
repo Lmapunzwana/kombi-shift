@@ -1,0 +1,18 @@
+{
+  "activeScenes": [
+    "KombiMainMenu",
+    "KombiShift_FirstShift"
+  ],
+  "hierarchyGroups": [
+    "00 Systems and Lighting",
+    "01 Environment",
+    "02 Roads and Route",
+    "03 Player and Camera",
+    "04 Passenger Stations",
+    "05 Traffic and Rivals"
+  ],
+  "archivedMegabytes": 220.2,
+  "archive": "../_Archive_Structure_Cleanup",
+  "brokenArchivedReferences": 0,
+  "playerPrefab": "Assets/KombiShift2/Prefabs/Vehicles/Player/Hiace_Player.prefab"
+}

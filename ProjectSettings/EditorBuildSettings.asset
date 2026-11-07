@@ -9,8 +9,8 @@ EditorBuildSettings:
     path: Assets/KombiShift2/Scenes/KombiMainMenu.unity
     guid: 3ab97203e13a3e3afb35f88b6582c921
   - enabled: 1
-    path: Assets/KombiShift2/Scenes/KombiDrive.unity
-    guid: e259029721ed489ecb34c033587832d0
+    path: Assets/KombiShift2/Scenes/KombiShift_FirstShift.unity
+    guid: 7e20b677c98b2fcacbbcea0360a1c6dd
   m_configObjects:
     Unity.XR.Oculus.Settings: {fileID: 11400000, guid: 887dad844864c429a834b02100601980, type: 2}
     com.unity.xr.management.loader_settings: {fileID: 11400000, guid: 18859f1ea7a924cfb8dfb33c31d53cb9, type: 2}
