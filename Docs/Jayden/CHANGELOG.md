@@ -33,6 +33,11 @@
 - Other kombis pull into ranks, dwell and depart.
 - Added credited CC0 bus audio, temporary synthesized conductor calls, horn, door/brake/coin effects and audio metering.
 
+## 2026-11-02 — Tendai AI, debug and profiling evidence
+- Added a readable RivalAI state and health HUD indicator, with regression checks for all four states.
+- Added a Windows development-player profiling build target and a level/Hwindi selector screenshot to the capture routine.
+- Re-ran the native Windows regression (41 passed) and before/after Unity Profiler capture (240 frames per mode); retained raw capture files and frame CSVs.
+- Added Tendai's AI/optimisation report and runtime UI screenshots. Unity Profiler-window screenshots and Tendai's live defence rehearsal remain outstanding.
 ## 2026-11-03 - complete local Editor project
 - Added persistent tuning and audio references, brake/suspension wear and paid workshop repairs.
 - Added individual fare reactions, actual Animator states, passenger clothing variants, reusable prefabs and an Art Workshop.

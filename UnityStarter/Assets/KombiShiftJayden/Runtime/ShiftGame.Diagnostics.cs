@@ -48,6 +48,11 @@ namespace KombiShift.JaydenStarter
             yield return new WaitForSecondsRealtime(2);
             yield return new WaitForEndOfFrame();
             ScreenCapture.CaptureScreenshot(Path.Combine(directory,"menu.png"));
+            screen=Screen.Selection;
+            yield return new WaitForEndOfFrame();
+            ScreenCapture.CaptureScreenshot(Path.Combine(directory,"level-hwindi-selection.png"));
+            screen=Screen.Menu;
+            yield return new WaitForEndOfFrame();
             yield return new WaitForSecondsRealtime(1);
             Begin();
             yield return new WaitForSecondsRealtime(1);
@@ -74,6 +79,7 @@ namespace KombiShift.JaydenStarter
             Rainy=false;Menu();
             rain.Stop(true,ParticleSystemStopBehavior.StopEmittingAndClear);
             Debug.Log("KOMBI_PREVIEW_CAPTURED "+directory);
+            if(Array.IndexOf(Environment.GetCommandLineArgs(),"--kombi-exit")>=0)Application.Quit();
             if(Array.IndexOf(Environment.GetCommandLineArgs(),"--kombi-exit")>=0&&!Application.isEditor)Application.Quit();
         }
         void IsolateTraffic(){rival.enabled=false;foreach(var car in traffic)car.transform.gameObject.SetActive(false);}
@@ -109,8 +115,8 @@ namespace KombiShift.JaydenStarter
             check(gameManager.Evaluate(FareTarget-.1f,100,100,0)==null,"below target is not a win");int ends=0;Action<string> ended=reason=>ends++;gameManager.OnShiftEnded+=ended;gross=FareTarget;yield return null;Finish("duplicate");check(screen==Screen.Statement&&outcome=="Fare target reached!"&&ends==1&&noCrashBonus==5,"fare target wins immediately and clean bonus is scored once");gameManager.OnShiftEnded-=ended;
             Begin();IsolateTraffic();fuelSystem.Amount=0;yield return null;check(outcome=="Out of fuel","zero fuel loses");Begin();IsolateTraffic();Condition=0;yield return null;check(outcome=="Vehicle unusable","zero health loses");Begin();IsolateTraffic();elapsed=shiftSeconds;yield return null;check(outcome=="Shift ended below target","clock expiry below target loses");
             Rainy=true;Begin();IsolateTraffic();check(stops.Length==4&&stops[3].z==465&&highwayEnvironment.gameObject.activeSelf&&!cityEnvironment.gameObject.activeSelf,"highway has a separate long-route environment");check(Fuel<50&&level.fuelPerMetre>.07f&&level.aggression>1&&FareTarget>18,"highway changes fuel economy target grip and aggression");check(hazards.Count==12&&rain.isPlaying,"highway activates pooled hazards and rain");
-            Rainy=false;Begin();IsolateTraffic();rival.gameObject.SetActive(true);rival.enabled=true;driver.Body.position=new Vector3(40,.3f,220);rival.GetComponent<Rigidbody>().position=new Vector3(0,.225f,-15);rival.Configure(this,roadGraph,1,false);yield return new WaitForSeconds(.5f);check(rival.Current==RivalAI.State.ChasePassenger,"rival pursues nearest waiting passenger");
-            rival.ApplyDamage(90);yield return new WaitForSeconds(.5f);check(rival.Current==RivalAI.State.Flee,"damaged rival retreats");rival.Configure(this,roadGraph,1,false);driver.Body.position=rival.transform.position+Vector3.forward*9;yield return new WaitForSeconds(.5f);check(rival.Current==RivalAI.State.Block,"nearby rival attempts bounded blocking");
+            Rainy=false;Begin();IsolateTraffic();rival.gameObject.SetActive(true);rival.enabled=true;driver.Body.position=new Vector3(40,.3f,220);rival.GetComponent<Rigidbody>().position=new Vector3(0,.225f,-15);rival.Configure(this,roadGraph,1,false);check(rival.DebugLabel=="CRUISE","rival exposes a readable cruise debug label");yield return new WaitForSeconds(.5f);check(rival.Current==RivalAI.State.ChasePassenger&&rival.DebugLabel=="CHASE PASSENGER","rival pursues nearest waiting passenger and updates its debug label");
+            rival.ApplyDamage(90);yield return new WaitForSeconds(.5f);check(rival.Current==RivalAI.State.Flee&&rival.DebugLabel=="FLEE","damaged rival retreats and updates its debug label");rival.Configure(this,roadGraph,1,false);driver.Body.position=rival.transform.position+Vector3.forward*9;yield return new WaitForSeconds(.5f);check(rival.Current==RivalAI.State.Block&&rival.DebugLabel=="BLOCK","nearby rival attempts bounded blocking and updates its debug label");
             rival.enabled=false;check(sun.shadows==LightShadows.None&&QualitySettings.shadows==ShadowQuality.Disable,"prior no-shadow preference preserved");check(idleRecording!=null&&callClip!=null,"recorded engine and conductor calls load");
             Rainy=false;Begin();IsolateTraffic();
             float freshStopping=0,wornStopping=0;
