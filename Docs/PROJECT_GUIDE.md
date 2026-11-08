@@ -1,5 +1,7 @@
 # Kombi Shift: project guide
 
+Updated assessment work: see `Assessment/CURRENT_DESIGN.md` and `Assessment/LEARN_AND_DEFEND.md`. The current game now has selectable Morning (600s, 1+) and Rush Hour (420s, 6+) configurations, stage best earnings, event notifications, completed alighting before results, actual rival cruise/depart movement, buffered traffic queries, and pause audio/menu controls. Older limitations below describe features that remain outside the selected scope; current stage rules are authoritative in `KombiChallenge.cs`.
+
 Open `BranchProjects/KombiShift2` in Unity 6000.6.2f1. This is the cleaned version of `feat/kombishift2-unity6`, based on revision `ddd18ae`. Updates are maintained on `feat/kombishift2-unity6`.
 
 ## Open and play
@@ -39,7 +41,7 @@ Everything specific to the game is under `Assets/KombiShift2`:
 | Scripts/Traffic | Background traffic, rival pickups and signal support. |
 | Scripts/Weather | Weather states, effects and transitions. |
 | Scripts/Compatibility | A small compatibility component referenced by imported city objects. |
-| Scripts/Development | Verification runners compiled only for the editor, excluded from player builds. |
+| Scripts/Development | Editor verification runners plus an opt-in release integration runner; ordinary game launches do not activate automated tests. |
 | Prefabs/Vehicles/Player | `Hiace_Player.prefab`, the reusable player vehicle. Open Prefab Mode to inspect its setup. |
 | Prefabs/Passengers | The six reusable passenger appearances and humanoid rigs. |
 | Data/PassengerPersonas | Six definitions with appearance references and future economy/patience tuning values. |

@@ -12,6 +12,8 @@ namespace KombiShift2.Traffic
         private int routeDirection = 1;
         private TrafficSignalController[] signals;
         private float groundClearance = .05f;
+        private readonly RaycastHit[] obstacleHits = new RaycastHit[64];
+        private readonly RaycastHit[] groundHits = new RaycastHit[128];
 
         private void Start()
         {
@@ -50,12 +52,7 @@ namespace KombiShift2.Traffic
                 return;
             }
             Vector3 direction = delta.normalized;
-            bool blocked = false;
-            foreach (RaycastHit hit in Physics.SphereCastAll(transform.position + Vector3.up * .8f, .55f, direction, 6f))
-            {
-                if (hit.transform.IsChildOf(transform)) continue;
-                if (hit.rigidbody != null || hit.collider.GetComponentInParent<KombiTrafficVehicle>() != null) { blocked = true; break; }
-            }
+            bool blocked = ObstacleAhead(direction);
             if (!blocked && signals != null)
             {
                 foreach (TrafficSignalController signal in signals)
@@ -73,6 +70,34 @@ namespace KombiShift2.Traffic
             GroundAt(nextPosition);
             if (direction.sqrMagnitude > .1f) transform.rotation = Quaternion.Slerp(transform.rotation, Quaternion.LookRotation(direction), Time.deltaTime * 4f);
         }
+
+        private bool ObstacleAhead(Vector3 direction)
+        {
+            int count = Physics.SphereCastNonAlloc(transform.position + Vector3.up * .8f, .55f, direction, obstacleHits, 6f);
+            var hits = count == obstacleHits.Length ? Physics.SphereCastAll(transform.position + Vector3.up * .8f, .55f, direction, 6f) : obstacleHits;
+            if (hits != obstacleHits) count = hits.Length;
+            for (int i = 0; i < count; i++)
+            {
+                var hit = hits[i];
+                if (hit.transform.IsChildOf(transform)) continue;
+                if (hit.rigidbody != null || hit.collider.GetComponentInParent<KombiTrafficVehicle>() != null) return true;
+            }
+            return false;
+        }
+#if UNITY_EDITOR
+        // Same two queries as driving, measured in a controlled editor fixture.
+        public int ProfileQueries(bool allocatingBaseline)
+        {
+            if (!allocatingBaseline)
+            {
+                int a = Physics.SphereCastNonAlloc(transform.position + Vector3.up * .8f, .55f, transform.forward, obstacleHits, 6f);
+                int b = Physics.RaycastNonAlloc(transform.position + Vector3.up * 8f, Vector3.down, groundHits, 24f, ~0, QueryTriggerInteraction.Ignore);
+                return a + b;
+            }
+            return Physics.SphereCastAll(transform.position + Vector3.up * .8f, .55f, transform.forward, 6f).Length
+                + Physics.RaycastAll(transform.position + Vector3.up * 8f, Vector3.down, 24f, ~0, QueryTriggerInteraction.Ignore).Length;
+        }
+#endif
 
         private Vector3 OffsetPoint(int index)
         {
@@ -96,10 +121,14 @@ namespace KombiShift2.Traffic
 
         private void GroundAt(Vector3 position)
         {
-            RaycastHit[] hits = Physics.RaycastAll(position + Vector3.up * 8f, Vector3.down, 24f, ~0, QueryTriggerInteraction.Ignore);
+            int count = Physics.RaycastNonAlloc(position + Vector3.up * 8f, Vector3.down, groundHits, 24f, ~0, QueryTriggerInteraction.Ignore);
+            // Saturated buffers fall back to the complete query, preserving collision correctness.
+            RaycastHit[] hits = count == groundHits.Length ? Physics.RaycastAll(position + Vector3.up * 8f, Vector3.down, 24f, ~0, QueryTriggerInteraction.Ignore) : groundHits;
+            if (hits != groundHits) count = hits.Length;
             float bestY = float.NegativeInfinity;
-            foreach (RaycastHit hit in hits)
+            for (int i = 0; i < count; i++)
             {
+                var hit = hits[i];
                 if (hit.transform == transform || hit.transform.IsChildOf(transform)) continue;
                 if (hit.collider.GetComponentInParent<KombiTrafficVehicle>() != null) continue;
                 if (hit.point.y > bestY) bestY = hit.point.y;

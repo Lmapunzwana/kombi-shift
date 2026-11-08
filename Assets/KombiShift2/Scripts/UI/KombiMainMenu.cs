@@ -1,4 +1,5 @@
 using System.Collections;
+using KombiShift2.Gameplay;
 using UnityEngine;
 using UnityEngine.SceneManagement;
 
@@ -42,6 +43,7 @@ namespace KombiShift2.UI
             if(starting)return;
             if(Input.GetKeyDown(KeyCode.Escape)){settings=controls=false;return;}
             if(settings||controls)return;
+            if(Input.GetKeyDown(KeyCode.F2)) KombiChallenge.Selected = KombiChallenge.Selected == KombiStage.Morning ? KombiStage.RushHour : KombiStage.Morning;
             if(Input.GetKeyDown(KeyCode.RightArrow)||Input.GetKeyDown(KeyCode.Tab)||Input.GetKeyDown(KeyCode.DownArrow))Focus((selected+1)%3);
             if(Input.GetKeyDown(KeyCode.LeftArrow)||Input.GetKeyDown(KeyCode.UpArrow))Focus((selected+2+3)%3);
             if(Input.GetKeyDown(KeyCode.Return))Activate(selected<0?0:selected);
@@ -75,7 +77,7 @@ namespace KombiShift2.UI
             Fill(new Rect(0,0,w,6),new Color(.92f,.63f,.18f));
             Fill(new Rect(0,6,w,88),new Color(.025f,.038f,.044f,.83f));
             Text(new Rect(58,28,350,30),"K / S     HARARE, ZIMBABWE",section,new Color(.9f,.91f,.84f));
-            Text(new Rect(w-390,28,330,30),"01  /  MORNING SHIFT",section,new Color(.93f,.67f,.26f));
+            Text(new Rect(w-390,28,330,30),KombiChallenge.Name(KombiChallenge.Selected),section,new Color(.93f,.67f,.26f));
             Text(new Rect(54,116+(1-appear)*20,600,132),"KOMBI",logo,new Color(.95f,.96f,.91f,appear));
             Text(new Rect(54,218+(1-appear)*20,600,132),"SHIFT",logo,new Color(.95f,.66f,.22f,appear));
             Fill(new Rect(60,372,48,4),new Color(.95f,.66f,.22f));
@@ -84,6 +86,13 @@ namespace KombiShift2.UI
             Text(new Rect(w-390,115,330,30),"TOYOTA HIACE  /  COMMUTER",tiny,new Color(.82f,.86f,.85f));
             Text(new Rect(w-390,150,330,36),"CBD  /  MBARE",section,Color.white);
             float rowY=h-226;
+            if(!starting&&!settings&&!controls)
+            {
+                Rect stageButton = new Rect(60,rowY-68,620,42);
+                if(GUI.Button(stageButton, "F2 / CHANGE STAGE: " + KombiChallenge.Name(KombiChallenge.Selected), section))
+                    KombiChallenge.Selected = KombiChallenge.Selected == KombiStage.Morning ? KombiStage.RushHour : KombiStage.Morning;
+                Text(new Rect(60,rowY-105,750,30), $"{KombiChallenge.Seconds(KombiChallenge.Selected)/60:0} MIN   /   DELIVER {KombiChallenge.MinimumPassengers(KombiChallenge.Selected)}+   /   BEST ${KombiChallenge.Best(KombiChallenge.Selected)}", tiny, Color.white);
+            }
             bool pointerMoved=(Input.mousePosition-lastMouse).sqrMagnitude>.1f;lastMouse=Input.mousePosition;
             if(!settings&&!controls&&!starting)
             {
@@ -120,7 +129,7 @@ namespace KombiShift2.UI
             if(hover&&Event.current.type==EventType.MouseDown&&Event.current.button==0){Focus(index);Activate(index);Event.current.Use();}
             Text(new Rect(rect.x+20,rect.y+10,250,20),"0"+(index+1)+"  /  "+(index==0?"DRIVE":index==1?"LEARN":"TUNE"),tiny,Color.Lerp(new Color(.61f,.71f,.72f),new Color(.18f,.20f,.16f),t));
             Text(new Rect(rect.x+18,rect.y+34,270,42),titles[index],cardTitle,Color.Lerp(Color.white,new Color(.05f,.085f,.09f),t));
-            Text(new Rect(rect.x+20,rect.y+82,270,21),details[index],cardDetail,Color.Lerp(new Color(.70f,.78f,.79f),new Color(.2f,.25f,.22f),t));
+            Text(new Rect(rect.x+20,rect.y+82,270,21),(index==0 ? KombiChallenge.Name(KombiChallenge.Selected) : details[index]),cardDetail,Color.Lerp(new Color(.70f,.78f,.79f),new Color(.2f,.25f,.22f),t));
         }
         void DrawCardBackground(int index,Rect rect,float amount)
         {
@@ -142,7 +151,7 @@ namespace KombiShift2.UI
             }
             else
             {
-                Text(new Rect(panel.x+34,panel.y+105,565,235),"W / S     Accelerate, brake and reverse\nA / D     Steer       SPACE     Handbrake\nRMB DRAG     Orbit or look around\nMOUSE WHEEL     Zoom chase camera\nC / CAMERA BUTTON     Change view\n\nStop at a rank. Passengers board together.\nReach the stops before the rival kombis.",body,new Color(.84f,.89f,.88f));
+                Text(new Rect(panel.x+34,panel.y+105,565,300),"W / S     Accelerate, brake and reverse\nA / D     Steer       SPACE     Handbrake\nRMB DRAG     Orbit or look around\nMOUSE WHEEL     Zoom chase camera\nC / CAMERA BUTTON     Change view\n\nStop below 2 km/h. Hold Space while boarding.\nDeliver the stage target to MBARE before time runs out.\n$2 per boarding + a time bonus on success.\nF2 on title changes stage. Escape pauses. R restarts.",body,new Color(.84f,.89f,.88f));
             }
             Rect back=new(panel.x+34,panel.yMax-58,572,36);
             Fill(back,back.Contains(Event.current.mousePosition)?new Color(.72f,.48f,.15f):new Color(.13f,.24f,.27f));
@@ -163,7 +172,7 @@ namespace KombiShift2.UI
             logo=Style(displayFont,132);section=Style(bodyFont,27);body=Style(bodyFont,23);cardTitle=Style(displayFont,38);cardDetail=Style(bodyFont,17);tiny=Style(bodyFont,20);
         }
         static GUIStyle Style(Font font,int size){var style=new GUIStyle(GUI.skin.label){font=font,fontSize=size,wordWrap=false};style.normal.textColor=Color.white;return style;}
-        void Text(Rect rect,string value,GUIStyle style,Color color){GUI.color=color;GUI.Label(rect,value,style);GUI.color=Color.white;}
+        void Text(Rect rect,string value,GUIStyle style,Color color){if(style==section||style==tiny||style==cardDetail)rect.height=Mathf.Max(rect.height,style.lineHeight+4f);GUI.color=color;GUI.Label(rect,value,style);GUI.color=Color.white;}
         void Fill(Rect rect,Color color){GUI.color=color;GUI.DrawTexture(rect,pixel);GUI.color=Color.white;}
         static AudioClip Sound(string name,float frequency,float duration)
         {

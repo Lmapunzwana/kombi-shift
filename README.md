@@ -1,15 +1,15 @@
-# Kombi Shift — current Unity project
+# Kombi Shift 2 - Group 6
 
-Open this folder in Unity **6000.6.2f1**. This cleaned project is based on `feat/kombishift2-unity6` revision `ddd18ae`.
+**Team learning starts at [Docs/Assessment/START_HERE.md](Docs/Assessment/START_HERE.md).**
 
-Choose **Kombi Shift > Project Tour** for a guided explanation of the folders. Start with **Kombi Shift > Open Main Menu**, then Play and Start Shift.
+The current assessed project is this folder. Use Unity **6000.6.2f1** and open `Assets/KombiShift2/Scenes/KombiMainMenu.unity`, or choose **Kombi Shift > Play Main Menu**.
 
-Only two active scenes remain: `KombiMainMenu` and `KombiShift_FirstShift`. Earlier scenes, bus prototypes and demo assets are preserved outside the project in the sibling `_Archive_KombiShift2_Before_Cleanup` folder.
+Choose **Morning Shift** or **Rush Hour** using the title selector / F2. Morning: 600 seconds, deliver 1+ passengers; Rush Hour: 420 seconds, deliver 6+, faster rivals and a shorter head start. Both use the current city route. Win Morning to access Next: Rush Hour from results; either stage is also selectable directly.
 
-Read [the project guide](Docs/PROJECT_GUIDE.md) for controls, the folder map, system connections, known unfinished work and archive recovery. See [cleanup validation](Docs/CLEANUP_VALIDATION.txt) for the Unity checks.
+WASD/arrows drive, Space parking brake, S holds to reverse, RMB orbit, wheel zoom, C camera, L lights, V wipers, Escape pause, R restart. Stop below 2 km/h at the active stop and hold Space; boarding is automatic. Deliver at Mbare. $2 is credited per seated passenger and success adds a remaining-time bonus. Best earnings save separately per stage.
 
-The cleanup and gameplay updates are maintained on `feat/kombishift2-unity6`. Asset imports and original licence/attribution requirements remain relevant; see Docs/ASSET_REGISTER.csv and the source packs.
+Start with `Docs/Assessment/LEARN_AND_DEFEND.md` for explanations and live-change practice, `Docs/Assessment/CURRENT_DESIGN.md` for the current GDD/report, and `Docs/PROJECT_GUIDE.md` for file navigation. `Docs/Validation/Assessment` contains new staged integration and traffic-query measurements. Historical validation remains separately labelled.
 
-The current First Shift includes seated station queues, visible walk-in boarding, two rival kombis competing for those queues, a circular minimap and a compact speed/gear display. Stop below 2 km/h and hold Space while boarding. See Docs/PROJECT_GUIDE.md for the new components and remaining persona economy limitations.
+`../../Submission2026` contains current report, slides, tester worksheets and release preparation. The earlier workspace `Submission`, `UnityStarter` and `UnityHDRP` are different versions; their feature claims do not describe this game.
 
-The scene hierarchy is grouped into systems, environment, roads, player, stations and traffic. Another 220.2 MB of unused content is archived outside the project in `_Archive_Structure_Cleanup`; see its manifest and Docs/PROJECT_GUIDE.md. Vehicle grounding checks are in Docs/Validation/Grounding.
+Human playtesting, feedback-based fixes/retests, actual contributions, assigned-book reading, target-machine checks and dependency source hand-in permissions require real evidence. See `Docs/Assessment/AI_AND_ASSET_DECLARATION.md`. No such evidence is invented.

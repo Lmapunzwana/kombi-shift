@@ -51,7 +51,7 @@ namespace KombiShift2.UI
 
         private void Update()
         {
-            if (vehicle == null || Time.unscaledTime < nextMapUpdate) return;
+            if (vehicle == null || (gameDirector != null && (gameDirector.Paused || gameDirector.Finished)) || Time.unscaledTime < nextMapUpdate) return;
             nextMapUpdate = Time.unscaledTime + .15f;
             Array.Copy(background,pixels,pixels.Length);
             foreach (var road in roads)
@@ -144,7 +144,7 @@ namespace KombiShift2.UI
             GUI.Label(new Rect(30,70,layout.Objective.width-24,20),gameDirector.Notice,small);
             int seconds=Mathf.CeilToInt(gameDirector.TimeRemaining);
             GUI.Label(new Rect(layout.Stats.x+14,23,180,24),$"${gameDirector.Earnings} fares    {seconds/60:00}:{seconds%60:00}",label);
-            GUI.Label(new Rect(layout.Stats.x+14,48,180,22),"SHIFT EARNINGS / TIME",small);
+            GUI.Label(new Rect(layout.Stats.x+14,48,180,22),$"{KombiChallenge.Name(gameDirector.Stage)} / {gameDirector.MinimumPassengers}+",small);
             GUI.color=Color.white; GUI.DrawTexture(layout.Map,map);
             float distance=Vector3.Distance(vehicle.transform.position,gameDirector.CurrentTarget);
             GUI.Label(new Rect(24,layout.Map.yMax+2,208,22),$"NEXT STOP   {distance:0} m",heading);

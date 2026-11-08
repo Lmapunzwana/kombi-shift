@@ -30,7 +30,7 @@ namespace KombiShift2.Vehicle
             }
 
             yield return null;
-            bool automated = Application.isBatchMode;
+            bool automated = Application.isBatchMode && System.Array.IndexOf(System.Environment.GetCommandLineArgs(), "--kombi-smoke") >= 0;
             RCCP.RegisterPlayerVehicle(vehicle, true, true);
             var powertrain=vehicle.GetComponent<KombiPowertrain>();
             if(powertrain!=null)powertrain.Configure();

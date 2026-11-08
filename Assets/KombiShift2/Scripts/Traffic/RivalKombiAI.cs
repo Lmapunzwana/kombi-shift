@@ -21,6 +21,10 @@ namespace KombiShift2.Traffic
         private int destinationIndex;
         private float blockedTime;
         private float startedAt;
+        private bool shiftEnded;
+        public float DepartureDelay => departureDelay;
+        public void SetChallenge(float metresPerSecond, float delay) { speed = metresPerSecond; departureDelay = delay; }
+        public void StopForShiftEnd() { shiftEnded = true; }
         private readonly RaycastHit[] obstacles = new RaycastHit[20];
         public int PassengersTaken { get; private set; }
         public RivalState State { get; private set; }
@@ -42,10 +46,10 @@ namespace KombiShift2.Traffic
 
         private void Update()
         {
-            if (route == null || route.Length < 2 || stations == null || Time.time - startedAt < departureDelay || State == RivalState.Boarding) return;
-            if (PassengersTaken >= cabin.Seats.Length) { State = RivalState.Depart; return; }
+            if (shiftEnded || route == null || route.Length < 2 || stations == null || Time.time - startedAt < departureDelay || State == RivalState.Boarding) return;
+            if (PassengersTaken >= cabin.Seats.Length) { State = RivalState.Depart; CruiseRoute(); return; }
             if (target == null || !target.HasWaiting || (target.Reserved && State != RivalState.Boarding)) ChooseTarget();
-            if (target == null) { State = RivalState.Cruise; return; }
+            if (target == null) { State = RivalState.Cruise; CruiseRoute(); return; }
             Vector3 toService = target.ServicePoint.position - transform.position; toService.y = 0f;
             if (toService.magnitude < 2.2f)
             {
@@ -67,6 +71,12 @@ namespace KombiShift2.Traffic
             }
         }
 
+        private void CruiseRoute()
+        {
+            if (FlatDistance(route[routeIndex].position, transform.position) < 2.5f) routeIndex = (routeIndex + 1) % route.Length;
+            Drive(route[routeIndex].position, speed);
+        }
+
         private void ChooseTarget()
         {
             target = null; float best = float.MaxValue;
@@ -84,7 +94,7 @@ namespace KombiShift2.Traffic
         {
             var stop = target;
             yield return stop.Board(transform, cabin.Doorway, cabin.Seats, PassengersTaken,
-                person => PassengersTaken++, () => isActiveAndEnabled && stop != null);
+                person => PassengersTaken++, () => !shiftEnded && isActiveAndEnabled && stop != null);
             target = null;
             routeIndex = NearestRouteIndex(transform.position);
             State = RivalState.Depart;

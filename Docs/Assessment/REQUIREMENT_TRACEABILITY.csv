@@ -1,0 +1,10 @@
+requirement,subject,implementation,evidence,limit
+M1,Journey,KombiMainMenu.cs; KombiShiftGameDirector.cs,Both stage integration JSON; browser UI,Automated + observed browser; human full shift pending
+M2,Two challenge states,KombiChallenge.cs; main menu selector,Morning/RushHour integration JSON,Initial tuning; authentic balance review pending
+M3,C# manager events coroutine,KombiShiftGameDirector.cs; PassengerStation.cs,Fare/pause/outcome event checks,Implemented
+M4,Scenes prefabs animation,Scenes; Hiace_Player.prefab; StationPassenger.cs,Historical rig/service captures; current seat/delivery checks,"Procedural pose transitions, not Animator graph"
+M5,Physics,RCC; KombiVehicleStability.cs; query casts,Historical grounding + current native/browser driving,Imported engine integrated by custom scripts
+M6,AI,RivalKombiAI.cs,Historical rival service; stage rival tuning checks,Live full blocked/no-target fairness review pending
+M7,UI/audio/accessibility,KombiMainMenu.cs; KombiNavigationHud.cs,Browser pause/menu/drive screenshots,Real accessibility/audio-device review pending
+M8,Measured optimisation,KombiTrafficVehicle.cs; AssessmentBuild.cs,traffic-query-results.json + samples.csv,Controlled editor heap-delta fixture; not FPS
+M9,PC + second platform,AssessmentBuild.cs,"Build summaries, Linux release JSON, browser JSON",Native Windows and weak-device testing remain
