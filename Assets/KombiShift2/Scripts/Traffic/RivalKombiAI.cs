@@ -221,6 +221,11 @@ namespace KombiShift2.Traffic
                     }
                     else if (Time.time - stoppedAt[zone] < 1f) desiredSpeed = 0f;
                 }
+                if (zone.rule == RoadRule.GiveWay)
+                {
+                    desiredSpeed = Mathf.Min(desiredSpeed,3f);
+                    if (!Clear(origin,transform.right,18f,out _) || !Clear(origin,-transform.right,18f,out _)) desiredSpeed = 0f;
+                }
                 if (zone.rule == RoadRule.NoEntry && Vector3.Dot(transform.forward, (zone.transform.position-transform.position).normalized) > .7f) desiredSpeed = 0f;
             }
             float error = desiredSpeed - actualSpeed;

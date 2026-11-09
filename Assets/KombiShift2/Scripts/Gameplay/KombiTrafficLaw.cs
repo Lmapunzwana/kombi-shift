@@ -22,13 +22,13 @@ namespace KombiShift2.Gameplay
         public void Configure(KombiShiftGameDirector value) => director = value;
         public void EnterLimit(KombiRoadRuleZone zone, float limit) => limits[zone] = limit;
         public void ExitLimit(KombiRoadRuleZone zone) => limits.Remove(zone);
-        public bool Record(string incident, string description, int fine, float cooldown = 30f)
+        public bool Record(string incident, string description, int fine, float cooldown = 30f, float severity = 1f)
         {
             if (director == null || director.Finished || director.Paused || (cooldowns.TryGetValue(incident, out float next) && Time.time < next)) return false;
             cooldowns[incident] = Time.time + cooldown;
             offences.Add(new TrafficOffence { incident = incident, description = description, fine = fine, time = Time.time });
             TotalFines += fine; director.DeductFine(fine);
-            director.Quality.Apply("law:" + incident, description + " — $" + fine + " game fine", -5f, -5, 0f);
+            director.Quality.Apply("law:" + incident, description + " — $" + fine + " game fine", -5f * severity, -Mathf.CeilToInt(5f * severity), 0f);
             return true;
         }
         public void SampleSpeed(float kph, float seconds)
@@ -40,7 +40,7 @@ namespace KombiShift2.Gameplay
                 if (!speedingIncident && speedingSeconds >= speedGrace)
                 {
                     float severity = Mathf.Clamp((kph-SpeedLimit)/10f,1f,3f);
-                    Record("speeding", "Speed limit exceeded", Mathf.CeilToInt(speedingFine*severity), 0f);
+                    Record("speeding", "Speed limit exceeded", Mathf.CeilToInt(speedingFine*severity), 0f, severity);
                     speedingIncident = true;
                 }
             }

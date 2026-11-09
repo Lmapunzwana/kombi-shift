@@ -77,7 +77,7 @@ namespace KombiShift2.Gameplay
         public PassengerStation[] Stations => stations;
         public RivalKombiAI[] Rivals => rivals;
         public int RivalPassengers => rivals == null ? 0 : rivals.Sum(x => x != null ? x.PassengersTaken : 0);
-        public string Notice => servicing ? "BOARDING — KEEP THE KOMBI STOPPED" : notice;
+        public string Notice => servicing ? (trips.Any(x => x.state == TripState.Alighting) ? "ALIGHTING — KEEP THE KOMBI STOPPED" : "BOARDING — KEEP THE KOMBI STOPPED") : notice;
         public Vector3 CurrentTarget {
             get {
                 var request = trips.Where(x => x.requested && x.state != TripState.Completed).OrderBy(x => Vector3.SqrMagnitude(stations[x.destination].ServicePoint.position - vehicle.transform.position)).FirstOrDefault();
@@ -187,7 +187,7 @@ namespace KombiShift2.Gameplay
         private IEnumerator DropOff(PassengerStation station)
         {
             yield return AlightAt(station, true);
-            if (!finished) Finish(delivered >= MinimumPassengers);
+            if (!finished && onboard.Count == 0) Finish(delivered >= MinimumPassengers);
         }
 
         private IEnumerator AlightAt(PassengerStation station, bool terminal)

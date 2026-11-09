@@ -178,7 +178,7 @@ namespace KombiShift2.UI
                     if (rival == null) continue;
                     GUI.color = rival.MarkerColor;
                     string claim = rival.Target == null ? rival.State.ToString() : $"{rival.Target.name} {Vector3.Distance(rival.transform.position,rival.Target.ServicePoint.position):0}m";
-                    GUI.Label(new Rect(24,rivalY,Mathf.Min(560,width-260),22), $"{rival.name}: {rival.PassengersTaken} | {claim}", small);
+                    GUI.Label(new Rect(24,rivalY,Mathf.Min(560,width-260),22), $"{rival.name.Replace("Rival Kombi — ","")}: {rival.PassengersTaken} | {claim}", small);
                     rivalY += 24f;
                 }
             }

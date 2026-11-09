@@ -21,7 +21,7 @@ namespace KombiShift2.Gameplay
             var law = other.GetComponentInParent<KombiTrafficLaw>(); if (law == null) return;
             if (contacts.TryGetValue(law, out int count)) { contacts[law] = count + 1; return; }
             contacts[law] = 1; stopped[law] = 0f;
-            if (rule == RoadRule.SpeedLimit || rule == RoadRule.Crossing || rule == RoadRule.Roadworks) law.EnterLimit(this, limit);
+            if (rule == RoadRule.SpeedLimit || rule == RoadRule.Crossing || rule == RoadRule.Roadworks || rule == RoadRule.GiveWay) law.EnterLimit(this, limit);
             if (rule == RoadRule.NoEntry) law.Record("entry:" + GetEntityId(), "No entry", fine);
             if (rule == RoadRule.Hump)
             {

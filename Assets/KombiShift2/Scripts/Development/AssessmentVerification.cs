@@ -87,13 +87,14 @@ public sealed class KombiAssessmentVerification : MonoBehaviour
         Time.timeScale=4;
         float deadline=Time.realtimeSinceStartup+60;
         while((director.Passengers<6||director.Servicing)&&!director.Finished&&Time.realtimeSinceStartup<deadline)yield return null;
-        Check(director.Passengers==6&&fares==12&&director.Earnings==12,"Six actual seat arrivals pay $2 once via fare events");
+        Check(director.Passengers==6&&fares==0&&director.Earnings==0,"Six actual seat arrivals create trips; fares deferred until delivery");
         Check(first.People.Select(x=>x.transform.parent).Distinct().Count()==6,"Concurrent passengers occupy distinct seats");
         typeof(KombiShiftGameDirector).GetField("stopIndex",BindingFlags.Instance|BindingFlags.NonPublic).SetValue(director,director.StopCount-1);
         var terminal=director.Stations.Last();car.transform.SetPositionAndRotation(terminal.ServicePoint.position,terminal.ServicePoint.rotation);
         deadline=Time.realtimeSinceStartup+60;
         while(!director.Finished&&Time.realtimeSinceStartup<deadline)yield return null;
         Check(director.Success&&outcome&&outcomes==1,"Target delivery produces one successful outcome event");
+        Check(fares==(stage==KombiStage.Morning?12:18),"Completed trips emit stage-configured fare events once");
         Check(first.People.All(x=>x.State==PassengerState.Delivered),"Ending waits until passengers reach terminal seats");
         Check(Time.timeScale==0,"Results freeze world");
         Check(KombiChallenge.Best(stage)>=director.Earnings,"Successful stage score persists");
@@ -125,7 +126,7 @@ public sealed class KombiAssessmentVerification : MonoBehaviour
     {
         if(complete)return;complete=true;Time.timeScale=1;
         LastReport=JsonUtility.ToJson(report,true);
-        string folder=Application.isEditor?Path.GetFullPath("Docs/Validation/Assessment"):Application.persistentDataPath;
+        string folder=Application.isEditor?Path.GetFullPath("Docs/Validation/Expansion/Regression"):Application.persistentDataPath;
         Directory.CreateDirectory(folder);File.WriteAllText(Path.Combine(folder,"integration-"+stage+".json"),LastReport);
         Debug.Log("KOMBI_ASSESSMENT_JSON "+LastReport);
         Debug.Log("KOMBI_ASSESSMENT_RESULT "+(report.failed.Count==0?"PASS":"FAIL"));
