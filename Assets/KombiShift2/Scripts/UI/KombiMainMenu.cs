@@ -151,7 +151,7 @@ namespace KombiShift2.UI
             }
             else
             {
-                Text(new Rect(panel.x+34,panel.y+105,565,300),"W / S     Accelerate, brake and reverse\nA / D     Steer       SPACE     Handbrake\nRMB DRAG     Orbit or look around\nMOUSE WHEEL     Zoom chase camera\nC / CAMERA BUTTON     Change view\n\nStop below 2 km/h. Hold Space while boarding.\nDeliver the stage target to MBARE before time runs out.\n$2 per boarding + a time bonus on success.\nF2 on title changes stage. Escape pauses. R restarts.",body,new Color(.84f,.89f,.88f));
+                Text(new Rect(panel.x+34,panel.y+105,565,300),"W / S     Accelerate, brake and reverse\nA / D     Steer       SPACE     Handbrake\nRMB DRAG     Orbit or look around\nMOUSE WHEEL     Zoom chase camera\nC / CAMERA BUTTON     Change view\n\nStop below 2 km/h. Hold Space while boarding.\nListen for stop requests; stop to let passengers alight.\nFinish at MBARE. $2 Morning / $3 Rush per delivery.\nT repairs at stops. Fines reduce earnings and XP.\nF2 on title changes stage. Escape pauses. R restarts.",body,new Color(.84f,.89f,.88f));
             }
             Rect back=new(panel.x+34,panel.yMax-58,572,36);
             Fill(back,back.Contains(Event.current.mousePosition)?new Color(.72f,.48f,.15f):new Color(.13f,.24f,.27f));

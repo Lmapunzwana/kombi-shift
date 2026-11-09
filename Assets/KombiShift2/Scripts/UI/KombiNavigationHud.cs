@@ -72,7 +72,7 @@ namespace KombiShift2.UI
                 if (gameDirector.Stations != null) foreach (var stop in gameDirector.Stations)
                     if (stop != null && (stop.HasWaiting || stop.Terminal)) Ring(ToMap(stop.ServicePoint.position),5,new Color32(255,210,82,255));
                 if (gameDirector.Rivals != null) foreach (var rival in gameDirector.Rivals)
-                    if (rival != null) { Dot(ToMap(rival.transform.position),6,new Color32(18,20,24,255));Dot(ToMap(rival.transform.position),4,new Color32(255,113,101,255)); }
+                    if (rival != null) { Dot(ToMap(rival.transform.position),6,new Color32(18,20,24,255));Dot(ToMap(rival.transform.position),4,(Color32)rival.MarkerColor); }
             }
             if(gameDirector!=null)
             {
@@ -158,6 +158,30 @@ namespace KombiShift2.UI
             string gear=vehicle.direction<0 ? "R" : vehicle.absoluteSpeed<1 ? "N" : Mathf.Max(1,vehicle.currentGear).ToString();
             GUI.Label(new Rect(layout.Speed.x+15,layout.Speed.y+48,110,25),$"km/h     G {gear}",small);
             GUI.color=new Color(.88f,.67f,.29f);GUI.DrawTexture(new Rect(layout.Speed.x,layout.Speed.yMax-3,128,3),pixel);
+            // Secondary status remains grouped below the existing time/earnings panel.
+            Rect condition = new Rect(layout.Stats.x, 88, 200, 112);
+            Panel(condition);
+            GUI.Label(new Rect(condition.x+12,92,180,22), $"Condition {gameDirector.Condition.Health:0}%   Limit {gameDirector.Law.SpeedLimit:0}", small);
+            GUI.Label(new Rect(condition.x+12,116,180,22), $"XP {gameDirector.Quality.XP}   Happiness {gameDirector.Happiness:0}%", small);
+            GUI.Label(new Rect(condition.x+12,140,180,22), $"Delivered {gameDirector.Delivered}   Fines ${gameDirector.Law.TotalFines}", small);
+            GUI.Label(new Rect(condition.x+12,164,180,22), $"T: repair at stop (${gameDirector.Condition.RepairPrice})", small);
+            if (!string.IsNullOrEmpty(gameDirector.DropRequest))
+            {
+                Panel(new Rect(18,104,Mathf.Min(460,width-260),48));
+                GUI.Label(new Rect(30,106,Mathf.Min(436,width-284),44), gameDirector.DropRequest, heading);
+            }
+            if (gameDirector.Rivals != null)
+            {
+                float rivalY = 166f;
+                foreach (var rival in gameDirector.Rivals)
+                {
+                    if (rival == null) continue;
+                    GUI.color = rival.MarkerColor;
+                    string claim = rival.Target == null ? rival.State.ToString() : $"{rival.Target.name} {Vector3.Distance(rival.transform.position,rival.Target.ServicePoint.position):0}m";
+                    GUI.Label(new Rect(24,rivalY,Mathf.Min(560,width-260),22), $"{rival.name}: {rival.PassengersTaken} | {claim}", small);
+                    rivalY += 24f;
+                }
+            }
             GUI.matrix=previous;GUI.color=previousColor;
         }
         private static GUIStyle Style(int size,TextAnchor alignment,Color color)

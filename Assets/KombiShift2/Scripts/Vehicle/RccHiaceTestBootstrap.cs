@@ -16,6 +16,7 @@ namespace KombiShift2.Vehicle
         [System.NonSerialized] public float verificationBrake;
         [System.NonSerialized] public bool verificationPark;
 #endif
+        private KombiVehicleCondition condition;
         private bool interactiveInputEnabled;
         private float smoothedSteering;
         private float smoothedThrottle;
@@ -137,11 +138,12 @@ namespace KombiShift2.Vehicle
             float steeringRate = requestedSteering == 0f ? 1.9f : Mathf.Lerp(1.65f, .78f, Mathf.InverseLerp(0f, 100f, vehicle.absoluteSpeed));
             smoothedSteering = Mathf.MoveTowards(smoothedSteering, requestedSteering * speedSteeringLimit, Time.deltaTime * steeringRate);
 
+            condition ??= vehicle.GetComponent<KombiVehicleCondition>();
             RCCP_Inputs inputs = new()
             {
-                throttleInput = smoothedThrottle * KombiPowertrain.ThrottleFactor(vehicle.absoluteSpeed, vehicle.direction<0),
+                throttleInput = (condition != null ? condition.PowerFactor : 1f) * smoothedThrottle * KombiPowertrain.ThrottleFactor(vehicle.absoluteSpeed, vehicle.direction<0),
                 steerInput = smoothedSteering,
-                brakeInput = smoothedBrake,
+                brakeInput = smoothedBrake * (condition != null ? condition.BrakeFactor : 1f),
                 handbrakeInput = Input.GetKey(KeyCode.Space) ? 1f : 0f
             };
 #if UNITY_EDITOR

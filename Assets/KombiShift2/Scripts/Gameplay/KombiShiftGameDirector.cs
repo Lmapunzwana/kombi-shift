@@ -29,6 +29,26 @@ namespace KombiShift2.Gameplay
         private KombiPassengerCabin cabin;
         private readonly List<StationPassenger> onboard = new();
         private GUIStyle title, body;
+        [SerializeField] private List<PassengerTrip> trips = new();
+        [SerializeField] private float requestRadius = 90f, missedStopPenalty = 20f;
+        [SerializeField] private int missedStopXP = 10;
+        private int delivered;
+        private float nextTripSample;
+        private AudioSource serviceAudio;
+        private AudioClip requestTone;
+        public IReadOnlyList<PassengerTrip> Trips => trips;
+        public KombiServiceQuality Quality { get; private set; }
+        public KombiVehicleCondition Condition { get; private set; }
+        public KombiTrafficLaw Law { get; private set; }
+        public float Happiness => trips.Where(x => x.state != TripState.Completed).Select(x => x.happiness).DefaultIfEmpty(100f).Average();
+        public int Delivered => delivered;
+        public string DropRequest => trips.Any(x => x.requested && x.state != TripState.Completed) ? "STOP REQUESTED — " + stations[trips.First(x => x.requested && x.state != TripState.Completed).destination].name : "";
+        public bool AtServicePoint => stations != null && stations.Any(x => x != null && Vector3.Distance(vehicle.transform.position, x.ServicePoint.position) < stopRadius);
+        public bool TrySpend(int amount) { if (amount < 0 || earnings < amount) return false; earnings -= amount; return true; }
+        public void DeductFine(int amount) => earnings -= Mathf.Max(0, amount);
+        public event Action<PassengerTrip> TripChanged;
+        public void Announce(string message) { notice = message; }
+
         public event Action<int> OnFareEarned;
         public event Action<bool> OnPauseChanged;
         public event Action<bool> OnShiftFinished;
@@ -48,7 +68,7 @@ namespace KombiShift2.Gameplay
         public RCCP_CarController Vehicle => vehicle;
         public int CurrentStop => stopIndex;
         public int StopCount => stops?.Length ?? 0;
-        public int Passengers => passengers;
+        public int Passengers => onboard.Count;
         public int Earnings => earnings;
         public float TimeRemaining => timeRemaining;
         public bool Paused => paused;
@@ -58,7 +78,12 @@ namespace KombiShift2.Gameplay
         public RivalKombiAI[] Rivals => rivals;
         public int RivalPassengers => rivals == null ? 0 : rivals.Sum(x => x != null ? x.PassengersTaken : 0);
         public string Notice => servicing ? "BOARDING — KEEP THE KOMBI STOPPED" : notice;
-        public Vector3 CurrentTarget => StopCount == 0 ? transform.position : stops[Mathf.Min(stopIndex, StopCount - 1)].position;
+        public Vector3 CurrentTarget {
+            get {
+                var request = trips.Where(x => x.requested && x.state != TripState.Completed).OrderBy(x => Vector3.SqrMagnitude(stations[x.destination].ServicePoint.position - vehicle.transform.position)).FirstOrDefault();
+                return request != null ? stations[request.destination].ServicePoint.position : StopCount == 0 ? transform.position : stops[Mathf.Min(stopIndex, StopCount - 1)].position;
+            }
+        }
         public void Configure(RCCP_CarController player, Transform[] routeStops) { vehicle = player; stops = routeStops; }
 
         private void Start()
@@ -67,11 +92,29 @@ namespace KombiShift2.Gameplay
             Stage = KombiChallenge.Selected;
             shiftSeconds = KombiChallenge.Seconds(Stage);
             timeRemaining = shiftSeconds;
+            var stageSettings = KombiStageSettings.Load(Stage);
+            var traffic = FindObjectsByType<KombiTrafficVehicle>(FindObjectsSortMode.None);
+            Array.Sort(traffic, (a,b) => string.CompareOrdinal(a.name,b.name));
+            float fraction = stageSettings != null ? stageSettings.trafficFraction : Stage == KombiStage.Morning ? .6f : 1f;
+            for (int i = Mathf.CeilToInt(traffic.Length * fraction); i < traffic.Length; i++) traffic[i].gameObject.SetActive(false);
             cabin = vehicle != null ? vehicle.GetComponent<KombiPassengerCabin>() : null;
             stations = stops == null ? Array.Empty<PassengerStation>() : stops.Select(x => x != null ? x.GetComponent<PassengerStation>() : null).ToArray();
             rivals = FindObjectsByType<RivalKombiAI>(FindObjectsSortMode.None);
             for (int i = 0; i < rivals.Length; i++)
+            {
+                rivals[i].SetPersonality(Stage == KombiStage.RushHour ? (i % 2 == 0 ? RivalPersonality.Aggressive : RivalPersonality.Competitive) : (i % 2 == 0 ? RivalPersonality.Conservative : RivalPersonality.Competitive), i % 2 == 0 ? new Color(.95f,.35f,.22f) : new Color(.35f,.6f,1f));
+                rivals[i].ActivityChanged += (rival, activity) => Announce(rival.name + ": " + activity);
                 rivals[i].SetChallenge(KombiChallenge.RivalSpeed(Stage), KombiChallenge.RivalDelay(Stage) + i * 6f);
+            }
+            Quality = vehicle.gameObject.AddComponent<KombiServiceQuality>(); Quality.Configure(this);
+            Condition = vehicle.gameObject.AddComponent<KombiVehicleCondition>(); Condition.Configure(this);
+            Law = vehicle.gameObject.AddComponent<KombiTrafficLaw>(); Law.Configure(this);
+            serviceAudio = gameObject.AddComponent<AudioSource>(); serviceAudio.spatialBlend = 0f;
+            requestTone = AudioClip.Create("Passenger request bell", 11025, 1, 22050, false);
+            var samples = new float[11025];
+            for (int n = 0; n < samples.Length; n++) samples[n] = Mathf.Sin(n * 2f * Mathf.PI * 660f / 22050f) * .12f * (1f - n / (float)samples.Length);
+            requestTone.SetData(samples, 0);
+            Quality.Changed += (message, xp) => { notice = message + $"  XP {xp:+0;-0;0}"; serviceAudio.PlayOneShot(requestTone, .45f); };
             notice = $"{KombiChallenge.Name(Stage)} — deliver {MinimumPassengers}+ passengers to Mbare.";
         }
 
@@ -82,10 +125,19 @@ namespace KombiShift2.Gameplay
             if (paused || finished || vehicle == null || StopCount == 0) return;
             timeRemaining = Mathf.Max(0f, timeRemaining - Time.deltaTime);
             if (timeRemaining <= 0f) { Finish(false); return; }
+            if (Input.GetKeyDown(KeyCode.T)) notice = Condition.Repair() ? "Vehicle repaired." : $"Repair at a stop, below 2 km/h: ${Condition.RepairPrice}";
+            if (Time.time >= nextTripSample) { SampleTrips(); nextTripSample = Time.time + .5f; }
             if (servicing) return;
+            // Drop-off service is independent of pickup progression and reservations.
+            foreach (var drop in stations)
+            {
+                if (drop == null || drop.Terminal || !trips.Any(x => x.state != TripState.Completed && (stations[x.destination] == drop || x.missed))) continue;
+                if (vehicle.absoluteSpeed < 2f && Vector3.Distance(vehicle.transform.position, drop.ServicePoint.position) < stopRadius)
+                { StartCoroutine(AlightAt(drop, false)); return; }
+            }
             // A full vehicle must deliver instead of waiting forever at another pickup.
             if (cabin != null && onboard.Count >= cabin.Seats.Length) stopIndex = StopCount - 1;
-            while (stopIndex < StopCount - 1 && stations[stopIndex] != null && !stations[stopIndex].HasWaiting && !stations[stopIndex].Reserved)
+            while (stopIndex < StopCount - 1 && stations[stopIndex] != null && !stations[stopIndex].HasWaiting && !stations[stopIndex].Reserved && !trips.Any(x => x.destination == stopIndex && x.state != TripState.Completed))
             {
                 stopIndex++;
                 notice = "Next stop — rivals can take waiting passengers.";
@@ -103,29 +155,73 @@ namespace KombiShift2.Gameplay
         {
             servicing = true;
             yield return station.Board(vehicle.transform, cabin.Doorway, cabin.Seats, onboard.Count,
-                person => { onboard.Add(person); passengers++; earnings += 2; OnFareEarned?.Invoke(2); },
+                person => {
+                    onboard.Add(person); passengers++;
+                    int origin = Array.IndexOf(stations, station);
+                    // Alternate intermediate and terminal trips, always downstream.
+                    int destination = passengers % 2 == 0 ? StopCount - 1 : Mathf.Min(origin + 1, StopCount - 1);
+                    while (destination < StopCount - 1 && stations[destination] == null) destination++;
+                    var trip = new PassengerTrip { fare = KombiStageSettings.Load(Stage) != null ? KombiStageSettings.Load(Stage).fare : 2, passenger = person, boardingStation = origin, destination = destination, boardedAt = Time.time };
+                    trips.Add(trip); TripChanged?.Invoke(trip);
+                },
                 () => !finished && vehicle != null && vehicle.absoluteSpeed < 2f && Vector3.Distance(vehicle.transform.position, station.ServicePoint.position) < stopRadius + 2f);
             servicing = false;
             notice = station.HasWaiting ? "Stop fully to finish boarding." : "Passengers aboard. Continue to the next stop.";
         }
 
+        private void SampleTrips()
+        {
+            foreach (var trip in trips)
+            {
+                if (trip.state == TripState.Completed || trip.state == TripState.Alighting) continue;
+                float distance = Vector3.Distance(vehicle.transform.position, stations[trip.destination].ServicePoint.position);
+                if (trip.Request(distance, requestRadius))
+                { notice = "Passenger: Driver, next stop! " + stations[trip.destination].name; serviceAudio.PlayOneShot(requestTone); TripChanged?.Invoke(trip); }
+                if (trip.CheckMissed(distance, requestRadius))
+                { Quality.Apply("missed:" + trip.passenger.GetEntityId(), "Passenger: You missed my stop! Stop at a nearby station.", 0f, -missedStopXP, 0f); trip.Adjust(20f - missedStopPenalty); TripChanged?.Invoke(trip); }
+                if (Time.time - trip.boardedAt > trip.patienceSeconds)
+                    Quality.Apply("waiting", "Passenger: We have been waiting too long.", -3f, -1, 30f);
+            }
+        }
+
         private IEnumerator DropOff(PassengerStation station)
         {
-            servicing = true;
-            if (station.ArrivalSeats == null || station.ArrivalSeats.Length == 0)
-            { Debug.LogError("Terminal has no arrival seats."); servicing = false; Finish(false); yield break; }
-            for (int i = 0; i < onboard.Count; i++)
-            {
-                var person = onboard[i];
-                person.transform.SetPositionAndRotation(cabin.Doorway.position, vehicle.transform.rotation);
-                person.LeaveAt(station.ArrivalSeats[i % station.ArrivalSeats.Length]);
-                yield return new WaitForSeconds(.6f);
-            }
-            // Wait for visible delivery, not only the staggered exit calls.
-            while (!finished && onboard.Exists(person => person != null && person.State != PassengerState.Delivered)) yield return null;
-            servicing = false;
-            if (!finished) Finish(passengers >= MinimumPassengers);
+            yield return AlightAt(station, true);
+            if (!finished) Finish(delivered >= MinimumPassengers);
         }
+
+        private IEnumerator AlightAt(PassengerStation station, bool terminal)
+        {
+            servicing = true;
+            var leaving = trips.Where(x => x.state != TripState.Completed && (terminal || stations[x.destination] == station || x.missed)).ToArray();
+            foreach (var trip in leaving)
+            {
+                if (finished || vehicle.absoluteSpeed >= 2f) break;
+                var person = trip.passenger;
+                // Use the imported alighting animation and real destination seats.
+                Transform arrival = null;
+                if (station.ArrivalSeats != null && station.ArrivalSeats.Length > 0)
+                    arrival = station.ArrivalSeats[delivered % station.ArrivalSeats.Length];
+                if (arrival == null)
+                {
+                    var point = new GameObject("Passenger drop-off " + delivered).transform;
+                    point.SetParent(station.transform); point.position = station.ServicePoint.position + station.ServicePoint.right * -4f + station.ServicePoint.forward * (delivered % 5);
+                    arrival = point;
+                }
+                person.transform.SetPositionAndRotation(cabin.Doorway.position, vehicle.transform.rotation);
+                trip.state = TripState.Alighting; person.LeaveAt(arrival);
+                while (!finished && person != null && person.State != PassengerState.Delivered) yield return null;
+                if (finished) break;
+                trip.state = TripState.Completed; trip.Adjust(trip.missed ? 0f : 5f);
+                onboard.Remove(person); delivered++; earnings += trip.fare; OnFareEarned?.Invoke(trip.fare);
+                Quality.Apply("delivery:" + person.GetEntityId(), trip.missed ? "Passenger delivered at a recovery stop." : "Passenger: Thank you for the safe arrival!", 0f, trip.missed ? 2 : 10, 0f);
+                TripChanged?.Invoke(trip);
+            }
+            servicing = false;
+            notice = "Drop-off complete. Continue the shift. T repairs at stops.";
+        }
+
+        private void OnDestroy() { if (requestTone != null) Destroy(requestTone); }
 
         private void Finish(bool completed)
         {
@@ -152,7 +248,7 @@ namespace KombiShift2.Gameplay
             Rect panel = new(Screen.width * .5f - width * .5f, Screen.height * .5f - 180f, width, 360f);
             GUI.Box(panel, GUIContent.none);
             GUI.Label(new Rect(panel.x + 12, panel.y + 22, width - 24, 42), paused ? "SHIFT PAUSED" : success ? "SHIFT COMPLETE" : "SHIFT FAILED", title);
-            string message = paused ? $"{KombiChallenge.Name(Stage)}\nDeliver {MinimumPassengers}+ passengers to Mbare.\nEscape — resume    R — restart" : $"{KombiChallenge.Name(Stage)}\nPassengers delivered: {onboard.Count(x => x != null && x.State == PassengerState.Delivered)} / target {MinimumPassengers}\nRivals collected: {RivalPassengers}\nEarnings: ${earnings}   Best: ${KombiChallenge.Best(Stage)}\n{(success ? "Target reached." : "Time expired or delivery target missed.")}";
+            string message = paused ? $"{KombiChallenge.Name(Stage)}\nDeliver {MinimumPassengers}+ passengers to Mbare.\nEscape — resume    R — restart" : $"{KombiChallenge.Name(Stage)}\nPassengers delivered: {delivered} / target {MinimumPassengers}\nRivals collected: {RivalPassengers}\nEarnings: ${earnings}   Best: ${KombiChallenge.Best(Stage)}\n{(success ? "Target reached." : "Time expired or delivery target missed.")}";
             GUI.Label(new Rect(panel.x + 20, panel.y + 78, width - 40, 155), message, body);
             if (paused)
             {

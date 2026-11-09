@@ -25,7 +25,7 @@ namespace KombiShift2.Gameplay
 
         public bool TryReserve(Transform owner)
         {
-            if (!HasWaiting || (reservedBy != null && reservedBy != owner)) return false;
+            if (owner == null || !HasWaiting || (reservedBy != null && reservedBy != owner)) return false;
             Vector3 delta = owner.position - ServicePoint.position; delta.y = 0f;
             if (delta.sqrMagnitude > 144f) return false;
             reservedBy = owner; return true;

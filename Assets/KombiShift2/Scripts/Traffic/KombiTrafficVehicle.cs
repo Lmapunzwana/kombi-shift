@@ -103,11 +103,12 @@ namespace KombiShift2.Traffic
         {
             Vector3 point = route[index].position;
             int neighbour = Mathf.Clamp(index + (routeDirection >= 0 ? 1 : -1), 0, route.Length - 1);
-            if (neighbour == index) neighbour = Mathf.Clamp(index - routeDirection, 0, route.Length - 1);
-            Vector3 forward = route[neighbour].position - point;
+            bool endpoint = neighbour == index;
+            if (endpoint) neighbour = Mathf.Clamp(index - routeDirection, 0, route.Length - 1);
+            Vector3 forward = endpoint ? point - route[neighbour].position : route[neighbour].position - point;
             forward.y = 0f;
             Vector3 right = Vector3.Cross(Vector3.up, forward.normalized);
-            return point + right * laneOffset;
+            return point - right * laneOffset;
         }
 
         private void SnapToRoute()
