@@ -73,3 +73,6 @@ crashlytics-build.properties
 
 # Native Unity crash dumps
 mono_crash.*
+
+# Local expansion run logs contain editor/licensing and machine details.
+/Docs/Validation/Expansion/Logs/

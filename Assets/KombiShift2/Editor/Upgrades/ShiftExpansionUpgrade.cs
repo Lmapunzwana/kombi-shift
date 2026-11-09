@@ -109,6 +109,32 @@ public static class KombiShiftExpansionUpgrade
         File.WriteAllText("Docs/Validation/Expansion/scene-upgrade.txt", $"Unity {Application.unityVersion}\nUTC {DateTime.UtcNow:o}\nRoute points {route.Length}; stations {stations.Length}; route length {length:F1} m\nReused connected bz0/bz1 road geometry, colliders and existing bz2. No scene GUID changes.\n");
         Debug.Log("KOMBI_EXPANSION_SCENE_READY " + length);
     }
+    public static void RepairRouteTreeColliders()
+    {
+        var scene = EditorSceneManager.OpenScene(KombiProjectWorkbench.Shift);
+        var hud = Object.FindFirstObjectByType<KombiNavigationHud>();
+        int repaired = 0; var details = new List<string>();
+        foreach (var collider in Object.FindObjectsByType<MeshCollider>(FindObjectsSortMode.None))
+        {
+            string name = collider.name.ToLowerInvariant();
+            if (!collider.enabled || !name.Contains("tree") || !name.Contains("plane")) continue;
+            Bounds bounds = collider.bounds;
+            bool crossesRoad = hud.RoutePoints.Any(point => Vector3.Distance(bounds.ClosestPoint(point.position + Vector3.up), point.position + Vector3.up) < 4f);
+            if (!crossesRoad) continue;
+            // Alpha-cutout leaves are not solid walls. Preserve the art and collide with its trunk.
+            collider.enabled = false;
+            var trunk = new GameObject("Route tree trunk collider");
+            trunk.transform.position = new Vector3(bounds.center.x, bounds.min.y + 1.5f, bounds.center.z);
+            var capsule = trunk.AddComponent<CapsuleCollider>(); capsule.height = 3f; capsule.radius = Mathf.Clamp(Mathf.Min(bounds.size.x,bounds.size.z) * .05f,.2f,.45f);
+            // An independent root avoids nonuniform imported tree scales stretching the capsule across the road.
+            trunk.transform.SetParent(GameObject.Find(RootName).transform,true);
+            details.Add(collider.name + " trunk=" + trunk.transform.position.ToString("F2") + " radius=" + capsule.radius); repaired++;
+        }
+        EditorSceneManager.MarkSceneDirty(scene); EditorSceneManager.SaveScene(scene);
+        Directory.CreateDirectory("Docs/Validation/Expansion");
+        File.WriteAllLines("Docs/Validation/Expansion/tree-collider-repair.txt",new[] { "Executed " + DateTime.UtcNow.ToString("o"), "Disabled oversized alpha-plane colliders near route; added narrow solid trunk capsules: " + repaired }.Concat(details));
+        Debug.Log("KOMBI_ROUTE_TREE_COLLIDERS_REPAIRED " + repaired);
+    }
     public static void Refine()
     {
         var scene = EditorSceneManager.OpenScene(KombiProjectWorkbench.Shift);

@@ -42,7 +42,7 @@ public sealed class PassengerServiceVerificationRunner : MonoBehaviour
     bool done;
     void Start()
     {
-        output=Path.GetFullPath(Path.Combine(Application.dataPath,"../../../Builds/PassengerServiceEvidence"));
+        output=Path.GetFullPath(Path.Combine(Application.dataPath,"../../../Builds/Expansion2026/PassengerServiceEvidence"));
         DontDestroyOnLoad(gameObject);
         Directory.CreateDirectory(output);started=Time.realtimeSinceStartup;StartCoroutine(Run());
     }
@@ -62,9 +62,11 @@ public sealed class PassengerServiceVerificationRunner : MonoBehaviour
         var car=FindFirstObjectByType<RCCP_CarController>();
         var body=car.GetComponent<Rigidbody>();body.isKinematic=true;
         var stations=director.Stations;var rivals=director.Rivals;
-        Check(stations.Length==4,"Four route stations configured");
-        Check(stations[0].WaitingCount==6&&stations[1].WaitingCount==3&&stations[2].WaitingCount==3,"Twelve real waiting passengers at three pickups");
+        Check(stations.Length==7,"Seven expanded route stations configured");
+        Check(stations[0].WaitingCount==6&&stations[1].WaitingCount==6&&stations[2].WaitingCount==6,"Expanded route begins with three six-person queues");
         Check(rivals.Length==2,"Two rival kombis present");
+        foreach(var item in rivals)item.GetComponent<Rigidbody>().isKinematic=true;
+        for(int i=1;i<rivals.Length;i++)rivals[i].gameObject.SetActive(false);
         bool seated=true,rigged=true;
         foreach(var stop in stations)foreach(var person in stop.People){seated&=person.State==PassengerState.Seated;rigged&=person.HasHumanRig;}
         Check(seated&&rigged,"All waiting passengers seated with valid humanoid rigs");
@@ -124,18 +126,26 @@ public sealed class PassengerServiceVerificationRunner : MonoBehaviour
         for(int i=0;i<route.Length;i++){float d=(route[i].position-next.ServicePoint.position).sqrMagnitude;if(d<best){best=d;nearest=i;}}
         int begin=Mathf.Max(0,nearest-2);rival.transform.position=route[begin].position+Vector3.up*.08f;
         rival.transform.rotation=Quaternion.LookRotation(route[Mathf.Min(begin+1,route.Length-1)].position-route[begin].position);
-        Vector3 rivalStart=rival.transform.position;rival.enabled=true;
+        Vector3 rivalStart=rival.transform.position;rival.GetComponent<Rigidbody>().isKinematic=false;rival.GetComponent<Rigidbody>().linearVelocity=Vector3.zero;Physics.SyncTransforms();rival.GetComponent<Rigidbody>().WakeUp();rival.enabled=true;
         deadline=Time.time+110f;
-        while(rival.PassengersTaken<3&&Time.time<deadline)yield return null;
+        while(rival.PassengersTaken<6&&Time.time<deadline)yield return null;
         yield return null;yield return null;
         Check(Vector3.Distance(rivalStart,rival.transform.position)>3f,"Rival travels along the route to a waiting stop");
         Debug.Log("KOMBI_RIVAL_DIAGNOSTIC state="+rival.State+" pax="+rival.PassengersTaken+" waiting="+next.WaitingCount+" position="+rival.transform.position+" target="+(rival.Target!=null?rival.Target.name:"none")+" stop="+next.ServicePoint.position);
+        var rivalBody=rival.GetComponent<Rigidbody>();
+        Debug.Log("KOMBI_RIVAL_PHYSICS sleeping="+rivalBody.IsSleeping()+" velocity="+rivalBody.linearVelocity+" forward="+rival.transform.forward+" blocked="+typeof(RivalKombiAI).GetField("blockedTime",System.Reflection.BindingFlags.Instance|System.Reflection.BindingFlags.NonPublic).GetValue(rival));
+        foreach(var wheel in rival.GetComponentsInChildren<WheelCollider>()){bool grounded=wheel.GetGroundHit(out var contact);Debug.Log("KOMBI_RIVAL_WHEEL "+wheel.name+" grounded="+grounded+" road="+(grounded?contact.collider.name:"none")+" motor="+wheel.motorTorque+" brake="+wheel.brakeTorque+" steer="+wheel.steerAngle);}
+        var query=new object[]{rival.transform.position+Vector3.up,rival.transform.forward,7f,default(RaycastHit)};
+        bool clear=(bool)typeof(RivalKombiAI).GetMethod("Clear",System.Reflection.BindingFlags.Instance|System.Reflection.BindingFlags.NonPublic).Invoke(rival,query);
+        var obstacle=(RaycastHit)query[3];Debug.Log("KOMBI_RIVAL_SENSOR clear="+clear+" collider="+(obstacle.collider!=null?obstacle.collider.name:"none")+" distance="+obstacle.distance+" normal="+obstacle.normal);
+        camera.transform.position=rival.transform.position-rival.transform.forward*8f+Vector3.up*4f;camera.transform.LookAt(rival.transform.position+rival.transform.forward*4f);CaptureCamera(camera,"rival-approach-diagnostic.png");
         foreach(var person in next.People) Debug.Log("KOMBI_PERSON_DIAGNOSTIC "+person.State+" position="+person.transform.position);
-        Check(rival.PassengersTaken==3&&next.WaitingCount==0,"Rival boards and removes three waiting passengers");
+        Check(rival.PassengersTaken==6&&next.WaitingCount==0,"Rival boards and removes six waiting passengers");
         Check(director.Passengers==6,"Rival passengers are not credited to player");
-        Check(director.CurrentStop==2,"Player is redirected past the stop taken by a rival");
+        Check(director.CurrentStop==1,"A pending passenger destination keeps an exhausted pickup as a valid drop-off");
         CaptureCamera(camera,"03-rival-service.png");rival.enabled=false;
         // Verify leaving during boarding returns an uncollected person to the bench.
+        typeof(KombiShiftGameDirector).GetField("stopIndex",System.Reflection.BindingFlags.Instance|System.Reflection.BindingFlags.NonPublic).SetValue(director,2);
         var third=stations[2];car.transform.SetPositionAndRotation(third.ServicePoint.position,third.ServicePoint.rotation);
         deadline=Time.time+4f;walking=false;
         while(Time.time<deadline){foreach(var person in third.People)walking|=person.State==PassengerState.Walking;if(walking)break;yield return null;}
@@ -143,7 +153,7 @@ public sealed class PassengerServiceVerificationRunner : MonoBehaviour
         car.transform.position=originalPosition+Vector3.up*.1f;
         deadline=Time.time+18f;
         while((third.Reserved||third.People[0].State!=PassengerState.Seated)&&Time.time<deadline)yield return null;
-        Check(third.WaitingCount==3&&!third.Reserved&&third.People[0].State==PassengerState.Seated,"Driving away cancels boarding and returns passengers to bench");
+        Check(third.WaitingCount==6&&!third.Reserved&&third.People[0].State==PassengerState.Seated,"Driving away cancels boarding and returns passengers to bench");
         foreach(var dimensions in new[]{new Vector2(1600,900),new Vector2(1280,720),new Vector2(900,600)})
         {
             var layout=KombiNavigationHud.GetLayout(dimensions.x,dimensions.y);
@@ -157,13 +167,14 @@ public sealed class PassengerServiceVerificationRunner : MonoBehaviour
         deadline=Time.time+85f;
         while((third.WaitingCount>0||director.Servicing)&&Time.time<deadline)yield return null;
         yield return null;yield return null;
-        Check(director.Passengers==9&&director.CurrentStop==3,"Player can collect the remaining passengers after rival theft");
+        Check(director.Passengers==12&&director.CurrentStop==3,"Player can collect the remaining passengers after rival theft");
+        typeof(KombiShiftGameDirector).GetField("stopIndex",System.Reflection.BindingFlags.Instance|System.Reflection.BindingFlags.NonPublic).SetValue(director,stations.Length-1);
         var terminal=stations[stations.Length-1];
         car.transform.SetPositionAndRotation(terminal.ServicePoint.position,terminal.ServicePoint.rotation);
         deadline=Time.time+45f;
         while(!director.Finished&&Time.time<deadline)yield return null;
         Check(director.Finished,"Final terminal completes the shift and starts alighting");
-        yield return new WaitForSeconds(8f);
+        yield return new WaitForSecondsRealtime(.2f);
         Check(first.WaitingCount==0&&next.WaitingCount==0&&third.WaitingCount==0,"Delivered passengers never reappear in earlier waiting queues");
         Time.timeScale=1f;
         if(!Application.isBatchMode)

@@ -27,7 +27,7 @@ public sealed class KombiDrivingMenuVerificationRunner:MonoBehaviour
 {
  [Serializable]class Report{public List<string> passed=new();public List<string> failed=new();public string physics;}
  Report report=new();string output;float began;bool done;RCCP_CarController car;float throttle;bool hold=true;RccHiaceTestBootstrap driver;
- void Start(){DontDestroyOnLoad(gameObject);output=Path.GetFullPath(Path.Combine(Application.dataPath,"../../../Builds/MenuCameraEvidence"));Directory.CreateDirectory(output);began=Time.realtimeSinceStartup;StartCoroutine(Run());}
+ void Start(){DontDestroyOnLoad(gameObject);output=Path.GetFullPath(Path.Combine(Application.dataPath,"../../../Builds/Expansion2026/MenuCameraEvidence"));Directory.CreateDirectory(output);began=Time.realtimeSinceStartup;StartCoroutine(Run());}
  void Update()
  {
   if(done)return;
@@ -70,9 +70,9 @@ public sealed class KombiDrivingMenuVerificationRunner:MonoBehaviour
   Check(above&&upright,"Chase camera stays above the road with a level horizon");
   Check(Vector3.Dot(car.transform.up,Vector3.up)>.95f,"Dynamic kombi stays upright while parked");
   yield return Shot("05-chase-view");
-  Vector3 before=camera.transform.position;follow.Orbit(80,20);follow.Zoom(2);yield return new WaitForSeconds(.5f);
+  Vector3 before=camera.transform.position;float beforeDistance=follow.Distance;follow.Orbit(80,20);follow.Zoom(2);yield return new WaitForSeconds(.5f);
   Check(Vector3.Distance(before,camera.transform.position)>1f&&Mathf.Abs(follow.OrbitYaw-80)<.1f,"Orbit control moves the chase camera around the kombi");
-  Check(follow.Distance>8f,"Mouse-wheel zoom changes chase distance");yield return Shot("06-mouse-orbit");
+  Check(Mathf.Approximately(follow.Distance,Mathf.Clamp(beforeDistance+2f,4.5f,12f)),"Zoom applies its requested delta and clamp with the saved setting");yield return Shot("06-mouse-orbit");
   follow.CycleView();yield return new WaitForSeconds(.4f);Check(follow.CabinView&&camera.transform.position.y>car.transform.position.y+.7f,"Camera switch opens an above-ground driver view");yield return Shot("07-driver-view");
   follow.CycleView();follow.ResetView();
   Quaternion parkedRotation=car.transform.rotation;body.isKinematic=true;car.transform.rotation=Quaternion.Euler(70,parkedRotation.eulerAngles.y,125);follow.ResetView();
