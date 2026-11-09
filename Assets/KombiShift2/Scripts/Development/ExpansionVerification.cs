@@ -60,6 +60,9 @@ public sealed class KombiExpansionVerification : MonoBehaviour
         Check(length > 1200f && contiguous && grounded, "expanded route has contiguous grounded road waypoints over 1.2 km");
         Check(director.Rivals.All(x => !x.GetComponent<Rigidbody>().isKinematic && x.GetComponentsInChildren<WheelCollider>().Length == 4), "rivals use dynamic rigidbodies and four suspension wheels");
         Check(director.Rivals.Select(x => x.MarkerColor).Distinct().Count() == 2, "rival identifiers differ");
+        // Give the rivals a clear test approach; a stationary player now correctly starts ahead of them.
+        FindFirstObjectByType<RccHiaceTestBootstrap>().enabled=false;
+        car.GetComponent<Rigidbody>().isKinematic=true; car.transform.position+=car.transform.right*8f; Physics.SyncTransforms();
         var rival = director.Rivals[0]; var start = rival.transform.position;
         foreach (var item in director.Rivals) { Set(item,"departureDelay",0f); }
         float deadline = Time.realtimeSinceStartup + 35f;

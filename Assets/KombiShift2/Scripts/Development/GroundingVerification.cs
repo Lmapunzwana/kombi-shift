@@ -38,14 +38,18 @@ public sealed class KombiGroundingRunner:MonoBehaviour
   Check(car.direction>0,"Parking does not request reverse gear");
   Vector3 start=body.position;Quaternion rotation=body.rotation;
   var director=Object.FindFirstObjectByType<KombiShift2.Gameplay.KombiShiftGameDirector>();
+  // Isolate handling from background vehicles; explicit impact fixtures below still exercise collision physics.
+  foreach(var rival in director.Rivals)rival.gameObject.SetActive(false);
+  foreach(var traffic in Object.FindObjectsByType<KombiShift2.Traffic.KombiTrafficVehicle>(FindObjectsSortMode.None))traffic.gameObject.SetActive(false);
   Vector3 service=director.Stations[0].ServicePoint.position;service.y=Ground(service)+.13f;ResetAt(service,rotation);
   float boardDeadline=Time.time+25;while(director.Passengers<6&&Time.time<boardDeadline)yield return null;
   Check(director.Passengers>=6,"Six passengers board while the kombi uses dynamic physics");
   Check(car.GetComponentsInChildren<Collider>().Length==5&&wheels.Count(w=>w.isGrounded)>=3,"Boarded passengers add no colliders that lift the vehicle");
   ResetAt(start,rotation);yield return new WaitForSeconds(2);measure=true;yield return Shot("01-grounded-at-start");
   park=false;throttle=1;yield return new WaitForSeconds(2);Check(car.absoluteSpeed>5&&result.peakMotorTorque>1,"Throttle powers the wheels and accelerates the kombi");yield return new WaitForSeconds(4);Record("accelerating");
-  float heading=car.transform.eulerAngles.y;steer=1;yield return new WaitForSeconds(4);steer=-1;yield return new WaitForSeconds(4);Record("hard turns");
-  Check(Mathf.Abs(Mathf.DeltaAngle(heading,car.transform.eulerAngles.y))>3,"Hard steering turns the vehicle");yield return Shot("02-after-hard-turns");
+  float heading=car.transform.eulerAngles.y;float peakTurn=0f;float turningUntil=Time.time+8f;
+  while(Time.time<turningUntil){steer=Time.time<turningUntil-4f?1f:-1f;peakTurn=Mathf.Max(peakTurn,Mathf.Abs(Mathf.DeltaAngle(heading,car.transform.eulerAngles.y)));yield return null;}Record("hard turns; peak heading change="+peakTurn);
+  Check(peakTurn>3,"Hard steering produces observable heading change during opposing turns");yield return Shot("02-after-hard-turns");
   throttle=steer=0;park=true;yield return new WaitForSeconds(5);Record("braking");Check(car.absoluteSpeed<1,"Handbrake stops the vehicle from city speed");
   Vector3 stopped=body.position;yield return new WaitForSeconds(3);Check(Vector3.Distance(stopped,body.position)<.15f,"Held brake prevents creeping while parked");
   park=false;brake=1;Vector3 reverseStart=body.position;yield return new WaitForSeconds(4);

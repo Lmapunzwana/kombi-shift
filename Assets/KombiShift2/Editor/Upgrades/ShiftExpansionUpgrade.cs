@@ -109,6 +109,42 @@ public static class KombiShiftExpansionUpgrade
         File.WriteAllText("Docs/Validation/Expansion/scene-upgrade.txt", $"Unity {Application.unityVersion}\nUTC {DateTime.UtcNow:o}\nRoute points {route.Length}; stations {stations.Length}; route length {length:F1} m\nReused connected bz0/bz1 road geometry, colliders and existing bz2. No scene GUID changes.\n");
         Debug.Log("KOMBI_EXPANSION_SCENE_READY " + length);
     }
+    public static void PositionRivalsBehindPlayer()
+    {
+        var scene = EditorSceneManager.OpenScene(KombiProjectWorkbench.Shift);
+        var hud = Object.FindFirstObjectByType<KombiNavigationHud>();
+        var director = Object.FindFirstObjectByType<KombiShiftGameDirector>();
+        var old = hud.RoutePoints;
+        var first = GameObject.Find("Rival head start route point");
+        var route = old;
+        if (first == null)
+        {
+            var road = Object.FindObjectsByType<BezierSpline>(FindObjectsSortMode.None).First(x => x.name == "bz0");
+            first = new GameObject("Rival head start route point"); first.transform.SetParent(GameObject.Find(RootName).transform);
+            first.transform.position = Ground(road.GetPoint(.15f));
+            route = new[] { first.transform }.Concat(old).ToArray();
+        }
+        var data = new SerializedObject(director); var stops = data.FindProperty("stops");
+        var stations = Enumerable.Range(0,stops.arraySize).Select(i => ((Transform)stops.GetArrayElementAtIndex(i).objectReferenceValue).GetComponent<PassengerStation>()).ToArray();
+        hud.Configure(director.Vehicle,route,director);
+        int n = 0;
+        foreach (var rival in Object.FindObjectsByType<RivalKombiAI>(FindObjectsSortMode.None).OrderBy(x => x.name))
+        {
+            int index = n++ == 0 ? 1 : 0;
+            Vector3 forward = route[index+1].position-route[index].position; forward.y=0f;
+            rival.transform.SetPositionAndRotation(route[index].position+RivalKombiAI.LeftOffset(forward,1.55f)+Vector3.up*.12f,Quaternion.LookRotation(forward));
+            rival.Configure(route,stations,rival.DepartureDelay,rival.Speed);
+        }
+        if (route != old) foreach (var traffic in Object.FindObjectsByType<KombiTrafficVehicle>(FindObjectsSortMode.None))
+        {
+            var serialized = new SerializedObject(traffic); var path = serialized.FindProperty("route"); path.arraySize=route.Length;
+            for(int i=0;i<route.Length;i++)path.GetArrayElementAtIndex(i).objectReferenceValue=route[i];
+            serialized.FindProperty("targetIndex").intValue++; serialized.ApplyModifiedPropertiesWithoutUndo();
+        }
+        EditorSceneManager.MarkSceneDirty(scene); EditorSceneManager.SaveScene(scene);
+        RepairRouteTreeColliders(); KombiExpansionValidation.Audit();
+        Debug.Log("KOMBI_RIVALS_POSITIONED_BEHIND_PLAYER");
+    }
     public static void RepairRouteTreeColliders()
     {
         var scene = EditorSceneManager.OpenScene(KombiProjectWorkbench.Shift);
@@ -132,7 +168,7 @@ public static class KombiShiftExpansionUpgrade
         }
         EditorSceneManager.MarkSceneDirty(scene); EditorSceneManager.SaveScene(scene);
         Directory.CreateDirectory("Docs/Validation/Expansion");
-        File.WriteAllLines("Docs/Validation/Expansion/tree-collider-repair.txt",new[] { "Executed " + DateTime.UtcNow.ToString("o"), "Disabled oversized alpha-plane colliders near route; added narrow solid trunk capsules: " + repaired }.Concat(details));
+        File.AppendAllLines("Docs/Validation/Expansion/tree-collider-repair.txt",new[] { "Executed " + DateTime.UtcNow.ToString("o"), "Disabled oversized alpha-plane colliders near route; added narrow solid trunk capsules: " + repaired }.Concat(details));
         Debug.Log("KOMBI_ROUTE_TREE_COLLIDERS_REPAIRED " + repaired);
     }
     public static void Refine()

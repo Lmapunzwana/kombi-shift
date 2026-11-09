@@ -7560,6 +7560,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::KombiShift2.Traffic.KombiTrafficVehicle
   route:
+  - {fileID: 1610758411}
   - {fileID: 1408385180}
   - {fileID: 1255929887}
   - {fileID: 878120895}
@@ -7686,7 +7687,7 @@ MonoBehaviour:
   - {fileID: 596104278}
   - {fileID: 239201967}
   - {fileID: 1063246606}
-  targetIndex: 118
+  targetIndex: 119
   speed: 7
   laneOffset: 1.55
   reverseRoute: 1
@@ -15512,6 +15513,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::KombiShift2.Traffic.KombiTrafficVehicle
   route:
+  - {fileID: 1610758411}
   - {fileID: 1408385180}
   - {fileID: 1255929887}
   - {fileID: 878120895}
@@ -15638,7 +15640,7 @@ MonoBehaviour:
   - {fileID: 596104278}
   - {fileID: 239201967}
   - {fileID: 1063246606}
-  targetIndex: 96
+  targetIndex: 97
   speed: 9.8
   laneOffset: 1.55
   reverseRoute: 0
@@ -26099,6 +26101,7 @@ Transform:
   - {fileID: 1733701867}
   - {fileID: 227173431}
   - {fileID: 433742358}
+  - {fileID: 1610758411}
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &493507938
@@ -29338,6 +29341,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::KombiShift2.Traffic.KombiTrafficVehicle
   route:
+  - {fileID: 1610758411}
   - {fileID: 1408385180}
   - {fileID: 1255929887}
   - {fileID: 878120895}
@@ -29464,7 +29468,7 @@ MonoBehaviour:
   - {fileID: 596104278}
   - {fileID: 239201967}
   - {fileID: 1063246606}
-  targetIndex: 79
+  targetIndex: 80
   speed: 9.8
   laneOffset: 1.55
   reverseRoute: 0
@@ -30490,6 +30494,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::KombiShift2.UI.KombiNavigationHud
   vehicle: {fileID: 6115432507585903833}
   routePoints:
+  - {fileID: 1610758411}
   - {fileID: 1408385180}
   - {fileID: 1255929887}
   - {fileID: 878120895}
@@ -34398,6 +34403,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::KombiShift2.Traffic.KombiTrafficVehicle
   route:
+  - {fileID: 1610758411}
   - {fileID: 1408385180}
   - {fileID: 1255929887}
   - {fileID: 878120895}
@@ -34524,7 +34530,7 @@ MonoBehaviour:
   - {fileID: 596104278}
   - {fileID: 239201967}
   - {fileID: 1063246606}
-  targetIndex: 113
+  targetIndex: 114
   speed: 9.8
   laneOffset: 1.55
   reverseRoute: 0
@@ -46137,6 +46143,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::KombiShift2.Traffic.KombiTrafficVehicle
   route:
+  - {fileID: 1610758411}
   - {fileID: 1408385180}
   - {fileID: 1255929887}
   - {fileID: 878120895}
@@ -46263,7 +46270,7 @@ MonoBehaviour:
   - {fileID: 596104278}
   - {fileID: 239201967}
   - {fileID: 1063246606}
-  targetIndex: 90
+  targetIndex: 91
   speed: 8.4
   laneOffset: 1.55
   reverseRoute: 0
@@ -63068,6 +63075,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::KombiShift2.Traffic.KombiTrafficVehicle
   route:
+  - {fileID: 1610758411}
   - {fileID: 1408385180}
   - {fileID: 1255929887}
   - {fileID: 878120895}
@@ -63194,7 +63202,7 @@ MonoBehaviour:
   - {fileID: 596104278}
   - {fileID: 239201967}
   - {fileID: 1063246606}
-  targetIndex: 85
+  targetIndex: 86
   speed: 7
   laneOffset: 1.55
   reverseRoute: 1
@@ -66052,6 +66060,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::KombiShift2.Traffic.KombiTrafficVehicle
   route:
+  - {fileID: 1610758411}
   - {fileID: 1408385180}
   - {fileID: 1255929887}
   - {fileID: 878120895}
@@ -66178,7 +66187,7 @@ MonoBehaviour:
   - {fileID: 596104278}
   - {fileID: 239201967}
   - {fileID: 1063246606}
-  targetIndex: 73
+  targetIndex: 74
   speed: 8.4
   laneOffset: 1.55
   reverseRoute: 0
@@ -68257,6 +68266,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::KombiShift2.Traffic.KombiTrafficVehicle
   route:
+  - {fileID: 1610758411}
   - {fileID: 1408385180}
   - {fileID: 1255929887}
   - {fileID: 878120895}
@@ -68383,7 +68393,7 @@ MonoBehaviour:
   - {fileID: 596104278}
   - {fileID: 239201967}
   - {fileID: 1063246606}
-  targetIndex: 101
+  targetIndex: 102
   speed: 7
   laneOffset: 1.55
   reverseRoute: 1
@@ -77342,8 +77352,8 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1460537671}
   serializedVersion: 2
-  m_LocalRotation: {x: -0, y: 0.78009784, z: -0, w: 0.62565756}
-  m_LocalPosition: {x: -904.8343, y: 17.570137, z: 617.84296}
+  m_LocalRotation: {x: -0, y: 0.77533895, z: -0, w: 0.63154536}
+  m_LocalPosition: {x: -945.93726, y: 16.53775, z: 628.9147}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children:
@@ -77367,6 +77377,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::KombiShift2.Traffic.RivalKombiAI
   route:
+  - {fileID: 1610758411}
   - {fileID: 1408385180}
   - {fileID: 1255929887}
   - {fileID: 878120895}
@@ -83273,8 +83284,8 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1563357998}
   serializedVersion: 2
-  m_LocalRotation: {x: -0, y: 0.79886925, z: -0, w: 0.60150474}
-  m_LocalPosition: {x: -926.3771, y: 16.974098, z: 623.69763}
+  m_LocalRotation: {x: -0, y: 0.64872307, z: -0, w: 0.7610246}
+  m_LocalPosition: {x: -953.5841, y: 16.57822, z: 627.7907}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children:
@@ -83298,6 +83309,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::KombiShift2.Traffic.RivalKombiAI
   route:
+  - {fileID: 1610758411}
   - {fileID: 1408385180}
   - {fileID: 1255929887}
   - {fileID: 878120895}
@@ -86937,6 +86949,37 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 7066eff5a6fb665639d0b7755e27b9c4, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::KombiShift2.Gameplay.StationPassenger
+--- !u!1 &1610758410
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 1610758411}
+  m_Layer: 0
+  m_Name: Rival head start route point
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &1610758411
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1610758410}
+  serializedVersion: 2
+  m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
+  m_LocalPosition: {x: -953.33875, y: 16.45822, z: 626.26025}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 491977799}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &1610830250
 GameObject:
   m_ObjectHideFlags: 0
@@ -287027,6 +287070,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::KombiShift2.Traffic.KombiTrafficVehicle
   route:
+  - {fileID: 1610758411}
   - {fileID: 1408385180}
   - {fileID: 1255929887}
   - {fileID: 878120895}
@@ -287153,7 +287197,7 @@ MonoBehaviour:
   - {fileID: 596104278}
   - {fileID: 239201967}
   - {fileID: 1063246606}
-  targetIndex: 68
+  targetIndex: 69
   speed: 7
   laneOffset: 1.55
   reverseRoute: 1
@@ -294308,6 +294352,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::KombiShift2.Traffic.KombiTrafficVehicle
   route:
+  - {fileID: 1610758411}
   - {fileID: 1408385180}
   - {fileID: 1255929887}
   - {fileID: 878120895}
@@ -294434,7 +294479,7 @@ MonoBehaviour:
   - {fileID: 596104278}
   - {fileID: 239201967}
   - {fileID: 1063246606}
-  targetIndex: 107
+  targetIndex: 108
   speed: 8.4
   laneOffset: 1.55
   reverseRoute: 0
