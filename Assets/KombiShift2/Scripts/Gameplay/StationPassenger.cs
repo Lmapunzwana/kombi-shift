@@ -29,6 +29,10 @@ namespace KombiShift2.Gameplay
         private bool routeAborted;
         private float seatedBlend = 1f;
         private Transform stationParent;
+        private bool sitOnArrival = true;
+        private Vector3 walkingScale;
+        public Transform WaitingSeat => waitingSeat;
+        public void SetWaitingSeat(Transform seat) { waitingSeat=seat; stationParent=seat; }
         public PassengerState State { get; private set; } = PassengerState.Seated;
         public PassengerPersona Persona => persona;
         public bool Boarded => State == PassengerState.Onboard;
@@ -44,6 +48,7 @@ namespace KombiShift2.Gameplay
         private void Awake()
         {
             stationParent = transform.parent;
+            walkingScale = transform.localScale;
             InitialiseRig();
         }
 
@@ -68,7 +73,7 @@ namespace KombiShift2.Gameplay
 
         private void LateUpdate()
         {
-            float desired = State == PassengerState.Seated || State == PassengerState.Onboard || State == PassengerState.Delivered ? 1f : 0f;
+            float desired = State == PassengerState.Seated || State == PassengerState.Onboard || (State == PassengerState.Delivered && sitOnArrival) ? 1f : 0f;
             seatedBlend = Mathf.MoveTowards(seatedBlend, desired, Time.deltaTime * 3.5f);
             if (State == PassengerState.Walking || State == PassengerState.Returning || State == PassengerState.Alighting) phase += Time.deltaTime * 7f;
             ApplyPose();
@@ -98,9 +103,12 @@ namespace KombiShift2.Gameplay
             pose.bodyPosition = standingBody;
             poseHandler.SetHumanPose(ref pose);
             var hips = visual.GetBoneTransform(HumanBodyBones.Hips);
-            Vector3 hipPosition = hips.position;
-            hipPosition.y = transform.position.y + Mathf.Lerp(standingHipHeight, .5f, seatedBlend);
-            hips.position = hipPosition;
+            // Every rig's pelvis must be centred over its actual seat, including its X/Z offsets.
+            // Adjusting only Y left different character rigs hanging outside their seat anchors.
+            Vector3 standingHip = hips.position;
+            standingHip.y = transform.position.y + standingHipHeight;
+            Vector3 seatedHip = transform.position + Vector3.up * (State == PassengerState.Onboard ? .5f * transform.lossyScale.y : .58f);
+            hips.position = Vector3.Lerp(standingHip, seatedHip, seatedBlend);
             PoseSeatLeg(HumanBodyBones.LeftUpperLeg, HumanBodyBones.LeftLowerLeg, HumanBodyBones.LeftFoot, HumanBodyBones.LeftToes);
             PoseSeatLeg(HumanBodyBones.RightUpperLeg, HumanBodyBones.RightLowerLeg, HumanBodyBones.RightFoot, HumanBodyBones.RightToes);
             PoseRestingArm(HumanBodyBones.LeftUpperArm,HumanBodyBones.LeftLowerArm,HumanBodyBones.LeftHand,-1f);
@@ -190,9 +198,11 @@ namespace KombiShift2.Gameplay
             transform.position = Vector3.MoveTowards(transform.position, target, walkingSpeed * Time.deltaTime);
         }
 
-        public void LeaveAt(Transform destination)
+        public void LeaveAt(Transform destination, bool seatedAtDestination = true)
         {
+            sitOnArrival = seatedAtDestination;
             transform.SetParent(null, true);
+            transform.localScale = walkingScale;
             StartCoroutine(Alight(destination));
         }
 
@@ -201,7 +211,11 @@ namespace KombiShift2.Gameplay
             State = PassengerState.Alighting;
             while (destination != null && Vector3.Distance(transform.position, destination.position) > .15f)
             { Move(destination.position); yield return null; }
-            if(destination!=null) transform.rotation=destination.rotation;
+            if(destination!=null)
+            {
+                transform.SetParent(destination, false);
+                transform.localPosition=Vector3.zero; transform.localRotation=Quaternion.identity;
+            }
             State = PassengerState.Delivered;
         }
 

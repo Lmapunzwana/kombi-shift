@@ -81,7 +81,11 @@ namespace KombiShift2.Gameplay
         public Vector3 CurrentTarget {
             get {
                 var request = trips.Where(x => x.requested && x.state != TripState.Completed).OrderBy(x => Vector3.SqrMagnitude(stations[x.destination].ServicePoint.position - vehicle.transform.position)).FirstOrDefault();
-                return request != null ? stations[request.destination].ServicePoint.position : StopCount == 0 ? transform.position : stops[Mathf.Min(stopIndex, StopCount - 1)].position;
+                if (request != null) return stations[request.destination].ServicePoint.position;
+                if (StopCount == 0) return transform.position;
+                int index = Mathf.Min(stopIndex, StopCount - 1);
+                return stations != null && index < stations.Length && stations[index] != null
+                    ? stations[index].ServicePoint.position : stops[index].position;
             }
         }
         public void Configure(RCCP_CarController player, Transform[] routeStops) { vehicle = player; stops = routeStops; }
@@ -132,7 +136,7 @@ namespace KombiShift2.Gameplay
             foreach (var drop in stations)
             {
                 if (drop == null || drop.Terminal || !trips.Any(x => x.state != TripState.Completed && (stations[x.destination] == drop || x.missed))) continue;
-                if (vehicle.absoluteSpeed < 2f && Vector3.Distance(vehicle.transform.position, drop.ServicePoint.position) < stopRadius)
+                if (vehicle.absoluteSpeed < 2f && drop.MatchesApproach(vehicle.transform) && Vector3.Distance(vehicle.transform.position, drop.ServicePoint.position) < stopRadius)
                 { StartCoroutine(AlightAt(drop, false)); return; }
             }
             // A full vehicle must deliver instead of waiting forever at another pickup.
@@ -146,6 +150,7 @@ namespace KombiShift2.Gameplay
             if (station == null || cabin == null) return;
             Vector3 distance = vehicle.transform.position - station.ServicePoint.position; distance.y = 0f;
             if (distance.magnitude > stopRadius || vehicle.absoluteSpeed >= 2f) return;
+            if (!station.MatchesApproach(vehicle.transform)) { notice="Use the left lane and face the stop direction to serve passengers."; return; }
             if (station.Terminal) { StartCoroutine(DropOff(station)); return; }
             if (station.Reserved) { notice = "A rival reached this stop first."; return; }
             if (onboard.Count < cabin.Seats.Length && station.HasWaiting) StartCoroutine(Board(station));
@@ -164,7 +169,7 @@ namespace KombiShift2.Gameplay
                     var trip = new PassengerTrip { fare = KombiStageSettings.Load(Stage) != null ? KombiStageSettings.Load(Stage).fare : 2, passenger = person, boardingStation = origin, destination = destination, boardedAt = Time.time };
                     trips.Add(trip); TripChanged?.Invoke(trip);
                 },
-                () => !finished && vehicle != null && vehicle.absoluteSpeed < 2f && Vector3.Distance(vehicle.transform.position, station.ServicePoint.position) < stopRadius + 2f);
+                () => !finished && vehicle != null && station.MatchesApproach(vehicle.transform) && vehicle.absoluteSpeed < 2f && Vector3.Distance(vehicle.transform.position, station.ServicePoint.position) < stopRadius + 2f);
             servicing = false;
             notice = station.HasWaiting ? "Stop fully to finish boarding." : "Passengers aboard. Continue to the next stop.";
         }
@@ -199,17 +204,9 @@ namespace KombiShift2.Gameplay
                 if (finished || vehicle.absoluteSpeed >= 2f) break;
                 var person = trip.passenger;
                 // Use the imported alighting animation and real destination seats.
-                Transform arrival = null;
-                if (station.ArrivalSeats != null && station.ArrivalSeats.Length > 0)
-                    arrival = station.ArrivalSeats[delivered % station.ArrivalSeats.Length];
-                if (arrival == null)
-                {
-                    var point = new GameObject("Passenger drop-off " + delivered).transform;
-                    point.SetParent(station.transform); point.position = station.ServicePoint.position + station.ServicePoint.right * -4f + station.ServicePoint.forward * (delivered % 5);
-                    arrival = point;
-                }
+                Transform arrival = station.ClaimArrival(person, out bool seatedAtDestination);
                 person.transform.SetPositionAndRotation(cabin.Doorway.position, vehicle.transform.rotation);
-                trip.state = TripState.Alighting; person.LeaveAt(arrival);
+                trip.state = TripState.Alighting; person.LeaveAt(arrival, seatedAtDestination);
                 while (!finished && person != null && person.State != PassengerState.Delivered) yield return null;
                 if (finished) break;
                 trip.state = TripState.Completed; trip.Adjust(trip.missed ? 0f : 5f);

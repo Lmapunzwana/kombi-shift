@@ -86,6 +86,7 @@ public static class KombiPassengerSceneUpgrade
         }
         foreach(var renderer in Object.FindObjectsByType<Renderer>(FindObjectsInactive.Include,FindObjectsSortMode.None)) renderer.shadowCastingMode=ShadowCastingMode.Off;
         EditorSceneManager.MarkSceneDirty(scene);EditorSceneManager.SaveScene(scene);AssetDatabase.SaveAssets();
+        KombiPassengerSeatingLaneRepair.Apply();
         Directory.CreateDirectory("Docs");
         File.WriteAllText("Docs/PASSENGER_UPGRADE.txt",$"Passenger stations: {stations.Length}\nSeated waiting passengers: {stations.Sum(x=>x.WaitingCount)}\nCompeting kombis: 2\nPassenger prefab variants: {actorPrefabs.Length}\nCircular map and compact corner HUD enabled.\n");
         Debug.Log("KOMBI_PASSENGER_SCENE_UPGRADED: seated stations, cabin seats and two rivals saved.");
@@ -160,11 +161,11 @@ public static class KombiPassengerSceneUpgrade
         var old=vehicle.transform.Find("Passenger Cabin");if(old!=null)Object.DestroyImmediate(old.gameObject);
         var root=new GameObject("Passenger Cabin").transform;root.SetParent(vehicle.transform,false);
         var entry=new GameObject("Passenger Doorway").transform;entry.SetParent(root,false);entry.localPosition=new Vector3(-1.25f,.08f,.5f);
-        var seats=new Transform[14];
+        var seats=new Transform[KombiPassengerCabin.SeatCount];
         for(int i=0;i<seats.Length;i++)
         {
             seats[i]=new GameObject($"Cabin Seat {i+1}").transform;seats[i].SetParent(root,false);
-            seats[i].localPosition=new Vector3(i%2==0?-.36f:.36f,.05f,.5f-(i/2)*.45f);
+            seats[i].localPosition=KombiPassengerCabin.SeatLocalPosition(i);seats[i].localScale=Vector3.one*KombiPassengerCabin.PassengerScale;
         }
         var cabin=vehicle.GetComponent<KombiPassengerCabin>()??vehicle.AddComponent<KombiPassengerCabin>();cabin.Configure(entry,seats);
     }

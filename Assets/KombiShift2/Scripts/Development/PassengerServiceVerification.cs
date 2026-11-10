@@ -167,7 +167,7 @@ public sealed class PassengerServiceVerificationRunner : MonoBehaviour
         deadline=Time.time+85f;
         while((third.WaitingCount>0||director.Servicing)&&Time.time<deadline)yield return null;
         yield return null;yield return null;
-        Check(director.Passengers==12&&director.CurrentStop==3,"Player can collect the remaining passengers after rival theft");
+        Check(director.Passengers==12&&director.CurrentStop==stations.Length-1,"Player can collect the remaining passengers after rival theft");
         typeof(KombiShiftGameDirector).GetField("stopIndex",System.Reflection.BindingFlags.Instance|System.Reflection.BindingFlags.NonPublic).SetValue(director,stations.Length-1);
         var terminal=stations[stations.Length-1];
         car.transform.SetPositionAndRotation(terminal.ServicePoint.position,terminal.ServicePoint.rotation);

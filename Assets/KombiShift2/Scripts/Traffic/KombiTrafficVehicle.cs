@@ -17,6 +17,7 @@ namespace KombiShift2.Traffic
 
         private void Start()
         {
+            routeDirection = reverseRoute ? -1 : 1;
             signals = FindObjectsByType<TrafficSignalController>(FindObjectsInactive.Exclude, FindObjectsSortMode.None);
             Renderer[] renderers = GetComponentsInChildren<Renderer>();
             if (renderers.Length > 0)

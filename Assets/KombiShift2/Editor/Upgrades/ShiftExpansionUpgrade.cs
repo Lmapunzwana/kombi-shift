@@ -85,6 +85,7 @@ public static class KombiShiftExpansionUpgrade
         BuildOrderedRoadRules(root, route, stations);
         MakeRoadCarriageMarkings(root, route);
         EditorSceneManager.MarkSceneDirty(scene); EditorSceneManager.SaveScene(scene); AssetDatabase.SaveAssets();
+        KombiPassengerSeatingLaneRepair.Apply();
         float length = 0; for (int i = 1; i < route.Length; i++) length += Vector3.Distance(route[i-1].position,route[i].position);
         Directory.CreateDirectory("Docs/Validation/Expansion");
         File.WriteAllText("Docs/Validation/Expansion/scene-upgrade.txt", $"Unity {Application.unityVersion}\nUTC {DateTime.UtcNow:o}\nRoute points {route.Length}; stations {stations.Length}; route length {length:F1} m\nReused connected bz0/bz1 road geometry, colliders and existing bz2. No scene GUID changes.\n");
