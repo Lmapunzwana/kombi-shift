@@ -22,3 +22,11 @@ The repository contains source, guides, report, presentation and selected eviden
 ## Honesty before defence
 
 Real playtests, authentic feedback fixes/retests, actual member contributions, assigned-book consultation, weakest-machine/native Windows checks and dependency source redistribution permissions remain evidence tasks. Imported RCC supplies vehicle physics; current custom logic and documentation were prepared with AI assistance and require personal review. Read AI_AND_ASSET_DECLARATION.md.
+
+## 9 November source expansion
+
+Read CURRENT_DESIGN.md, EXPANSION_TEST_PLAN.md, EXPANSION_DEFENCE.md and EXPANSION_ENGINEERING_REPORT.md for the current implementation. Existing PDF/deck/submission folders are earlier snapshots. New service rules pay on delivery, allow intermediate alighting and add T repair. Stage parameters are assets under Assets/Resources. Do not apply the scene upgrade a second time.
+
+## Current dated PDF
+
+Use [the 10 November expansion report](../../output/pdf/KombiShift2_Expansion_Report_2026-11-10.pdf) for current design, systems, evidence and remaining gaps. The earlier illustrated PDF/deck are historical snapshots.

@@ -1,0 +1,14 @@
+[
+  {
+    "platform": "WindowsPlayer under Wine",
+    "stage": "Morning",
+    "exit": 0,
+    "seconds": 15.77
+  },
+  {
+    "platform": "WindowsPlayer under Wine",
+    "stage": "RushHour",
+    "exit": 0,
+    "seconds": 14.31
+  }
+]

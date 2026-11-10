@@ -13,3 +13,7 @@ Start with `Docs/Assessment/LEARN_AND_DEFEND.md` for explanations and live-chang
 `../../Submission2026` contains current report, slides, tester worksheets and release preparation. The earlier workspace `Submission`, `UnityStarter` and `UnityHDRP` are different versions; their feature claims do not describe this game.
 
 Human playtesting, feedback-based fixes/retests, actual contributions, assigned-book reading, target-machine checks and dependency source hand-in permissions require real evidence. See `Docs/Assessment/AI_AND_ASSET_DECLARATION.md`. No such evidence is invented.
+
+## 9 November service and route expansion
+
+The current source extends the existing roads to approximately 1.25 km/seven stops, adds physical rival driving and utility decisions, individual trip destinations, requests, intermediate alighting, happiness/XP, traffic fines, vehicle condition and T repairs at stops. Fares pay on completed delivery: $2 Morning, $3 Rush. See `Docs/Assessment/EXPANSION_ENGINEERING_REPORT.md` and `EXPANSION_TEST_PLAN.md` for validation scope and remaining gaps. Stage settings are editable under `Assets/Resources`. Existing submission snapshots and prior builds describe the earlier release; new exports use `Builds/Expansion2026` in the parent workspace.

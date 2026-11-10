@@ -1,0 +1,32 @@
+[
+  {
+    "step": "legacy-service-final",
+    "exit": 0,
+    "seconds": 68.38
+  },
+  {
+    "step": "grounding-final-retest",
+    "exit": 0,
+    "seconds": 99.52
+  },
+  {
+    "step": "integration-collider-final",
+    "exit": 0,
+    "seconds": 79.44
+  },
+  {
+    "step": "build-linux-final",
+    "exit": 0,
+    "seconds": 37.32
+  },
+  {
+    "step": "build-windows-final",
+    "exit": 0,
+    "seconds": 41.18
+  },
+  {
+    "step": "build-web-final",
+    "exit": 0,
+    "seconds": 73.12
+  }
+]

@@ -1,0 +1,20 @@
+{
+    "utc": "2026-11-09T19:53:52.2742760Z",
+    "unity": "6000.6.2f1",
+    "scope": "Headless actual RCC suspension/hump physics at staged approach positions and initial velocities; no human driving or rendered comfort claim.",
+    "passed": [
+        "safe-speed RCC vehicle crosses physical hump",
+        "safe hump maintains suspension contact without launch velocity",
+        "safe crossing does not damage vehicle",
+        "fast crossing produces suspension-condition consequence",
+        "vehicle remains upright after fast hump"
+    ],
+    "failed": [],
+    "safeDistance": 11.81982707977295,
+    "fastDistance": 48.9228630065918,
+    "safeVerticalSpeed": 1.343068242073059,
+    "fastVerticalSpeed": 1.2731919288635254,
+    "safeHealth": 100.0,
+    "fastHealth": 96.7905502319336,
+    "contactSamples": 1608
+}

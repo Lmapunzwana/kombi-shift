@@ -1,0 +1,32 @@
+{
+    "utc": "2026-11-09T19:48:15.3933960Z",
+    "unity": "6000.6.2f1",
+    "scope": "Actual scene physics/rival observation, then staged passenger, offence and reset integration. Staged positions are test fixtures; not human driving.",
+    "passed": [
+        "expanded stations and navigation references",
+        "rivals use dynamic rigidbodies and four suspension wheels",
+        "rival identifiers differ",
+        "rival makes physical progress along expanded route",
+        "rival evaluates demand and approaches a station",
+        "rival physically reaches and boards from shared station pool",
+        "actual boarding creates six individual trip records",
+        "fares wait for completed delivery",
+        "destinations always downstream and valid",
+        "concurrent boarding allocates distinct cabin seats",
+        "pause freezes shift and services",
+        "approach emits passenger stop request",
+        "intermediate alighting completes through character animation",
+        "completed trips finalise fare and XP",
+        "service reaction event accepted",
+        "quality cooldown suppresses repeated penalties",
+        "fine incident cooldown charges once",
+        "condition reduces power and braking",
+        "intermediate plus terminal deliveries complete Morning stage",
+        "restart clears trips XP condition and violations",
+        "timeout produces failure"
+    ],
+    "failed": [
+        "expanded route has contiguous grounded road waypoints over 1.2 km",
+        "paid repair at a stopped service point"
+    ]
+}

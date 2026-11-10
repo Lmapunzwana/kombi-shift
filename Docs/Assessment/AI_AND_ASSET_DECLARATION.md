@@ -7,3 +7,7 @@ Current assets include imported Hiace/traffic vehicles, humanoid characters, cit
 The RCC Lite agreement present locally restricts redistribution of the asset itself. Resolve source hand-in/distribution permission with the rights holder/instructor. No vendor DLL is decompiled or ownership claimed. A local review ZIP is not a representation of clearance for public redistribution.
 
 Use DEPENDENCY_INVENTORY.csv as a review starting point, together with Docs/ASSET_REGISTER.csv and included licence files. AI-produced/generated code does not establish student understanding; every member must explain and modify claimed work. No tester result or contribution has been fabricated.
+
+## 9 November expansion
+
+Codex assisted the new service-trip, quality, damage, traffic-law, rival-wheel-physics, route-upgrade and verification code. Three additional stops clone existing shelter and passenger assets; existing bz0/bz1 road geometry is reused. New art consists of a shallow procedural hump mesh/material, runtime road-sign text and a locally generated request tone. No external speech service, paid dependency, vendor DLL edit or decompilation was used. Existing asset rights and genuine student understanding still require the team's review.

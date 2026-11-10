@@ -1,0 +1,27 @@
+Executed 2026-11-09T19:55:12.4583950Z Unity 6000.6.2f1
+Scope: editor rule/component fixtures; not a driven shift or human playtest.
+PASS utility favours demand over proximity
+PASS utility caps available seats
+PASS reservations reduce utility
+PASS congestion reduces utility
+PASS forward left lane
+PASS reverse left lane
+PASS request outside radius rejected
+PASS request near destination
+PASS request emitted once
+PASS stop not missed on approach
+PASS missed stop after passing
+PASS missed stop penalty once
+PASS happiness lower clamp
+PASS happiness upper clamp
+PASS harmless contact no damage
+PASS low impulse no damage
+PASS severity proportional damage
+PASS damage capped
+PASS condition and modifiers bounded
+PASS first physical reservation succeeds
+PASS competing reservation rejected
+PASS other owner cannot release
+PASS owner releases reservation
+PASS distant reservation rejected
+PASS stage escalation

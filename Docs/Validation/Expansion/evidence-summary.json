@@ -1,0 +1,80 @@
+{
+  "suites": {
+    "Expansion integration": {
+      "passed": 28,
+      "failed": 0,
+      "record": "integration.json"
+    },
+    "Legacy passenger service": {
+      "passed": 26,
+      "failed": 0,
+      "record": "legacy-service-results.json"
+    },
+    "Grounding": {
+      "passed": 18,
+      "failed": 0,
+      "record": "grounding-results.json"
+    },
+    "Menu and camera": {
+      "passed": 22,
+      "failed": 0,
+      "record": "menu-camera-results.json"
+    },
+    "Powertrain": {
+      "passed": 11,
+      "failed": 0,
+      "record": "powertrain-results.json"
+    },
+    "Unity Test Framework": {
+      "passed": 15,
+      "failed": 0,
+      "record": "utf-editmode.xml"
+    },
+    "Rule component fixtures": {
+      "passed": 25,
+      "failed": 0,
+      "record": "rule-results.txt"
+    },
+    "RCC hump physics": {
+      "passed": 5,
+      "failed": 0,
+      "record": "road-physics.json"
+    }
+  },
+  "platformRuns": {
+    "native-linux-final-Morning": {
+      "passed": 18,
+      "failed": 0,
+      "record": "native-linux-final-Morning.json"
+    },
+    "native-linux-final-RushHour": {
+      "passed": 18,
+      "failed": 0,
+      "record": "native-linux-final-RushHour.json"
+    },
+    "wine-final-Morning": {
+      "passed": 18,
+      "failed": 0,
+      "record": "wine-final-Morning.json"
+    },
+    "wine-final-RushHour": {
+      "passed": 18,
+      "failed": 0,
+      "record": "wine-final-RushHour.json"
+    },
+    "webgl-Morning": {
+      "passed": 18,
+      "failed": 0,
+      "record": "webgl-Morning.json",
+      "scope": "Browser run before final scene-only collision/spawn repairs; refreshed WebGL export succeeded."
+    },
+    "webgl-RushHour": {
+      "passed": 18,
+      "failed": 0,
+      "record": "webgl-RushHour.json",
+      "scope": "Browser run before final scene-only collision/spawn repairs; refreshed WebGL export succeeded."
+    }
+  },
+  "humanPlaytests": "Not performed or fabricated",
+  "remainingScope": "See EXPANSION_ENGINEERING_REPORT.md"
+}

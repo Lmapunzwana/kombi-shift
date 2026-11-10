@@ -13,3 +13,7 @@ Use the current release and write its SHA256/build ID in each row. Get consent a
 Record each task's observed result, not just a broad PASS. Severity: critical prevents start/completion; high blocks a core task; medium causes repeated confusion; low is a cosmetic/minor issue. Record hardware and ordinary-play frame data if available.
 
 Select at least three genuine problems. In FEEDBACK_FIX_RETEST.csv link the actual observation to a fix/file/commit, then repeat the same task and record what the tester actually did. Do not count three arbitrary code edits as authentic feedback-based fixes. Return the completed CSVs to this chat for analysis and follow-up changes.
+
+## Current expansion tasks
+
+Use [EXPANSION_TEST_PLAN.md](EXPANSION_TEST_PLAN.md) for the new passenger requests, intermediate deliveries, fines, damage, repair, rival passing and hump tasks. Fares now pay on completed delivery ($2 Morning / $3 Rush), and intermediate deliveries count toward the target. A visit to Mbare still ends the shift. Record build identity carefully: historical release behaviour differs from this expanded source. Do not fill the empty tester CSVs with automated observations.

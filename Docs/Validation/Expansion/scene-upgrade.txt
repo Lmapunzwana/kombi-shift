@@ -1,0 +1,4 @@
+Unity 6000.6.2f1
+UTC 2026-11-09T19:46:19.8409580Z
+Route points 122; stations 7; route length 1242.1 m
+Reused connected bz0/bz1 road geometry, colliders and existing bz2. No scene GUID changes.

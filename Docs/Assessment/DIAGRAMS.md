@@ -1,41 +1,49 @@
-# Current system diagrams
+# Current system diagrams — 9 November expansion
 
-## Gameplay communication
 ```mermaid
 flowchart LR
- Menu[Main menu] --> Challenge[Stage configuration]
- Challenge --> Director[Shift director]
- Director --> Station[Station reservation]
- Station --> Passenger[Passenger boarding coroutine]
- Passenger --> Callback[Seat arrival callback]
- Callback --> Director
- Director --> HUD[HUD and result]
- Input[Keyboard input] --> RCC[RCC vehicle physics]
- RCC --> Director
- Rival[Rival AI] --> Station
+ Stage[StageSettings] --> Director
+ Director --> Station[Exclusive station reservation]
+ Station --> Character[Physical boarding callback]
+ Character --> Trip[PassengerTrip manifest]
+ Trip --> Request[Stop request bell and HUD]
+ Request --> Alight[Stopped service / alighting animation]
+ Alight --> Fare[Completed fare and XP]
+ Fare --> Director
+ Rigidbody --> Condition[Collision condition adapter]
+ Condition --> RCC[RCC input modifiers]
+ Rigidbody --> Quality[Service quality sampler]
+ Zone[Road rule zones] --> Law[Grace / incidents / fines]
+ Law --> Director
+ Law --> Quality
+ Quality --> HUD
+ Rival[Utility evaluator / driving profile] --> Wheel[WheelCollider steering and torque]
+ Wheel --> Station
+ Rival --> HUD
 ```
 
-## Passenger transitions
 ```mermaid
 stateDiagram-v2
- [*] --> Seated
- Seated --> Walking: queue reserved and free seat
- Walking --> Onboard: reaches cabin seat
- Walking --> Returning: vehicle leaves
- Returning --> Seated: reaches bench
+ [*] --> Onboard: real seat arrival / destination assigned
+ Onboard --> Requested: within approach radius
+ Requested --> Missed: recedes beyond threshold / one penalty
+ Requested --> Alighting: stopped at destination
+ Missed --> Alighting: stopped at a valid recovery station
  Onboard --> Alighting: terminal service
- Alighting --> Delivered: reaches terminal seat
+ Alighting --> Completed: character reaches arrival seat / fare / XP
 ```
 
-## Rival transitions
 ```mermaid
 stateDiagram-v2
  [*] --> Cruise
- Cruise --> ChasePassenger: waiting target found
- ChasePassenger --> PullIn: destination waypoint reached
- PullIn --> Boarding: near service point
- Boarding --> Depart: boarding sequence ends
- Depart --> ChasePassenger: another target and space
- Depart --> Depart: full cabin follows route
- ChasePassenger --> Cruise: no eligible queue
+ Cruise --> ChasePassenger: utility winner / cooldown
+ ChasePassenger --> ChasePassenger: new winner exceeds hysteresis
+ ChasePassenger --> PullIn: station approach
+ PullIn --> Boarding: physical arrival and stopped
+ Boarding --> Depart: real boarding callbacks finish
+ Depart --> ChasePassenger: free seats and eligible queue
+ Depart --> Depart: full / physically drive to Mbare
+ ChasePassenger --> Cruise: exhausted or reserved targets
 ```
+
+Character states (Seated, Walking, Onboard, Returning, Alighting, Delivered) remain separate from trip service states. No event alone proves physical movement: integration checks observe the rigidbody and actual passenger transitions.

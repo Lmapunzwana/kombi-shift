@@ -1,29 +1,28 @@
-# Group 6 readiness after technical completion work
+# Current source readiness — 9 November expansion
 
-## Implemented and supplied
+Read [EXPANSION_ENGINEERING_REPORT.md](EXPANSION_ENGINEERING_REPORT.md) for current executed checks, build status and limitations. The 8 November PDFs, deck, submission folders and release evidence remain historical snapshots; do not present them as evidence for the new systems.
 
-Two selectable stages (Morning 600s/1+; Rush 420s/6+), distinct rival speed/head-start rules, stage best scores, fare/pause/outcome events, visible terminal completion, result freeze, full-cabin terminal routing, actual rival cruise/depart movement, pause volume/menu controls, instructions clipping correction, buffered traffic queries and current Linux/Windows/WebGL builds. Workspace launchers now open the current project by default.
+## Implemented in current source
 
-Current report/GDD, player personas, annotated storyboard/flows, architecture/state diagrams, code excerpts, requirement traceability, 13-slide deck, learning/defence guide, all five member registration details, contribution worksheets, genuine tester sheets and platform/source inventories are included.
+- Physical WheelCollider rival driving, utility station evaluation, driver profiles, left-lane offsets, clearance-based passing, identifiable colours and activity feedback.
+- A connected approximately 1.25 km itinerary using existing roads, seven stations, extended traffic/rival/minimap navigation and shallow physical speed humps.
+- Individual player passenger trips, intermediate drop-off requests and animation, recovery from missed stops, delivery fares and cumulative delivered totals.
+- Separate happiness and XP, rate-limited reactions, severity-based impact condition, bounded RCC input modifiers and paid stopped-service repair.
+- Configurable traffic-law zones, speed grace and continuous incidents, fine records and secondary HUD metrics.
+- Stage settings assets, lower Morning traffic, greater Rush pressure and higher Rush delivery fares.
+- Rule/component, Unity Test Framework, actual-scene integration, RCC hump and existing regression fixtures; new evidence is kept under Docs/Validation/Expansion.
 
-## Actual evidence
+## Required human work
 
-- Unity Editor: Morning 17 passed, 0 failed; Rush Hour 17 passed, 0 failed.
-- Linux standalone: Morning 17/0, Rush Hour Vulkan 17/0; final package smoke check Morning 17/0 after UI/configuration correction. Staged integration, not human driving.
-- Windows Mono executable under Wine: Morning 17/0 and Rush Hour 17/0. This is not native Windows hardware certification.
-- Browser WebGL: actual title/city rendering, F2 stage selection, driving/braking, pause/menu; staged Rush Hour suite 17/0 and final Morning suite 17/0. Final layout reinspection is documented in PLATFORM_NOTES.
-- Final exports: Linux, Windows and WebGL all succeeded with zero build errors. Actual warnings and raw logs are retained.
-- Current traffic fixture: 491,520 bytes summed baseline used-heap increase versus zero observed buffered increase across 120 samples, matching hit counts; controlled editor measurement, not whole-game FPS.
-- Presentation package/font/layout checks passed. Report rendered and visually reviewed.
+1. At least three authentic tester sessions on identified builds/devices.
+2. Severity analysis and at least three actual observation-linked fixes plus same-task retests.
+3. Real member contributions/understanding, live walkthrough/change practice and Q&A.
+4. Actual assigned-book editions/sections and design connections.
+5. Native Windows, weakest-machine, browser audio/input/accessibility and fresh import/extraction checks.
+6. Imported dependency/source hand-in permission, including the existing RCC source redistribution restriction.
+7. Any genuine early feedback that exists; current design and storyboard are not backdated evidence.
+8. Use the current dated expansion PDF/report; refresh the deck and final submission snapshots after human review.
 
-## Required real work still outstanding
+## Engineering limitations to review
 
-1. At least three authentic tester sessions on identified devices/builds.
-2. Severity/feedback analysis and at least three real feedback-based fixes plus same-task retests. Technical fixes do not fabricate this chain.
-3. Every member records and understands actual personal work, then practises the live walkthrough/change and Q&A.
-4. Consult actual assigned textbook editions/sections and record the design/implementation connections.
-5. Confirm native Windows and weakest-laptop behaviour, real audibility/usability/accessibility and fresh import/extraction on another machine.
-6. Resolve imported dependency/source hand-in permissions. The included RCC Lite notice restricts redistribution of the asset itself; local packaging is not clearance to publish it.
-7. Add any genuine early feedback if it exists. Current final-design storyboard is not falsely backdated to an early study.
-
-The local ZIP is a review/submission preparation package, not a declaration that all human/permission evidence is complete. No new changes were pushed during this work.
+The road itinerary is not a general branching lane graph. Full intersection right-of-way, robust endpoint turning/alternate-route recovery and controlled oncoming/passing scenarios need further validation. Give-way is caution/speed control rather than a complete yield-violation classifier. Rival offences are only partially recorded. Dedicated severe-damage smoke/engine audio and complete whole-game before/after CPU/GPU profiling are not claimed. Actual platform results and any remaining test failures belong in the engineering report.

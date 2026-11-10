@@ -1,0 +1,25 @@
+accelerating: pos=(-930.16, 16.75, 624.88); angles=(0.00, 106.06, 0.00); speed=0.001126685; contacts=4; COM=(0.00, 0.24, 0.04)
+ WheelCollider_L mount=(-0.60, 0.26, -1.03) contact=Asphalt Street bz0 motorTorque=1212.422
+ WheelCollider_R mount=(0.60, 0.26, -1.03) contact=Asphalt Street bz0 motorTorque=968.4491
+ WheelCollider_L mount=(-0.60, 0.26, 1.02) contact=Asphalt Street bz0 motorTorque=0
+ WheelCollider_R mount=(0.60, 0.26, 1.02) contact=Asphalt Street bz0 motorTorque=0
+hard turns: pos=(-930.16, 16.75, 624.88); angles=(0.00, 106.06, 0.00); speed=0.01599432; contacts=4; COM=(0.00, 0.24, 0.04)
+ WheelCollider_L mount=(-0.60, 0.26, -1.03) contact=Asphalt Street bz0 motorTorque=1078.906
+ WheelCollider_R mount=(0.60, 0.26, -1.03) contact=Asphalt Street bz0 motorTorque=251.374
+ WheelCollider_L mount=(-0.60, 0.26, 1.02) contact=Asphalt Street bz0 motorTorque=0
+ WheelCollider_R mount=(0.60, 0.26, 1.02) contact=Asphalt Street bz0 motorTorque=0
+braking: pos=(-930.16, 16.75, 624.88); angles=(0.00, 106.05, 0.00); speed=0.0004501235; contacts=4; COM=(0.00, 0.24, 0.04)
+ WheelCollider_L mount=(-0.60, 0.26, -1.03) contact=Asphalt Street bz0 motorTorque=0
+ WheelCollider_R mount=(0.60, 0.26, -1.03) contact=Asphalt Street bz0 motorTorque=0
+ WheelCollider_L mount=(-0.60, 0.26, 1.02) contact=Asphalt Street bz0 motorTorque=0
+ WheelCollider_R mount=(0.60, 0.26, 1.02) contact=Asphalt Street bz0 motorTorque=0
+after kerb: pos=(-929.44, 16.77, 624.62); angles=(0.00, 106.09, 0.00); speed=0.001281004; contacts=4; COM=(0.00, 0.24, 0.04)
+ WheelCollider_L mount=(-0.60, 0.26, -1.03) contact=Asphalt Street bz0 motorTorque=0
+ WheelCollider_R mount=(0.60, 0.26, -1.03) contact=Asphalt Street bz0 motorTorque=0
+ WheelCollider_L mount=(-0.60, 0.26, 1.02) contact=Asphalt Street bz0 motorTorque=0
+ WheelCollider_R mount=(0.60, 0.26, 1.02) contact=Asphalt Street bz0 motorTorque=0
+traffic impact: pos=(-932.61, 16.68, 625.69); angles=(0.00, 107.71, 0.00); speed=0.0002603252; contacts=4; COM=(0.00, 0.24, 0.04)
+ WheelCollider_L mount=(-0.60, 0.26, -1.03) contact=Asphalt Street bz0 motorTorque=0
+ WheelCollider_R mount=(0.60, 0.26, -1.03) contact=Asphalt Street bz0 motorTorque=0
+ WheelCollider_L mount=(-0.60, 0.26, 1.02) contact=Asphalt Street bz0 motorTorque=0
+ WheelCollider_R mount=(0.60, 0.26, 1.02) contact=Asphalt Street bz0 motorTorque=0

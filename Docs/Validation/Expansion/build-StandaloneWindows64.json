@@ -1,0 +1,11 @@
+{
+    "unity": "6000.6.2f1",
+    "utc": "2026-11-09T20:56:24.3721300Z",
+    "platform": "StandaloneWindows64",
+    "result": "Succeeded",
+    "output": "/home/jayden-mapasure/Documents/ChatGPT/kombi shift game/Builds/Expansion2026/Windows/KombiShift2.exe",
+    "errors": 0,
+    "warnings": 59,
+    "bytes": 395244885,
+    "seconds": 19.195603
+}

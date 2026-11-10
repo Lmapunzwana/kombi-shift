@@ -1,0 +1,14 @@
+{
+  "baseline": {
+    "points": 64,
+    "lengthMetres": 674.17,
+    "largestGapMetres": 23.25
+  },
+  "expanded": {
+    "points": 127,
+    "lengthMetres": 1249.31,
+    "largestGapMetres": 23.25
+  },
+  "lengthIncreasePercent": 85.31,
+  "scope": "World-space scene-audit path length, not driven odometry."
+}

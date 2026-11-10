@@ -1,0 +1,20 @@
+Executed 2026-11-09T20:45:45.0434920Z
+Disabled oversized alpha-plane colliders near route; added narrow solid trunk capsules: 16
+tree1Plane_001 607 trunk=(-841.56, 19.35, 508.26) radius=0.45
+tree1Plane_002 589 trunk=(-819.28, 19.78, 520.10) radius=0.45
+tree1Plane 607 trunk=(-841.56, 19.35, 508.26) radius=0.3965271
+tree1Plane_001 589 trunk=(-819.28, 19.78, 520.10) radius=0.3044251
+tree1Plane_002 414 trunk=(-847.17, 19.08, 520.53) radius=0.4394409
+tree1Plane 583 trunk=(-807.48, 20.10, 517.73) radius=0.45
+tree1Plane_001 550 trunk=(-813.27, 20.64, 497.43) radius=0.45
+tree1Plane 200 trunk=(-503.57, 26.59, 525.42) radius=0.208548
+tree1Plane_002 162 trunk=(-510.39, 21.76, 725.46) radius=0.2
+tree1Plane_004 162 trunk=(-509.40, 22.89, 725.66) radius=0.2
+tree1Plane_004 200 trunk=(-504.98, 26.80, 527.63) radius=0.45
+tree1Plane_001 162 trunk=(-510.39, 21.76, 725.46) radius=0.2
+tree1Plane_001 414 trunk=(-847.17, 19.08, 520.53) radius=0.3828186
+tree1Plane 550 trunk=(-813.27, 20.64, 497.43) radius=0.3314575
+tree1Plane_001 583 trunk=(-807.48, 20.10, 517.73) radius=0.4240234
+tree1Plane_002 550 trunk=(-813.27, 20.64, 497.43) radius=0.2
+Executed 2026-11-09T20:51:44.2334130Z
+Disabled oversized alpha-plane colliders near route; added narrow solid trunk capsules: 0
