@@ -16,4 +16,4 @@ Select at least three genuine problems. In FEEDBACK_FIX_RETEST.csv link the actu
 
 ## Current expansion tasks
 
-Use [EXPANSION_TEST_PLAN.md](EXPANSION_TEST_PLAN.md) for the new passenger requests, intermediate deliveries, fines, damage, repair, rival passing and hump tasks. Fares now pay on completed delivery ($2 Morning / $3 Rush), and intermediate deliveries count toward the target. A visit to Mbare still ends the shift. Record build identity carefully: historical release behaviour differs from this expanded source. Do not fill the empty tester CSVs with automated observations.
+Use [EXPANSION_TEST_PLAN.md](EXPANSION_TEST_PLAN.md) for passenger requests, intermediate deliveries, fines, damage, repair, designated-lane rival driving and hump tasks. Fares pay on completed delivery ($2 Morning / $3 Rush), and intermediate deliveries count toward the target. A visit to Mbare still ends the shift. Record build identity carefully: historical release behaviour differs from this expanded source. Do not fill the empty tester CSVs with automated observations.

@@ -247,8 +247,14 @@ namespace KombiShift2.Gameplay
             float width = Mathf.Min(440f, Screen.width - 24f);
             Rect panel = new(Screen.width * .5f - width * .5f, Screen.height * .5f - 180f, width, 360f);
             GUI.Box(panel, GUIContent.none);
-            GUI.Label(new Rect(panel.x + 12, panel.y + 22, width - 24, 42), paused ? "SHIFT PAUSED" : success ? "SHIFT COMPLETE" : "SHIFT FAILED", title);
-            string message = paused ? $"{KombiChallenge.Name(Stage)}\nDeliver {MinimumPassengers}+ passengers to Mbare.\nEscape — resume    R — restart" : $"{KombiChallenge.Name(Stage)}\nPassengers delivered: {delivered} / target {MinimumPassengers}\nRivals collected: {RivalPassengers}\nEarnings: ${earnings}   Best: ${KombiChallenge.Best(Stage)}\n{(success ? "Target reached." : "Time expired or delivery target missed.")}";
+            GUI.Label(new Rect(panel.x + 12, panel.y + 22, width - 24, 42), paused ? "SHIFT PAUSED" : success ? "YOU WON" : "YOU LOST", title);
+            string outcome = success
+                ? $"Mbare reached. {delivered} passengers delivered; target {MinimumPassengers} reached."
+                : timeRemaining <= 0f
+                    ? $"TIME EXPIRED. Mbare was not reached. {delivered} passengers delivered; target {MinimumPassengers}."
+                    : $"TARGET MISSED at Mbare. {delivered} passengers delivered; {MinimumPassengers} required.";
+            string stats = $"Passengers delivered: {delivered} / {MinimumPassengers}\nRivals collected: {RivalPassengers}\nEarnings: ${earnings}   Best: ${KombiChallenge.Best(Stage)}";
+            string message = paused ? $"{KombiChallenge.Name(Stage)}\nDeliver {MinimumPassengers}+ passengers to Mbare.\nEscape — resume    R — restart" : $"{KombiChallenge.Name(Stage)}\n{outcome}\n\n{stats}";
             GUI.Label(new Rect(panel.x + 20, panel.y + 78, width - 40, 155), message, body);
             if (paused)
             {

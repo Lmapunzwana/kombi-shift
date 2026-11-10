@@ -4,7 +4,7 @@ Read [EXPANSION_ENGINEERING_REPORT.md](EXPANSION_ENGINEERING_REPORT.md) for curr
 
 ## Implemented in current source
 
-- Physical WheelCollider rival driving, utility station evaluation, driver profiles, left-lane offsets, clearance-based passing, identifiable colours and activity feedback.
+- Physical WheelCollider rival driving, utility station evaluation, faster competitive profiles, signed designated-lane offsets, identifiable colours and activity feedback.
 - A connected approximately 1.25 km itinerary using existing roads, seven stations, extended traffic/rival/minimap navigation and shallow physical speed humps.
 - Individual player passenger trips, intermediate drop-off requests and animation, recovery from missed stops, delivery fares and cumulative delivered totals.
 - Separate happiness and XP, rate-limited reactions, severity-based impact condition, bounded RCC input modifiers and paid stopped-service repair.
@@ -25,4 +25,4 @@ Read [EXPANSION_ENGINEERING_REPORT.md](EXPANSION_ENGINEERING_REPORT.md) for curr
 
 ## Engineering limitations to review
 
-The road itinerary is not a general branching lane graph. Full intersection right-of-way, robust endpoint turning/alternate-route recovery and controlled oncoming/passing scenarios need further validation. Give-way is caution/speed control rather than a complete yield-violation classifier. Rival offences are only partially recorded. Dedicated severe-damage smoke/engine audio and complete whole-game before/after CPU/GPU profiling are not claimed. Actual platform results and any remaining test failures belong in the engineering report.
+The road itinerary is not a general branching lane graph. Full intersection right-of-way, robust endpoint turning/alternate-route recovery and prolonged blockage need further validation. Give-way is caution/speed control rather than a complete yield-violation classifier. Rival offences are only partially recorded. Dedicated severe-damage smoke/engine audio and complete whole-game before/after CPU/GPU profiling are not claimed. Actual platform results and any remaining test failures belong in the engineering report.

@@ -145,31 +145,85 @@ public static class KombiShiftExpansionUpgrade
         RepairRouteTreeColliders(); KombiExpansionValidation.Audit();
         Debug.Log("KOMBI_RIVALS_POSITIONED_BEHIND_PLAYER");
     }
+    [MenuItem("Kombi Shift/Repair Hidden Roadside Collisions")]
     public static void RepairRouteTreeColliders()
     {
         var scene = EditorSceneManager.OpenScene(KombiProjectWorkbench.Shift);
         var hud = Object.FindFirstObjectByType<KombiNavigationHud>();
+        var route = hud.RoutePoints;
         int repaired = 0; var details = new List<string>();
         foreach (var collider in Object.FindObjectsByType<MeshCollider>(FindObjectsSortMode.None))
         {
             string name = collider.name.ToLowerInvariant();
             if (!collider.enabled || !name.Contains("tree") || !name.Contains("plane")) continue;
             Bounds bounds = collider.bounds;
-            bool crossesRoad = hud.RoutePoints.Any(point => Vector3.Distance(bounds.ClosestPoint(point.position + Vector3.up), point.position + Vector3.up) < 4f);
+            Bounds roadCorridor = bounds;
+            roadCorridor.Expand(8f);
+            bool crossesRoad = false;
+            for (int i = 1; i < route.Length && !crossesRoad; i++)
+                crossesRoad = SegmentIntersectsBounds(route[i - 1].position + Vector3.up, route[i].position + Vector3.up, roadCorridor);
             if (!crossesRoad) continue;
             // Alpha-cutout leaves are not solid walls. Preserve the art and collide with its trunk.
             collider.enabled = false;
-            var trunk = new GameObject("Route tree trunk collider");
-            trunk.transform.position = new Vector3(bounds.center.x, bounds.min.y + 1.5f, bounds.center.z);
-            var capsule = trunk.AddComponent<CapsuleCollider>(); capsule.height = 3f; capsule.radius = Mathf.Clamp(Mathf.Min(bounds.size.x,bounds.size.z) * .05f,.2f,.45f);
-            // An independent root avoids nonuniform imported tree scales stretching the capsule across the road.
-            trunk.transform.SetParent(GameObject.Find(RootName).transform,true);
-            details.Add(collider.name + " trunk=" + trunk.transform.position.ToString("F2") + " radius=" + capsule.radius); repaired++;
+            var trunkPosition = new Vector3(bounds.center.x, bounds.min.y + 1.5f, bounds.center.z);
+            bool hasTrunk = Object.FindObjectsByType<CapsuleCollider>(FindObjectsSortMode.None)
+                .Any(x => x.name == "Route tree trunk collider" && HorizontalDistance(x.transform.position, trunkPosition) < 1f);
+            if (!hasTrunk)
+            {
+                var trunk = new GameObject("Route tree trunk collider");
+                trunk.transform.position = trunkPosition;
+                var capsule = trunk.AddComponent<CapsuleCollider>(); capsule.height = 3f; capsule.radius = Mathf.Clamp(Mathf.Min(bounds.size.x,bounds.size.z) * .05f,.2f,.45f);
+                // An independent root avoids nonuniform imported tree scales stretching the capsule across the road.
+                trunk.transform.SetParent(GameObject.Find(RootName).transform,true);
+                details.Add(collider.name + " trunk=" + trunk.transform.position.ToString("F2") + " radius=" + capsule.radius);
+            }
+            repaired++;
         }
+        int duplicateTrunks = RemoveDuplicateTreeTrunks();
         EditorSceneManager.MarkSceneDirty(scene); EditorSceneManager.SaveScene(scene);
         Directory.CreateDirectory("Docs/Validation/Expansion");
-        File.AppendAllLines("Docs/Validation/Expansion/tree-collider-repair.txt",new[] { "Executed " + DateTime.UtcNow.ToString("o"), "Disabled oversized alpha-plane colliders near route; added narrow solid trunk capsules: " + repaired }.Concat(details));
-        Debug.Log("KOMBI_ROUTE_TREE_COLLIDERS_REPAIRED " + repaired);
+        File.AppendAllLines("Docs/Validation/Expansion/tree-collider-repair.txt",new[] { "Executed " + DateTime.UtcNow.ToString("o"), "Disabled oversized alpha-plane colliders near route: " + repaired, "Removed overlapping duplicate route tree trunk capsules: " + duplicateTrunks }.Concat(details));
+        Debug.Log("KOMBI_ROUTE_TREE_COLLIDERS_REPAIRED " + repaired + " duplicate trunks removed " + duplicateTrunks);
+    }
+    static int RemoveDuplicateTreeTrunks()
+    {
+        var trunks = Object.FindObjectsByType<CapsuleCollider>(FindObjectsSortMode.None)
+            .Where(x => x.name == "Route tree trunk collider")
+            .OrderBy(x => x.transform.position.x).ThenBy(x => x.transform.position.z).ToArray();
+        var kept = new List<CapsuleCollider>();
+        int removed = 0;
+        foreach (var trunk in trunks)
+        {
+            var duplicate = kept.FirstOrDefault(x => HorizontalDistance(x.transform.position, trunk.transform.position) < 0.9f);
+            if (duplicate == null) { kept.Add(trunk); continue; }
+            duplicate.radius = Mathf.Max(duplicate.radius, trunk.radius);
+            duplicate.height = Mathf.Max(duplicate.height, trunk.height);
+            Object.DestroyImmediate(trunk.gameObject);
+            removed++;
+        }
+        return removed;
+    }
+    [MenuItem("Kombi Shift/Repair Road Sign Placement")]
+    public static void RepairRoadSignPlacement()
+    {
+        var scene = EditorSceneManager.OpenScene(KombiProjectWorkbench.Shift);
+        int moved = 0;
+        foreach (var zone in Object.FindObjectsByType<KombiRoadRuleZone>(FindObjectsSortMode.None))
+        {
+            var post = zone.transform.Find(zone.rule + " sign post");
+            var label = zone.transform.Find("Readable road sign");
+            if (post == null || label == null) continue;
+            PlaceRoadSign(zone, post, label);
+            moved++;
+        }
+        EditorSceneManager.MarkSceneDirty(scene);
+        EditorSceneManager.SaveScene(scene);
+        Debug.Log("KOMBI_ROADSIDE_SIGNS_REPAIRED " + moved);
+    }
+    public static void RepairRoadsideSceneIssues()
+    {
+        RepairRoadSignPlacement();
+        RepairRouteTreeColliders();
     }
     public static void Refine()
     {
@@ -221,6 +275,31 @@ public static class KombiShiftExpansionUpgrade
         KombiExpansionValidation.Audit(); KombiExpansionValidation.Rules();
     }
     static int Nearest(Transform[] route, Vector3 point) => Enumerable.Range(0,route.Length).OrderBy(i => (route[i].position-point).sqrMagnitude).First();
+    static bool SegmentIntersectsBounds(Vector3 start, Vector3 end, Bounds bounds)
+    {
+        Vector3 direction = end - start;
+        float minimum = 0f, maximum = 1f;
+        for (int axis = 0; axis < 3; axis++)
+        {
+            float origin = axis == 0 ? start.x : axis == 1 ? start.y : start.z;
+            float delta = axis == 0 ? direction.x : axis == 1 ? direction.y : direction.z;
+            float low = axis == 0 ? bounds.min.x : axis == 1 ? bounds.min.y : bounds.min.z;
+            float high = axis == 0 ? bounds.max.x : axis == 1 ? bounds.max.y : bounds.max.z;
+            if (Mathf.Abs(delta) < .0001f)
+            {
+                if (origin < low || origin > high) return false;
+                continue;
+            }
+            float enter = (low - origin) / delta, exit = (high - origin) / delta;
+            if (enter > exit) (enter, exit) = (exit, enter);
+            minimum = Mathf.Max(minimum, enter);
+            maximum = Mathf.Min(maximum, exit);
+            if (minimum > maximum) return false;
+        }
+        return true;
+    }
+    static float HorizontalDistance(Vector3 a, Vector3 b)
+        => Vector2.Distance(new Vector2(a.x, a.z), new Vector2(b.x, b.z));
     static Vector3 Ground(Vector3 point)
     {
         var hits = Physics.RaycastAll(point + Vector3.up * 2f, Vector3.down, 8f, ~0, QueryTriggerInteraction.Ignore);
@@ -235,14 +314,22 @@ public static class KombiShiftExpansionUpgrade
         var box = zone.AddComponent<BoxCollider>(); box.isTrigger = true; box.size = new Vector3(rule == RoadRule.NoEntry ? 4f : 7f, 4f, length);
         var behaviour = zone.AddComponent<KombiRoadRuleZone>(); behaviour.rule = rule; behaviour.limit = limit; behaviour.travelDirection = forward;
         var post = GameObject.CreatePrimitive(PrimitiveType.Cylinder); post.name = rule + " sign post"; post.transform.SetParent(zone.transform);
-        post.transform.position = point + RivalKombiAI.LeftOffset(forward, 4.8f) + Vector3.up; post.transform.localScale = new Vector3(.08f,1f,.08f);
+        post.transform.localScale = new Vector3(.08f,1f,.08f);
         Object.DestroyImmediate(post.GetComponent<Collider>());
         var text = new GameObject("Readable road sign"); text.transform.SetParent(post.transform, false); text.transform.localScale = Vector3.one;
-        text.transform.SetPositionAndRotation(post.transform.position + Vector3.up * 1.3f, Quaternion.LookRotation(forward));
-        // TextMesh world scale is independent of the thin post.
         text.transform.SetParent(zone.transform, true); text.transform.localScale = Vector3.one;
         var label = text.AddComponent<TextMesh>(); label.text = rule == RoadRule.SpeedLimit ? limit.ToString("0") + " km/h" : rule == RoadRule.Hump ? "HUMP 20" : rule.ToString().ToUpperInvariant();
         label.fontSize = 48; label.characterSize = .09f; label.anchor = TextAnchor.MiddleCenter; label.color = Color.yellow;
+        PlaceRoadSign(behaviour, post.transform, text.transform);
+    }
+    static void PlaceRoadSign(KombiRoadRuleZone zone, Transform post, Transform label)
+    {
+        Vector3 forward = zone.travelDirection; forward.y = 0f; forward.Normalize();
+        Vector3 ground = zone.transform.position - Vector3.up * 1.5f;
+        Vector3 position = ground + RivalKombiAI.LeftOffset(forward, 6.5f) + Vector3.up;
+        post.SetPositionAndRotation(position, Quaternion.LookRotation(forward));
+        label.SetPositionAndRotation(position + Vector3.up * 1.3f, Quaternion.LookRotation(forward));
+        label.localScale = Vector3.one;
     }
     static void MakeHump(Transform parent, Vector3 point, Vector3 forward)
     {

@@ -4,7 +4,7 @@
 
 The current assessed project is this folder. Use Unity **6000.6.2f1** and open `Assets/KombiShift2/Scenes/KombiMainMenu.unity`, or choose **Kombi Shift > Play Main Menu**.
 
-Choose **Morning Shift** or **Rush Hour** using the title selector / F2. Morning: 600 seconds, deliver 1+ passengers; Rush Hour: 420 seconds, deliver 6+, faster rivals and a shorter head start. Both use the current city route. Win Morning to access Next: Rush Hour from results; either stage is also selectable directly.
+Choose **Morning Shift** or **Rush Hour** using the title selector / F2. Morning: 600 seconds, deliver 1+ passengers; Rush Hour: 420 seconds, deliver 6+, faster rivals and a shorter head start. Rivals compete for pickups while staying in their designated lane. Both use the current city route. Win Morning to access Next: Rush Hour from results; either stage is also selectable directly.
 
 WASD/arrows drive, Space parking brake, S holds to reverse, RMB orbit, wheel zoom, C camera, L lights, V wipers, Escape pause, R restart. Stop below 2 km/h at the active stop and hold Space; boarding is automatic. Deliver at Mbare. $2 is credited per seated passenger and success adds a remaining-time bonus. Best earnings save separately per stage.
 

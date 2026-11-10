@@ -14,7 +14,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::KombiShift2.Gameplay.KombiStageSettings
   duration: 420
   deliveryTarget: 6
-  rivalSpeed: 9
-  rivalHeadStart: 8
+  rivalSpeed: 10.5
+  rivalHeadStart: 4
   trafficFraction: 1
   fare: 3

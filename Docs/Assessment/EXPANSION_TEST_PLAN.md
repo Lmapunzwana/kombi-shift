@@ -23,8 +23,8 @@ Record build hash, date, platform/GPU/browser, anonymous tester ID and observed 
 2. Stop at a queue, observe walkers and concurrent seat allocation. Depart during boarding; check uncollected passengers return.
 3. Follow a stop request, brake and alight; confirm cabin count falls, cumulative delivery and fare rise. Deliberately miss one request and recover at another station.
 4. Drive safely, then brake/steer harshly; compare XP/happiness and rate limiting. Confirm tone is audible at different volume settings.
-5. Observe each rival from departure to a real pickup and departure; compare colours, names, marker and queue reduction. Watch conservative versus aggressive following/passing on both stages.
-6. Follow a slow vehicle. Observe a pass only with clearance; add oncoming traffic and verify inhibition. Observe lane return, junctions, endpoint turns and prolonged blockage. Report any collision or path deadlock.
+5. Observe each rival from departure to a real pickup and departure; compare colours, names, marker and queue reduction. Confirm every personality stays in its designated lane while its speed, following gap and target selection remain competitive.
+6. Follow a slow vehicle. Confirm the rival follows and brakes in its lane rather than entering opposing traffic. Observe junctions, endpoint turns and prolonged blockage. Report any collision or path deadlock.
 7. Cross a hump at 10, 20 and 40 km/h using RCC. Record wheel contact, peak vertical acceleration, launch/roll risk, comfort and condition. Repeat after any collider changes.
 8. Cross speed/stop/no-entry/direction/no-passing zones; verify one fine per incident and no repeated continuous-speed charging. Check intersections and sign readability both directions.
 9. Make minor and severe impacts. Check proportional damage, controllability and lower power. Try insufficient-funds repair, paid repair and moving/remote repair rejection.

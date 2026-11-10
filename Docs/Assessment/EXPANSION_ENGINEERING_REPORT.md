@@ -6,12 +6,12 @@
 
 | Area | Files under Assets/KombiShift2 | Result |
 |---|---|---|
-| Competition | Scripts/Traffic/RivalKombiAI.cs; RivalDrivingProfile.cs; KombiTrafficVehicle.cs | Demand/travel/congestion utility, hysteresis, physical wheels and torque, profiles, left lanes, clearance-gated passing, signal/zone caution, visible colours/activity |
+| Competition | Scripts/Traffic/RivalKombiAI.cs; RivalDrivingProfile.cs; KombiTrafficVehicle.cs | Demand/travel/congestion utility, hysteresis, physical wheels and torque, faster competitive profiles, signed left-lane driving, signal/zone caution, visible colours/activity |
 | Passenger service | Scripts/Gameplay/PassengerTrip.cs; PassengerStation.cs; KombiShiftGameDirector.cs | Individual player trips, downstream destinations, bell/text requests, intermediate animation, delivery fares, one-shot missed penalty and recovery |
 | Service quality | Scripts/Gameplay/KombiServiceQuality.cs | Separate XP and bounded passenger happiness, cooldowns, motion/collision/law reactions and smooth-service rewards |
 | Condition | Scripts/Vehicle/KombiVehicleCondition.cs; RccHiaceTestBootstrap.cs | Impact speed/impulse filtering, bounded damage, throttle/brake adapter, paid stopped-service repair |
 | Law | Scripts/Gameplay/KombiTrafficLaw.cs; KombiRoadRuleZone.cs; KombiRoadRules.cs | Configurable zones, speed grace, continuous offence incidents, stop/no-entry/direction/passing detection and offence records |
-| World/stages | Scenes/KombiShift_FirstShift.unity; Editor/Upgrades/ShiftExpansionUpgrade.cs; Art/Generated; Scripts/Gameplay/KombiStageSettings.cs; KombiChallenge.cs; Assets/Resources | 674.2 m → 1,249.3 m itinerary (85.3% longer), 127 waypoints, seven stations, navigation for player/rivals/traffic, shared physical hump mesh, stage traffic/fare/profile differences |
+| World/stages | Scenes/KombiShift_FirstShift.unity; Editor/Upgrades/ShiftExpansionUpgrade.cs; Art/Generated; Scripts/Gameplay/KombiStageSettings.cs; KombiChallenge.cs; Assets/Resources | 674.2 m → 1,249.3 m itinerary (85.3% longer), 127 waypoints, seven stations, navigation for player/rivals/traffic, roadside signs, full-corridor hidden tree-collider repair, shared physical hump mesh, stage traffic/fare/rival challenge differences |
 | UI | Scripts/UI/KombiNavigationHud.cs; KombiMainMenu.cs | Existing design extended with requests, XP/happiness, condition, limit, fines, deliveries, rival proximity and repair help |
 | Verification | Tests/Editor; Scripts/Development/ExpansionVerification.cs; RoadPhysicsVerification.cs; ExpansionVisual.cs; updated AssessmentVerification.cs; Editor/Validation/ExpansionValidation.cs; ExpansionBuild.cs | Repeatable component, UTF, physical scene, RCC hump, regression, render and build workflows |
 
@@ -37,8 +37,8 @@ New build output root: `Builds/Expansion2026` in the parent workspace. Existing 
 ## Known limitations and remaining definition-of-done work
 
 1. The expanded map is a connected bidirectional itinerary using three existing road splines. It is not a general branching lane graph, and this work does not add an independently routed alternate street network or certify all road widths/intersections/endpoint turns. Blocked rivals wait and reconsider demand; they cannot plan an alternate road. No teleport recovery is used.
-2. Passing requires side/rear/forward clearance and gradual physical steering. Controlled oncoming, overtaking return, endpoint-turn, intersection-priority and long deadlock scenarios need further deterministic integration coverage and human review. Current tests prove physical pickup/departure, not every manoeuvre's safety.
-3. Conservative/competitive/aggressive differences are implemented, but stage targets and risk parameters are initial tuning. More aggression is not a measured balance result. Aggressive illegal passing is counted; a unified complete rival offence/economy log is not implemented.
+2. Rivals remain in their designated lane and do not overtake into opposing traffic. Endpoint-turn, intersection-priority and long deadlock scenarios still need deterministic integration coverage and human review. Current tests prove physical pickup/departure, not every manoeuvre's safety.
+3. Conservative/competitive/aggressive differences and more competitive stage pace/head starts are implemented, but targets and risk parameters are initial tuning, not measured balance results. A unified complete rival offence/economy log is not implemented.
 4. Give-way has caution/speed behaviour; it is not a complete reliable yielding-offence detector. Signs use lightweight readable text rather than a full authored sign-art set. Zone extents and player passing classification require route playtesting.
 5. Player passengers have individual intermediate trips. Rival passengers still follow their rival toward Mbare. Completed passenger records retain satisfaction, but there is no separately presented aggregate end-of-trip star rating.
 6. Condition reduces power/acceleration and braking with controllability bounds. Suspension discomfort/damage is represented through hump consequences, not a complete per-wheel alignment/suspension wear simulator. Dedicated severe-damage smoke/impact VFX/engine-audio changes remain polish work.
@@ -52,7 +52,7 @@ New build output root: `Builds/Expansion2026` in the parent workspace. Existing 
 | Design/GDD 12 | Human balance review; regenerate illustrated PDF from current design |
 | Storyboard/prototype 8 | Updated current storyboard is supplied; genuine early prototype feedback remains historical evidence to supply |
 | Architecture 17 / core 13 | Further manoeuvre, junction, long-shift and nonregression coverage; member understanding |
-| AI/level/progression 10 | Branching lane-graph scope gap, controlled passing/junction tests, human difficulty balance |
+| AI/level/progression 10 | Branching lane-graph scope gap, endpoint/junction tests, human difficulty balance |
 | UI/art/animation/audio 9 | Human audibility/accessibility/legibility; lecturer-specific Animator expectations; remaining damage polish |
 | Playtesting/iteration 9 | Three authentic testers, observations/severity, three observation-linked fixes and same-task retests |
 | Optimisation/deployment 7 | Actual gameplay before/after profiling, native Windows/weak-machine/browser checks and fresh import |

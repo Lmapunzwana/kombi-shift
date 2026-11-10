@@ -12,13 +12,15 @@ namespace KombiShift2.Traffic
         [Min(1f)] public float reassessSeconds = 4f, switchAdvantage = 3f, followingSeconds = 2f;
         [Range(0f, 35f)] public float maxSteering = 32f;
         [Min(.1f)] public float acceleration = 2f, braking = 4f;
-        public bool allowOvertaking;
         public float speedMultiplier = 1f;
         public static RivalDrivingProfile For(RivalPersonality kind) => new() {
-            personality = kind, allowOvertaking = kind != RivalPersonality.Conservative,
-            speedMultiplier = kind == RivalPersonality.Aggressive ? 1.2f : kind == RivalPersonality.Competitive ? 1.08f : .9f,
-            followingSeconds = kind == RivalPersonality.Aggressive ? 1.1f : kind == RivalPersonality.Competitive ? 1.5f : 2f,
-            passengerValue = kind == RivalPersonality.Aggressive ? 12f : 8f };
+            personality = kind,
+            speedMultiplier = kind == RivalPersonality.Aggressive ? 1.3f : kind == RivalPersonality.Competitive ? 1.18f : .9f,
+            followingSeconds = kind == RivalPersonality.Aggressive ? 1f : kind == RivalPersonality.Competitive ? 1.25f : 2f,
+            reassessSeconds = kind == RivalPersonality.Aggressive ? 2f : kind == RivalPersonality.Competitive ? 3f : 4f,
+            switchAdvantage = kind == RivalPersonality.Aggressive ? 1f : kind == RivalPersonality.Competitive ? 2f : 3f,
+            acceleration = kind == RivalPersonality.Aggressive ? 3.2f : kind == RivalPersonality.Competitive ? 2.6f : 2f,
+            passengerValue = kind == RivalPersonality.Aggressive ? 12f : kind == RivalPersonality.Competitive ? 10f : 8f };
         public float Utility(int demand, int seats, float distance, float speed, int congestion, bool reserved)
             => Mathf.Min(demand, seats) * passengerValue - distance / Mathf.Max(1f, speed) * travelCost - congestion * congestionPenalty - (reserved ? reservationPenalty : 0f);
     }

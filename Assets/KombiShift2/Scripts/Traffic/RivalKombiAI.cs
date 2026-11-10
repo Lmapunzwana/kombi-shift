@@ -22,10 +22,9 @@ namespace KombiShift2.Traffic
         private WheelCollider[] wheels;
         private TrafficSignalController[] signals;
         private int routeIndex, destinationIndex, direction = 1;
-        private float startedAt, nextEvaluation, nextDeparture, blockedTime, laneOffset, passUntil;
-        private bool shiftEnded, passing;
+        private float startedAt, nextEvaluation, nextDeparture, blockedTime;
+        private bool shiftEnded;
         private readonly Dictionary<KombiRoadRuleZone, float> stoppedAt = new();
-        public int Violations { get; private set; }
         private readonly RaycastHit[] obstacles = new RaycastHit[64];
         private readonly Collider[] congestion = new Collider[32];
         public int PassengersTaken { get; private set; }
@@ -129,7 +128,7 @@ namespace KombiShift2.Traffic
             int previous = Mathf.Clamp(index - direction, 0, route.Length - 1);
             int next = Mathf.Clamp(index + direction, 0, route.Length - 1);
             Vector3 forward = route[next].position - route[previous].position; forward.y = 0f;
-            return route[index].position + LeftOffset(forward, laneWidth * .5f - laneOffset);
+            return route[index].position + LeftOffset(forward, laneWidth * .5f);
         }
         private float RouteDistance(int index)
         {
@@ -188,20 +187,6 @@ namespace KombiShift2.Traffic
             float actualSpeed = body.linearVelocity.magnitude;
             bool clear = Clear(origin, transform.forward, Mathf.Max(7f, actualSpeed * profile.followingSeconds + 3f), out var obstacle);
             blockedTime = clear ? 0f : blockedTime + Time.fixedDeltaTime;
-            bool noPassing = false;
-            foreach (var zone in KombiRoadRules.Active)
-                if ((zone.rule == RoadRule.NoOvertaking || zone.rule == RoadRule.Stop || zone.rule == RoadRule.Crossing) && Vector3.Distance(zone.transform.position, transform.position) < 35f) noPassing = true;
-            if (!passing && !clear && blockedTime > 2f && profile.allowOvertaking && (!noPassing || profile.personality == RivalPersonality.Aggressive) && State != RivalState.PullIn && obstacle.rigidbody != null && Vector3.Dot(obstacle.transform.forward, transform.forward) > .7f)
-            {
-                float horizon = profile.personality == RivalPersonality.Aggressive ? 50f : 90f;
-                Vector3 passingOrigin = origin + transform.right * laneWidth;
-                // Both rear and forward clearance are mandatory, even for deliberate rule violations.
-                if (Clear(passingOrigin, transform.forward, horizon, out _) && Clear(passingOrigin, -transform.forward, 25f, out _) && Clear(origin, transform.right, laneWidth, out _))
-                { if (noPassing) Violations++; passing = true; passUntil = Time.time + 5f; Say(noPassing ? "Deliberate illegal overtake" : "Overtaking slow traffic"); }
-            }
-            if (passing && Time.time > passUntil && Clear(origin - transform.right * laneWidth, transform.forward, 12f, out _) && Clear(origin - transform.right * laneWidth, -transform.forward, 10f, out _))
-            { passing = false; Say("Returning to left lane"); }
-            laneOffset = Mathf.MoveTowards(laneOffset, passing ? laneWidth : 0f, Time.fixedDeltaTime * .7f);
             if (blockedTime > 25f && Time.time >= nextEvaluation)
             { target = null; ChooseTarget(); Say("Blocked route: reassessing demand; waiting for clearance"); }
             if (!clear) desiredSpeed = Mathf.Min(desiredSpeed, Mathf.Max(0f, (obstacle.distance - 4f) / profile.followingSeconds));
