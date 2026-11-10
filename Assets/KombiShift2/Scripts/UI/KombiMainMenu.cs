@@ -169,7 +169,7 @@ namespace KombiShift2.UI
         void Styles()
         {
             if(logo!=null)return;
-            logo=Style(displayFont,132);section=Style(bodyFont,27);body=Style(bodyFont,23);cardTitle=Style(displayFont,38);cardDetail=Style(bodyFont,17);tiny=Style(bodyFont,20);
+            logo=Style(displayFont,132);section=Style(bodyFont,27);body=Style(bodyFont,20);cardTitle=Style(displayFont,38);cardDetail=Style(bodyFont,17);tiny=Style(bodyFont,20);
         }
         static GUIStyle Style(Font font,int size){var style=new GUIStyle(GUI.skin.label){font=font,fontSize=size,wordWrap=false};style.normal.textColor=Color.white;return style;}
         void Text(Rect rect,string value,GUIStyle style,Color color){if(style==section||style==tiny||style==cardDetail)rect.height=Mathf.Max(rect.height,style.lineHeight+4f);GUI.color=color;GUI.Label(rect,value,style);GUI.color=Color.white;}

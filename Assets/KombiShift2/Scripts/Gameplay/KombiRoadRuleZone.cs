@@ -4,7 +4,8 @@ using UnityEngine;
 
 namespace KombiShift2.Gameplay
 {
-    public enum RoadRule { SpeedLimit, Stop, GiveWay, NoEntry, NoOvertaking, Crossing, Roadworks, Hump, Direction }
+    // Value 2 remains unused to preserve existing serialized road-rule values.
+    public enum RoadRule { SpeedLimit = 0, Stop = 1, NoEntry = 3, NoOvertaking = 4, Crossing = 5, Roadworks = 6, Hump = 7, Direction = 8 }
     [RequireComponent(typeof(BoxCollider))]
     public sealed class KombiRoadRuleZone : MonoBehaviour
     {
@@ -21,7 +22,7 @@ namespace KombiShift2.Gameplay
             var law = other.GetComponentInParent<KombiTrafficLaw>(); if (law == null) return;
             if (contacts.TryGetValue(law, out int count)) { contacts[law] = count + 1; return; }
             contacts[law] = 1; stopped[law] = 0f;
-            if (rule == RoadRule.SpeedLimit || rule == RoadRule.Crossing || rule == RoadRule.Roadworks || rule == RoadRule.GiveWay) law.EnterLimit(this, limit);
+            if (rule == RoadRule.SpeedLimit || rule == RoadRule.Crossing || rule == RoadRule.Roadworks) law.EnterLimit(this, limit);
             if (rule == RoadRule.NoEntry) law.Record("entry:" + GetEntityId(), "No entry", fine);
             if (rule == RoadRule.Hump)
             {

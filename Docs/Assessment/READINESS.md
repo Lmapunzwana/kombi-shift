@@ -4,7 +4,7 @@ Read [EXPANSION_ENGINEERING_REPORT.md](EXPANSION_ENGINEERING_REPORT.md) for curr
 
 ## Implemented in current source
 
-- Physical WheelCollider rival driving, utility station evaluation, faster competitive profiles, signed designated-lane offsets, identifiable colours and activity feedback.
+- Physical WheelCollider rival driving, utility station evaluation, faster competitive profiles, signed lane offsets with clearance-checked passes, identifiable colours and activity feedback.
 - A connected approximately 1.25 km itinerary using existing roads, seven stations, extended traffic/rival/minimap navigation and shallow physical speed humps.
 - Individual player passenger trips, intermediate drop-off requests and animation, recovery from missed stops, delivery fares and cumulative delivered totals.
 - Separate happiness and XP, rate-limited reactions, severity-based impact condition, bounded RCC input modifiers and paid stopped-service repair.

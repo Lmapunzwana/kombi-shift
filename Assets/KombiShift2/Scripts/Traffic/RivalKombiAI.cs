@@ -22,8 +22,9 @@ namespace KombiShift2.Traffic
         private WheelCollider[] wheels;
         private TrafficSignalController[] signals;
         private int routeIndex, destinationIndex, direction = 1;
-        private float startedAt, nextEvaluation, nextDeparture, blockedTime;
-        private bool shiftEnded;
+        private float startedAt, nextEvaluation, nextDeparture, blockedTime, laneOffset, passUntil;
+        private bool shiftEnded, passing;
+        private Rigidbody passTarget;
         private readonly Dictionary<KombiRoadRuleZone, float> stoppedAt = new();
         private readonly RaycastHit[] obstacles = new RaycastHit[64];
         private readonly Collider[] congestion = new Collider[32];
@@ -128,7 +129,7 @@ namespace KombiShift2.Traffic
             int previous = Mathf.Clamp(index - direction, 0, route.Length - 1);
             int next = Mathf.Clamp(index + direction, 0, route.Length - 1);
             Vector3 forward = route[next].position - route[previous].position; forward.y = 0f;
-            return route[index].position + LeftOffset(forward, laneWidth * .5f);
+            return route[index].position + LeftOffset(forward, laneWidth * .5f - laneOffset);
         }
         private float RouteDistance(int index)
         {
@@ -165,7 +166,7 @@ namespace KombiShift2.Traffic
             stop.Release(transform); target = null; State = RivalState.Depart; nextDeparture = Time.time + 3f;
             Say("Departing " + stop.name); routeIndex = NearestRouteIndex(transform.position);
         }
-        private bool Clear(Vector3 origin, Vector3 forward, float distance, out RaycastHit nearest)
+        private bool Clear(Vector3 origin, Vector3 forward, float distance, out RaycastHit nearest, Rigidbody ignoreBody = null)
         {
             int count = Physics.SphereCastNonAlloc(origin, .8f, forward, obstacles, distance, ~0, QueryTriggerInteraction.Ignore);
             var hits = count == obstacles.Length ? Physics.SphereCastAll(origin, .8f, forward, distance, ~0, QueryTriggerInteraction.Ignore) : obstacles;
@@ -173,10 +174,23 @@ namespace KombiShift2.Traffic
             nearest = default; float best = float.MaxValue;
             for (int i = 0; i < count; i++)
             {
-                var hit = hits[i]; if (hit.transform.IsChildOf(transform) || hit.normal.y > .6f) continue;
+                var hit = hits[i]; if (hit.transform.IsChildOf(transform) || (ignoreBody != null && hit.rigidbody == ignoreBody) || hit.normal.y > .6f) continue;
                 if (hit.distance < best) { best = hit.distance; nearest = hit; }
             }
             return best == float.MaxValue;
+        }
+        private bool CanOvertake(Vector3 origin, float actualSpeed, float steering, RaycastHit obstacle)
+        {
+            if (!profile.allowOvertaking || State == RivalState.PullIn || actualSpeed < 5f || Mathf.Abs(steering) > 12f ||
+                obstacle.rigidbody == null || Vector3.Dot(obstacle.transform.forward, transform.forward) < .7f) return false;
+            float closingSpeed = Vector3.Dot(body.linearVelocity - obstacle.rigidbody.linearVelocity, transform.forward);
+            if (closingSpeed < 1.5f) return false;
+            float passSeconds = Mathf.Clamp((obstacle.distance + 12f) / closingSpeed, 2.5f, 8f);
+            float clearDistance = Mathf.Clamp((actualSpeed + 12f) * passSeconds + 16f, 45f, 130f);
+            Vector3 passingOrigin = origin + transform.right * laneWidth;
+            return Clear(passingOrigin, transform.forward, clearDistance, out _, obstacle.rigidbody) &&
+                   Clear(passingOrigin, -transform.forward, Mathf.Max(25f, actualSpeed * passSeconds), out _) &&
+                   Clear(origin, transform.right, laneWidth + 1f, out _);
         }
         private void Drive(Vector3 point, float desiredSpeed)
         {
@@ -187,9 +201,44 @@ namespace KombiShift2.Traffic
             float actualSpeed = body.linearVelocity.magnitude;
             bool clear = Clear(origin, transform.forward, Mathf.Max(7f, actualSpeed * profile.followingSeconds + 3f), out var obstacle);
             blockedTime = clear ? 0f : blockedTime + Time.fixedDeltaTime;
+            bool noPassing = false;
+            foreach (var zone in KombiRoadRules.Active)
+            {
+                Vector3 toZone = zone.transform.position - transform.position;
+                if ((zone.rule == RoadRule.NoOvertaking || zone.rule == RoadRule.Stop || zone.rule == RoadRule.Crossing) &&
+                    toZone.magnitude < 35f && Vector3.Dot(transform.forward, toZone.normalized) > .25f) noPassing = true;
+            }
+            foreach (var signal in signals)
+                if (signal != null && signal.MustStop && Vector3.Distance(signal.transform.position, transform.position) < 35f &&
+                    Vector3.Dot(transform.forward, (signal.transform.position - transform.position).normalized) > .4f) noPassing = true;
+
+            Vector3 passingOrigin = origin + transform.right * laneWidth;
+            float passLookAhead = Mathf.Clamp((actualSpeed + 12f) * Mathf.Max(.5f, passUntil - Time.time) + 20f, 45f, 140f);
+            RaycastHit oncoming = default;
+            bool passingLaneClear = !passing || Clear(passingOrigin, transform.forward, passLookAhead, out oncoming, passTarget);
+            Vector3 returnOrigin = origin - transform.right * laneWidth;
+            bool returnLaneClear = Clear(returnOrigin, transform.forward, 12f, out _) &&
+                                   Clear(returnOrigin, -transform.forward, 12f, out _);
+            bool passedTarget = passTarget == null ||
+                                Vector3.Dot(passTarget.position - transform.position, transform.forward) < -4f;
+            if (passing && returnLaneClear && (passedTarget || noPassing || !passingLaneClear))
+            {
+                passing = false; passTarget = null;
+                Say(passingLaneClear ? "Returning to the left lane" : "Aborting overtake for oncoming traffic");
+            }
+            float overtakingDelay = profile.personality == RivalPersonality.Aggressive ? .6f : 1.1f;
+            if (!passing && !noPassing && !clear && blockedTime > overtakingDelay && CanOvertake(origin, actualSpeed, steering, obstacle))
+            {
+                passing = true; passTarget = obstacle.rigidbody; passUntil = Time.time + 6f;
+                Say("Clear opposing lane — overtaking slow traffic");
+            }
+            if (passing && !passingLaneClear && !returnLaneClear)
+                desiredSpeed = Mathf.Min(desiredSpeed, Mathf.Max(0f, (oncoming.distance - 10f) / profile.followingSeconds));
+            laneOffset = Mathf.MoveTowards(laneOffset, passing ? laneWidth : 0f, Time.fixedDeltaTime * 2f);
+            if (!clear && (!passing || obstacle.rigidbody != passTarget))
+                desiredSpeed = Mathf.Min(desiredSpeed, Mathf.Max(0f, (obstacle.distance - 4f) / profile.followingSeconds));
             if (blockedTime > 25f && Time.time >= nextEvaluation)
             { target = null; ChooseTarget(); Say("Blocked route: reassessing demand; waiting for clearance"); }
-            if (!clear) desiredSpeed = Mathf.Min(desiredSpeed, Mathf.Max(0f, (obstacle.distance - 4f) / profile.followingSeconds));
             foreach (var signal in signals)
                 if (signal != null && signal.MustStop && Vector3.Distance(signal.transform.position, transform.position) < 15f && Vector3.Dot(transform.forward, (signal.transform.position - transform.position).normalized) > .4f) desiredSpeed = 0f;
             foreach (var zone in KombiRoadRules.Active)
@@ -206,12 +255,14 @@ namespace KombiShift2.Traffic
                     }
                     else if (Time.time - stoppedAt[zone] < 1f) desiredSpeed = 0f;
                 }
-                if (zone.rule == RoadRule.GiveWay)
+                if (zone.rule == RoadRule.NoEntry)
                 {
-                    desiredSpeed = Mathf.Min(desiredSpeed,3f);
-                    if (!Clear(origin,transform.right,18f,out _) || !Clear(origin,-transform.right,18f,out _)) desiredSpeed = 0f;
+                    Vector3 toZone = zone.transform.position - transform.position;
+                    float ahead = Vector3.Dot(transform.forward, toZone);
+                    float lateral = Mathf.Abs(Vector3.Dot(transform.right, toZone));
+                    float halfWidth = zone.TryGetComponent<BoxCollider>(out var zoneCollider) ? zoneCollider.size.x * .5f : 0f;
+                    if (ahead > 0f && ahead < 14f && lateral <= laneWidth * .5f + halfWidth) desiredSpeed = 0f;
                 }
-                if (zone.rule == RoadRule.NoEntry && Vector3.Dot(transform.forward, (zone.transform.position-transform.position).normalized) > .7f) desiredSpeed = 0f;
             }
             float error = desiredSpeed - actualSpeed;
             for (int i = 0; i < wheels.Length; i++)

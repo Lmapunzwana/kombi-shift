@@ -133,7 +133,7 @@ namespace KombiShift2.CameraSystem
             GUI.matrix=Matrix4x4.TRS(new Vector3(safe.x,Screen.height-safe.yMax),Quaternion.identity,Vector3.one*scale);
             float w=safe.width/scale,h=safe.height/scale;
             if(GUI.Button(new Rect(w-146,h-144,128,32),cabView?"CHASE VIEW  C":"DRIVER VIEW  C",button))CycleView();
-            GUI.Label(new Rect(w*.5f-185,h-31,370,22),"RMB DRAG  Look around    WHEEL  Zoom    C  Camera",hint);
+            GUI.Label(new Rect(w*.5f-210,h-54,420,32),"RMB DRAG  Look around    WHEEL  Zoom    C  Camera",hint);
             GUI.matrix=old;
         }
     }

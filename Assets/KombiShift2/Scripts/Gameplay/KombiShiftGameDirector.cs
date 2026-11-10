@@ -102,7 +102,7 @@ namespace KombiShift2.Gameplay
             rivals = FindObjectsByType<RivalKombiAI>(FindObjectsSortMode.None);
             for (int i = 0; i < rivals.Length; i++)
             {
-                rivals[i].SetPersonality(Stage == KombiStage.RushHour ? (i % 2 == 0 ? RivalPersonality.Aggressive : RivalPersonality.Competitive) : (i % 2 == 0 ? RivalPersonality.Conservative : RivalPersonality.Competitive), i % 2 == 0 ? new Color(.95f,.35f,.22f) : new Color(.35f,.6f,1f));
+                rivals[i].SetPersonality(i % 2 == 0 ? RivalPersonality.Aggressive : RivalPersonality.Competitive, i % 2 == 0 ? new Color(.95f,.35f,.22f) : new Color(.35f,.6f,1f));
                 rivals[i].ActivityChanged += (rival, activity) => Announce(rival.name + ": " + activity);
                 rivals[i].SetChallenge(KombiChallenge.RivalSpeed(Stage), KombiChallenge.RivalDelay(Stage) + i * 6f);
             }

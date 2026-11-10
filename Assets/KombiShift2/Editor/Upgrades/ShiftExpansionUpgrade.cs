@@ -14,6 +14,7 @@ using Object = UnityEngine.Object;
 public static class KombiShiftExpansionUpgrade
 {
     const string RootName = "Shift Expansion 2026";
+    const string RoadMarkingRootName = "Road carriage markings";
     [MenuItem("Kombi Shift/Apply Service And Route Expansion")]
     public static void Apply()
     {
@@ -68,7 +69,7 @@ public static class KombiShiftExpansionUpgrade
         int rivalIndex = 0;
         foreach (var rival in Object.FindObjectsByType<RivalKombiAI>(FindObjectsSortMode.None))
         {
-            int index = 2 + rivalIndex * 2;
+            int index = rivalIndex == 0 ? 34 : 75;
             Vector3 forward = route[index + 1].position - route[index].position; forward.y = 0;
             rival.transform.SetPositionAndRotation(route[index].position + RivalKombiAI.LeftOffset(forward, 1.55f) + Vector3.up * .12f, Quaternion.LookRotation(forward));
             rival.Configure(route, stations, 18f + rivalIndex * 18f, 7.5f); rivalIndex++;
@@ -81,28 +82,8 @@ public static class KombiShiftExpansionUpgrade
             data.FindProperty("targetIndex").intValue += prefix.Count;
             data.ApplyModifiedPropertiesWithoutUndo();
         }
-        for (int n = 0; n < stations.Length; n++)
-        {
-            int index = Nearest(route, stations[n].ServicePoint.position);
-            Vector3 forward = route[Mathf.Min(route.Length - 1, index + 1)].position - route[Mathf.Max(0, index - 1)].position; forward.y = 0; forward.Normalize();
-            MakeSign(root, route[index].position, forward, RoadRule.SpeedLimit, n % 2 == 0 ? 30f : 50f, 35f);
-            if (n < stations.Length - 1)
-            {
-                int approach = Mathf.Max(1, index - 2);
-                Vector3 tangent = route[approach + 1].position - route[approach - 1].position; tangent.y = 0; tangent.Normalize();
-                MakeSign(root, route[approach].position, tangent, RoadRule.Crossing, 20f, 12f);
-                MakeSign(root, route[approach].position - tangent * 10f, tangent, RoadRule.Hump, 20f, 4f);
-                MakeHump(root, Ground(route[approach].position - tangent * 10f), tangent);
-                MakeSign(root, route[index].position - forward * 14f, forward, RoadRule.NoOvertaking, 30f, 30f);
-            }
-        }
-        MakeSign(root, route[25].position, (route[26].position-route[24].position).normalized, RoadRule.Stop, 0f, 20f);
-        MakeSign(root, route[38].position, (route[39].position-route[37].position).normalized, RoadRule.GiveWay, 20f, 18f);
-        MakeSign(root, route[43].position, (route[44].position-route[42].position).normalized, RoadRule.Roadworks, 20f, 18f);
-        MakeSign(root, route[12].position, (route[13].position-route[11].position).normalized, RoadRule.Direction, 30f, 40f);
-        // Prohibited side access does not obstruct the through route.
-        Vector3 side = route[38].position + RivalKombiAI.LeftOffset(route[39].position-route[37].position, -8f);
-        MakeSign(root, side, Vector3.right, RoadRule.NoEntry, 0f, 5f);
+        BuildOrderedRoadRules(root, route, stations);
+        MakeRoadCarriageMarkings(root, route);
         EditorSceneManager.MarkSceneDirty(scene); EditorSceneManager.SaveScene(scene); AssetDatabase.SaveAssets();
         float length = 0; for (int i = 1; i < route.Length; i++) length += Vector3.Distance(route[i-1].position,route[i].position);
         Directory.CreateDirectory("Docs/Validation/Expansion");
@@ -208,7 +189,9 @@ public static class KombiShiftExpansionUpgrade
     {
         var scene = EditorSceneManager.OpenScene(KombiProjectWorkbench.Shift);
         int moved = 0;
-        foreach (var zone in Object.FindObjectsByType<KombiRoadRuleZone>(FindObjectsSortMode.None))
+        var hud = Object.FindFirstObjectByType<KombiNavigationHud>();
+        foreach (var zone in Object.FindObjectsByType<KombiRoadRuleZone>(FindObjectsSortMode.None)
+                     .OrderBy(x => Nearest(hud.RoutePoints, x.transform.position)))
         {
             var post = zone.transform.Find(zone.rule + " sign post");
             var label = zone.transform.Find("Readable road sign");
@@ -222,8 +205,161 @@ public static class KombiShiftExpansionUpgrade
     }
     public static void RepairRoadsideSceneIssues()
     {
-        RepairRoadSignPlacement();
+        RebuildOrderedRoadRules();
         RepairRouteTreeColliders();
+        RefreshRoadCarriageMarkings();
+        RemovePhysicalRouteCenterLines();
+    }
+    public static void RebuildOrderedRoadRules()
+    {
+        var scene = EditorSceneManager.OpenScene(KombiProjectWorkbench.Shift);
+        var root = GameObject.Find(RootName);
+        if (root == null) throw new Exception("Shift expansion root is missing; cannot rebuild road signs.");
+        var hud = Object.FindFirstObjectByType<KombiNavigationHud>();
+        var director = Object.FindFirstObjectByType<KombiShiftGameDirector>();
+        var stops = new SerializedObject(director).FindProperty("stops");
+        var stations = Enumerable.Range(0, stops.arraySize)
+            .Select(i => stops.GetArrayElementAtIndex(i).objectReferenceValue as Transform)
+            .Where(x => x != null)
+            .Select(x => x.GetComponent<PassengerStation>())
+            .Where(x => x != null)
+            .ToArray();
+        BuildOrderedRoadRules(root.transform, hud.RoutePoints, stations);
+        foreach (var zone in Object.FindObjectsByType<KombiRoadRuleZone>(FindObjectsSortMode.None))
+            if ((int)zone.rule == 2) Object.DestroyImmediate(zone.gameObject);
+        EditorSceneManager.MarkSceneDirty(scene);
+        EditorSceneManager.SaveScene(scene);
+        AssetDatabase.SaveAssets();
+        int humps = Object.FindObjectsByType<KombiRoadRuleZone>(FindObjectsSortMode.None).Count(x => x.rule == RoadRule.Hump);
+        Debug.Log("KOMBI_ORDERED_ROAD_RULES_REBUILT stations=" + stations.Length + " humps=" + humps + " giveWay=0");
+    }
+    static void BuildOrderedRoadRules(Transform root, Transform[] route, PassengerStation[] stations)
+    {
+        if (route == null || route.Length < 4) throw new Exception("A complete route is required to place roadside rules.");
+        foreach (var zone in root.GetComponentsInChildren<KombiRoadRuleZone>(true)) Object.DestroyImmediate(zone.gameObject);
+        foreach (var child in root.GetComponentsInChildren<Transform>(true).Where(x => x.name == "Physical speed hump").ToArray())
+            Object.DestroyImmediate(child.gameObject);
+
+        var orderedStations = stations
+            .Where(x => x != null && x.ServicePoint != null)
+            .Select(x => (station: x, index: Nearest(route, x.ServicePoint.position)))
+            .OrderBy(x => x.index)
+            .ToArray();
+        var routeDistances = RouteDistances(route);
+        var crossingIndices = orderedStations.Where(x => !x.station.Terminal)
+            .Select(x => RouteIndexBehind(route, x.index, 18f)).ToArray();
+        var usedHumps = new List<int>();
+        var signs = new List<(int routeIndex, Action create)>();
+
+        int[] speedSignStations = orderedStations.Length > 2
+            ? new[] { 0, orderedStations.Length / 2, orderedStations.Length - 1 }
+            : Enumerable.Range(0, orderedStations.Length).ToArray();
+        foreach (int stationIndex in speedSignStations.Distinct())
+        {
+            int index = orderedStations[stationIndex].index;
+            Vector3 forward = RouteForward(route, index);
+            float limit = speedSignStations.Length > 1 && stationIndex == speedSignStations[1] ? 50f : 30f;
+            signs.Add((index, () => MakeSign(root, route[index].position, forward, RoadRule.SpeedLimit, limit, 35f)));
+        }
+
+        foreach (var entry in orderedStations)
+        {
+            int index = entry.index;
+            if (entry.station.Terminal) continue;
+
+            int crossing = RouteIndexBehind(route, index, 18f);
+            Vector3 crossingForward = RouteForward(route, crossing);
+            signs.Add((crossing, () => MakeSign(root, route[crossing].position, crossingForward, RoadRule.Crossing, 20f, 12f, false)));
+
+            int hump = FindStraightHumpIndex(route, index, crossingIndices, usedHumps, routeDistances);
+            if (hump >= 0)
+            {
+                usedHumps.Add(hump);
+                Vector3 humpForward = RouteForward(route, hump);
+                signs.Add((hump, () =>
+                {
+                    Vector3 point = route[hump].position;
+                    MakeSign(root, point, humpForward, RoadRule.Hump, 20f, 4f);
+                    MakeHump(root, point, humpForward);
+                }));
+            }
+
+            int noOvertaking = RouteIndexBehind(route, index, 25f);
+            Vector3 noOvertakingForward = RouteForward(route, noOvertaking);
+            signs.Add((noOvertaking, () => MakeSign(root, route[noOvertaking].position, noOvertakingForward, RoadRule.NoOvertaking, 30f, 30f, false)));
+        }
+
+        foreach (var sign in signs.OrderBy(x => x.routeIndex)) sign.create();
+    }
+    static float[] RouteDistances(Transform[] route)
+    {
+        var distances = new float[route.Length];
+        for (int i = 1; i < route.Length; i++)
+            distances[i] = distances[i - 1] + HorizontalDistance(route[i - 1].position, route[i].position);
+        return distances;
+    }
+    static int RouteIndexBehind(Transform[] route, int index, float distance)
+    {
+        float remaining = distance;
+        while (index > 0 && remaining > 0f)
+        {
+            remaining -= HorizontalDistance(route[index - 1].position, route[index].position);
+            index--;
+        }
+        return index;
+    }
+    static Vector3 RouteForward(Transform[] route, int index)
+    {
+        Vector3 forward = route[Mathf.Min(route.Length - 1, index + 1)].position - route[Mathf.Max(0, index - 1)].position;
+        forward.y = 0f;
+        return forward.sqrMagnitude > .001f ? forward.normalized : Vector3.forward;
+    }
+    static int FindStraightHumpIndex(Transform[] route, int stationIndex, int[] crossingIndices, List<int> usedHumps, float[] routeDistances)
+    {
+        float stationDistance = routeDistances[stationIndex];
+        var candidates = Enumerable.Range(2, route.Length - 4)
+            .Where(i =>
+            {
+                float distance = stationDistance - routeDistances[i];
+                if (distance < 45f || distance > 100f) return false;
+                Vector3 incoming = route[i].position - route[i - 1].position;
+                Vector3 outgoing = route[i + 1].position - route[i].position;
+                incoming.y = 0f; outgoing.y = 0f;
+                if (incoming.sqrMagnitude < .01f || outgoing.sqrMagnitude < .01f || Vector3.Angle(incoming, outgoing) > 12f) return false;
+                if (crossingIndices.Any(c => Mathf.Abs(routeDistances[c] - routeDistances[i]) < 22f)) return false;
+                if (usedHumps.Any(h => Mathf.Abs(routeDistances[h] - routeDistances[i]) < 40f)) return false;
+                return true;
+            })
+            .OrderBy(i => Mathf.Abs((stationDistance - routeDistances[i]) - 70f))
+            .ToArray();
+        return candidates.Length == 0 ? -1 : candidates[0];
+    }
+    [MenuItem("Kombi Shift/Refresh Road Carriage Markings")]
+    public static void RefreshRoadCarriageMarkings()
+    {
+        var scene = EditorSceneManager.OpenScene(KombiProjectWorkbench.Shift);
+        var hud = Object.FindFirstObjectByType<KombiNavigationHud>();
+        var root = GameObject.Find(RootName);
+        if (root == null) throw new Exception("Shift expansion root is missing; cannot place road markings.");
+        MakeRoadCarriageMarkings(root.transform, hud.RoutePoints);
+        EditorSceneManager.MarkSceneDirty(scene);
+        EditorSceneManager.SaveScene(scene);
+        AssetDatabase.SaveAssets();
+        Debug.Log("KOMBI_ROAD_MARKINGS_REFRESHED " + hud.RoutePoints.Length);
+    }
+    static void RemovePhysicalRouteCenterLines()
+    {
+        var scene = EditorSceneManager.OpenScene(KombiProjectWorkbench.Shift);
+        int removed = 0;
+        foreach (var renderer in Object.FindObjectsByType<MeshRenderer>(FindObjectsSortMode.None))
+        {
+            if (!renderer.gameObject.name.StartsWith("Centre Line bz", StringComparison.Ordinal)) continue;
+            renderer.enabled = false;
+            removed++;
+        }
+        EditorSceneManager.MarkSceneDirty(scene);
+        EditorSceneManager.SaveScene(scene);
+        Debug.Log("KOMBI_PHYSICAL_ROUTE_LINES_REMOVED " + removed);
     }
     public static void Refine()
     {
@@ -300,6 +436,132 @@ public static class KombiShiftExpansionUpgrade
     }
     static float HorizontalDistance(Vector3 a, Vector3 b)
         => Vector2.Distance(new Vector2(a.x, a.z), new Vector2(b.x, b.z));
+    static void MakeRoadCarriageMarkings(Transform parent, Transform[] route)
+    {
+        var previous = parent.Find(RoadMarkingRootName);
+        if (previous != null)
+        {
+            foreach (var filter in previous.GetComponentsInChildren<MeshFilter>())
+                if (filter.sharedMesh != null && !AssetDatabase.Contains(filter.sharedMesh)) Object.DestroyImmediate(filter.sharedMesh);
+            Object.DestroyImmediate(previous.gameObject);
+        }
+        var group = new GameObject(RoadMarkingRootName);
+        group.transform.SetParent(parent, false);
+        var restricted = Object.FindObjectsByType<KombiRoadRuleZone>(FindObjectsSortMode.None)
+            .Where(x => x.rule == RoadRule.NoOvertaking).ToArray();
+        CreateMarking(group.transform, "Road edge lines", BuildEdgeMarkings(route), RoadMarkingMaterial("RoadMarkingWhite", Color.white));
+        CreateMarking(group.transform, "Dashed centre line", BuildDashedCentreLine(route, restricted), RoadMarkingMaterial("RoadMarkingWhite", Color.white));
+        CreateMarking(group.transform, "No-overtaking double line", BuildRestrictedCentreLine(route, restricted), RoadMarkingMaterial("RoadMarkingWhite", Color.white));
+    }
+    static Mesh BuildEdgeMarkings(Transform[] route)
+    {
+        var vertices = new List<Vector3>(); var triangles = new List<int>();
+        for (int i = 1; i < route.Length; i++)
+        {
+            AddRoadStrip(vertices, triangles, route[i - 1].position, route[i].position, -3.05f, .12f);
+            AddRoadStrip(vertices, triangles, route[i - 1].position, route[i].position, 3.05f, .12f);
+        }
+        return RoadMarkingMesh("Road edge markings mesh", vertices, triangles);
+    }
+    static Mesh BuildDashedCentreLine(Transform[] route, KombiRoadRuleZone[] restricted)
+    {
+        var vertices = new List<Vector3>(); var triangles = new List<int>();
+        const float dash = 4f, cycle = 8f;
+        float distanceAlong = 0f;
+        for (int i = 1; i < route.Length; i++)
+        {
+            Vector3 start = route[i - 1].position, end = route[i].position;
+            float length = Vector3.Distance(new Vector3(start.x,0f,start.z), new Vector3(end.x,0f,end.z));
+            if (length < .01f) continue;
+            float cursor = 0f;
+            while (cursor < length)
+            {
+                float phase = (distanceAlong + cursor) % cycle;
+                bool draw = phase < dash;
+                float step = Mathf.Min(length - cursor, draw ? dash - phase : cycle - phase);
+                if (step < .001f) break;
+                if (draw)
+                {
+                    Vector3 a = Vector3.Lerp(start, end, cursor / length);
+                    Vector3 b = Vector3.Lerp(start, end, (cursor + step) / length);
+                    if (!IsRestricted(a + (b - a) * .5f, restricted)) AddRoadStrip(vertices, triangles, a, b, 0f, .12f);
+                }
+                cursor += step;
+            }
+            distanceAlong += length;
+        }
+        return RoadMarkingMesh("Dashed road centre line mesh", vertices, triangles);
+    }
+    static Mesh BuildRestrictedCentreLine(Transform[] route, KombiRoadRuleZone[] restricted)
+    {
+        var vertices = new List<Vector3>(); var triangles = new List<int>();
+        for (int i = 1; i < route.Length; i++)
+        {
+            Vector3 start = route[i - 1].position, end = route[i].position;
+            if (!IsRestricted((start + end) * .5f, restricted)) continue;
+            AddRoadStrip(vertices, triangles, start, end, -.16f, .1f);
+            AddRoadStrip(vertices, triangles, start, end, .16f, .1f);
+        }
+        return RoadMarkingMesh("Solid no-overtaking centre line mesh", vertices, triangles);
+    }
+    static bool IsRestricted(Vector3 point, KombiRoadRuleZone[] zones)
+    {
+        foreach (var zone in zones)
+        {
+            var box = zone.GetComponent<BoxCollider>();
+            if (box == null) continue;
+            Vector3 local = zone.transform.InverseTransformPoint(point) - box.center;
+            if (Mathf.Abs(local.x) <= box.size.x * .5f && Mathf.Abs(local.y) <= box.size.y * .5f &&
+                Mathf.Abs(local.z) <= box.size.z * .5f) return true;
+        }
+        return false;
+    }
+    static void AddRoadStrip(List<Vector3> vertices, List<int> triangles, Vector3 start, Vector3 end, float offset, float width)
+    {
+        Vector3 direction = end - start; direction.y = 0f;
+        if (direction.sqrMagnitude < .0001f) return;
+        Vector3 lateral = Vector3.Cross(Vector3.up, direction.normalized);
+        Vector3 lift = Vector3.up * .04f;
+        Vector3 a = start + lateral * (offset - width * .5f) + lift;
+        Vector3 b = end + lateral * (offset - width * .5f) + lift;
+        Vector3 c = start + lateral * (offset + width * .5f) + lift;
+        Vector3 d = end + lateral * (offset + width * .5f) + lift;
+        int first = vertices.Count;
+        vertices.AddRange(new[] { a, b, c, d });
+        triangles.AddRange(new[] { first, first + 1, first + 2, first + 2, first + 1, first + 3 });
+    }
+    static Mesh RoadMarkingMesh(string name, List<Vector3> vertices, List<int> triangles)
+    {
+        var mesh = new Mesh { name = name };
+        mesh.SetVertices(vertices); mesh.SetTriangles(triangles, 0); mesh.RecalculateNormals(); mesh.RecalculateBounds();
+        return mesh;
+    }
+    static Material RoadMarkingMaterial(string name, Color color)
+    {
+        string path = "Assets/KombiShift2/Art/Generated/" + name + ".mat";
+        var material = AssetDatabase.LoadAssetAtPath<Material>(path);
+        if (material == null)
+        {
+            Directory.CreateDirectory(Path.GetDirectoryName(path));
+            Shader shader = Shader.Find("Universal Render Pipeline/Unlit") ?? Shader.Find("Unlit/Color") ?? Shader.Find("Standard");
+            if (shader == null) throw new Exception("No supported shader found for road carriage markings.");
+            material = new Material(shader) { name = name };
+            AssetDatabase.CreateAsset(material, path);
+        }
+        material.SetColor(material.HasProperty("_BaseColor") ? "_BaseColor" : "_Color", color);
+        EditorUtility.SetDirty(material);
+        return material;
+    }
+    static void CreateMarking(Transform parent, string name, Mesh mesh, Material material)
+    {
+        var go = new GameObject(name);
+        go.transform.SetParent(parent, false);
+        go.AddComponent<MeshFilter>().sharedMesh = mesh;
+        var renderer = go.AddComponent<MeshRenderer>();
+        renderer.sharedMaterial = material;
+        renderer.shadowCastingMode = UnityEngine.Rendering.ShadowCastingMode.Off;
+        renderer.receiveShadows = false;
+    }
     static Vector3 Ground(Vector3 point)
     {
         var hits = Physics.RaycastAll(point + Vector3.up * 2f, Vector3.down, 8f, ~0, QueryTriggerInteraction.Ignore);
@@ -307,26 +569,52 @@ public static class KombiShiftExpansionUpgrade
         if (valid.Length == 0) throw new Exception("No road ground at " + point);
         return new Vector3(point.x, valid[0].point.y + .025f, point.z);
     }
-    static void MakeSign(Transform parent, Vector3 point, Vector3 forward, RoadRule rule, float limit, float length)
+    static void MakeSign(Transform parent, Vector3 point, Vector3 forward, RoadRule rule, float limit, float length, bool showSign = true)
     {
         forward.y = 0; forward.Normalize();
         var zone = new GameObject(rule + " zone"); zone.transform.SetParent(parent); zone.transform.SetPositionAndRotation(point + Vector3.up * 1.5f, Quaternion.LookRotation(forward));
         var box = zone.AddComponent<BoxCollider>(); box.isTrigger = true; box.size = new Vector3(rule == RoadRule.NoEntry ? 4f : 7f, 4f, length);
         var behaviour = zone.AddComponent<KombiRoadRuleZone>(); behaviour.rule = rule; behaviour.limit = limit; behaviour.travelDirection = forward;
+        if (!showSign) return;
         var post = GameObject.CreatePrimitive(PrimitiveType.Cylinder); post.name = rule + " sign post"; post.transform.SetParent(zone.transform);
         post.transform.localScale = new Vector3(.08f,1f,.08f);
         Object.DestroyImmediate(post.GetComponent<Collider>());
         var text = new GameObject("Readable road sign"); text.transform.SetParent(post.transform, false); text.transform.localScale = Vector3.one;
         text.transform.SetParent(zone.transform, true); text.transform.localScale = Vector3.one;
-        var label = text.AddComponent<TextMesh>(); label.text = rule == RoadRule.SpeedLimit ? limit.ToString("0") + " km/h" : rule == RoadRule.Hump ? "HUMP 20" : rule.ToString().ToUpperInvariant();
+        var label = text.AddComponent<TextMesh>(); label.text = RoadSignText(rule, limit);
         label.fontSize = 48; label.characterSize = .09f; label.anchor = TextAnchor.MiddleCenter; label.color = Color.yellow;
         PlaceRoadSign(behaviour, post.transform, text.transform);
+    }
+    static string RoadSignText(RoadRule rule, float limit)
+    {
+        return rule switch
+        {
+            RoadRule.SpeedLimit => limit.ToString("0") + " km/h",
+            RoadRule.Stop => "STOP",
+            RoadRule.NoEntry => "NO ENTRY",
+            RoadRule.NoOvertaking => "NO OVERTAKING",
+            RoadRule.Crossing => "CROSSING",
+            RoadRule.Roadworks => "ROADWORKS",
+            RoadRule.Hump => "HUMP 20",
+            RoadRule.Direction => "KEEP LEFT",
+            _ => rule.ToString().ToUpperInvariant()
+        };
     }
     static void PlaceRoadSign(KombiRoadRuleZone zone, Transform post, Transform label)
     {
         Vector3 forward = zone.travelDirection; forward.y = 0f; forward.Normalize();
         Vector3 ground = zone.transform.position - Vector3.up * 1.5f;
-        Vector3 position = ground + RivalKombiAI.LeftOffset(forward, 6.5f) + Vector3.up;
+        float approach = zone.rule switch
+        {
+            RoadRule.Hump => 15f,
+            RoadRule.Crossing => 20f,
+            RoadRule.NoOvertaking => 30f,
+            RoadRule.SpeedLimit => 12f,
+            RoadRule.Stop => 15f,
+            RoadRule.Roadworks => 20f,
+            _ => 0f
+        };
+        Vector3 position = ground + RivalKombiAI.LeftOffset(forward, 6.5f) - forward * approach + Vector3.up;
         post.SetPositionAndRotation(position, Quaternion.LookRotation(forward));
         label.SetPositionAndRotation(position + Vector3.up * 1.3f, Quaternion.LookRotation(forward));
         label.localScale = Vector3.one;
@@ -346,9 +634,8 @@ public static class KombiShiftExpansionUpgrade
         if (saved == null) { AssetDatabase.CreateAsset(mesh,path); saved = mesh; } else Object.DestroyImmediate(mesh);
         go.AddComponent<MeshFilter>().sharedMesh = saved;
         var renderer = go.AddComponent<MeshRenderer>();
-        const string matPath = "Assets/KombiShift2/Art/Generated/HumpWarning.mat";
-        var material = AssetDatabase.LoadAssetAtPath<Material>(matPath);
-        if (material == null) { material = new Material(Shader.Find("Standard")) { color = new Color(.8f,.55f,.08f) }; AssetDatabase.CreateAsset(material, matPath); }
+        var material = AssetDatabase.LoadAssetAtPath<Material>("Assets/KombiShift2/Generated/City/City Asphalt.mat");
+        if (material == null) throw new Exception("City asphalt material is missing; cannot match the speed hump to the road.");
         renderer.sharedMaterial = material; renderer.shadowCastingMode = UnityEngine.Rendering.ShadowCastingMode.Off;
         go.AddComponent<MeshCollider>().sharedMesh = saved;
     }
