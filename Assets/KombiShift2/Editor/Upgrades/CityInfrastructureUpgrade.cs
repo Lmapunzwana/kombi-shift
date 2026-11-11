@@ -89,12 +89,16 @@ public static class KombiCityInfrastructureUpgrade
         RepairCityFoliage(root.transform);
         BuildIntersections(root.transform,network);
         BuildMarkings(root.transform,network);
-        var originalStation=Object.FindObjectsByType<KombiShift2.Gameplay.PassengerStation>().First(s=>!s.Terminal && s.People.Length==6);
-        var template=Object.Instantiate(originalStation.ServicePoint.parent.gameObject);
-        template.name="City Passenger Station";
-        var station=template.GetComponent<KombiShift2.Gameplay.PassengerStation>()??template.AddComponent<KombiShift2.Gameplay.PassengerStation>();
-        station.Configure(template.GetComponentsInChildren<KombiShift2.Gameplay.StationPassenger>(),template.transform.Find("Kombi Service Point"),template.GetComponentsInChildren<Transform>().Where(t=>t.name.StartsWith("Bench Seat ")).ToArray(),false);
-        var stationPrefab=PrefabUtility.SaveAsPrefabAsset(template,Generated+"/CityPassengerStation.prefab");Object.DestroyImmediate(template);
+        var stationPrefab=AssetDatabase.LoadAssetAtPath<GameObject>(Generated+"/CityPassengerStation.prefab");
+        if(stationPrefab==null)
+        {
+            var originalStation=Object.FindObjectsByType<KombiShift2.Gameplay.PassengerStation>().First(s=>!s.Terminal && s.People.Length==6);
+            var template=Object.Instantiate(originalStation.ServicePoint.parent.gameObject);
+            template.name="City Passenger Station";
+            var station=template.GetComponent<KombiShift2.Gameplay.PassengerStation>()??template.AddComponent<KombiShift2.Gameplay.PassengerStation>();
+            station.Configure(template.GetComponentsInChildren<KombiShift2.Gameplay.StationPassenger>(),template.transform.Find("Kombi Service Point"),template.GetComponentsInChildren<Transform>().Where(t=>t.name.StartsWith("Bench Seat ")).ToArray(),false);
+            stationPrefab=PrefabUtility.SaveAsPrefabAsset(template,Generated+"/CityPassengerStation.prefab");Object.DestroyImmediate(template);
+        }
         var session=root.GetComponent<CityTripSession>()??root.AddComponent<CityTripSession>();session.stationPrefab=stationPrefab;
         if(root.GetComponent<CityNavigation>()==null)root.AddComponent<CityNavigation>();
         if(root.GetComponent<CityTrafficFleet>()==null)root.AddComponent<CityTrafficFleet>();
@@ -193,15 +197,34 @@ public static class KombiCityInfrastructureUpgrade
             MakeJunctionSign(go.transform,intersection.signalised?"SIGNAL AHEAD":intersection.stopControlled?"STOP":"GIVE WAY",Mathf.Max(6,node.width*.5f+1));
             if(intersection.signalised)
             {
-                var lamps=new List<Renderer>();
-                for(int i=0;i<4;i++)
+                var eastWest=new List<Renderer>();var northSouth=new List<Renderer>();
+                foreach(var forward in new[]{Vector3.right,Vector3.left,Vector3.forward,Vector3.back})
                 {
-                    var post=GameObject.CreatePrimitive(PrimitiveType.Cylinder);post.name="Traffic signal post";post.transform.SetParent(go.transform,false);post.transform.localPosition=new Vector3(i<2?(i==0?-6:6):0,1.5f,i>=2?(i==2?-6:6):0);post.transform.localScale=new Vector3(.08f,1.5f,.08f);
-                    var lamp=GameObject.CreatePrimitive(PrimitiveType.Sphere);lamp.name="Signal lamp";lamp.transform.SetParent(go.transform,false);lamp.transform.localPosition=new Vector3(i<2?(i==0?-6:6):0,3,i>=2?(i==2?-6:6):0);lamp.transform.localScale=Vector3.one*.4f;Object.DestroyImmediate(lamp.GetComponent<Collider>());lamp.GetComponent<Renderer>().sharedMaterial=lampMaterial;lamps.Add(lamp.GetComponent<Renderer>());
+                    float width=ApproachWidth(network,node.position,forward);
+                    Vector3 left=-Vector3.Cross(Vector3.up,forward);
+                    Vector3 position=node.position-forward*(intersection.radius+1f)+left*(width*.5f+.9f);
+                    var post=GameObject.CreatePrimitive(PrimitiveType.Cylinder);post.name="Traffic signal post";post.transform.SetParent(go.transform,false);
+                    post.transform.localPosition=new Vector3(position.x-node.position.x,1.5f,position.z-node.position.z);post.transform.localScale=new Vector3(.12f,1.5f,.12f);
+                    var lamp=GameObject.CreatePrimitive(PrimitiveType.Sphere);lamp.name="Signal lamp";lamp.transform.SetParent(go.transform,false);
+                    lamp.transform.localPosition=post.transform.localPosition+Vector3.up*1.5f;lamp.transform.localScale=Vector3.one*.4f;
+                    Object.DestroyImmediate(lamp.GetComponent<Collider>());lamp.GetComponent<Renderer>().sharedMaterial=lampMaterial;
+                    if(Mathf.Abs(forward.x)>Mathf.Abs(forward.z))eastWest.Add(lamp.GetComponent<Renderer>());else northSouth.Add(lamp.GetComponent<Renderer>());
                 }
-                intersection.eastWestLamps=lamps.Take(2).ToArray();intersection.northSouthLamps=lamps.Skip(2).ToArray();
+                intersection.eastWestLamps=eastWest.ToArray();intersection.northSouthLamps=northSouth.ToArray();
             }
         }
+    }
+    static float ApproachWidth(CityRoadNetwork network,Vector3 centre,Vector3 forward)
+    {
+        float nearest=float.MaxValue,width=7f;
+        foreach(var node in network.Nodes)
+        {
+            if(node.component!=0||node.junction||node.roundabout)continue;
+            Vector3 delta=node.position-centre;delta.y=0f;float distance=delta.magnitude;
+            if(distance<.5f||distance>45f||Vector3.Dot(delta/distance,-forward)<.7f||distance>=nearest)continue;
+            nearest=distance;width=node.width;
+        }
+        return width;
     }
     static void MakeJunctionSign(Transform parent,string label,float roadside)
     {
@@ -215,7 +238,8 @@ public static class KombiCityInfrastructureUpgrade
         var edges=GameObject.Find("Road edge lines");if(edges!=null)edges.SetActive(false);
         var old=root.Find("City road markings");if(old!=null)Object.DestroyImmediate(old.gameObject);
         var group=new GameObject("City road markings").transform;group.SetParent(root,false);
-        var vertices=new List<Vector3>();var triangles=new List<int>();
+        var whiteVertices=new List<Vector3>();var whiteTriangles=new List<int>();
+        var yellowVertices=new List<Vector3>();var yellowTriangles=new List<int>();
         var paintHits=new RaycastHit[24];
         bool GroundPaint(Vector3 point,out Vector3 projected)
         {
@@ -229,24 +253,51 @@ public static class KombiCityInfrastructureUpgrade
             }
             projected=new Vector3(point.x,highest+.025f,point.z);return !float.IsNegativeInfinity(highest);
         }
-        void Strip(Vector3 a,Vector3 b,float width)
+        void Strip(Vector3 a,Vector3 b,float width,List<Vector3> vertices,List<int> triangles)
         {
             Vector3 right=Vector3.Cross(Vector3.up,(b-a).normalized)*width*.5f;
             if(!GroundPaint(a-right,out var p0)||!GroundPaint(a+right,out var p1)||!GroundPaint(b+right,out var p2)||!GroundPaint(b-right,out var p3))return;
             int n=vertices.Count;vertices.Add(p0);vertices.Add(p1);vertices.Add(p2);vertices.Add(p3);triangles.AddRange(new[]{n,n+2,n+1,n,n+3,n+2});
         }
+        void Dashed(Vector3 a,Vector3 b,float width,List<Vector3> vertices,List<int> triangles)
+        {
+            Vector3 direction=b-a;direction.y=0f;float length=direction.magnitude;if(length<.1f)return;direction/=length;
+            float first=Vector3.Dot(a,direction),last=Vector3.Dot(b,direction);
+            Vector3 lowPoint=first<last?a:b,highPoint=first<last?b:a;
+            float low=Mathf.Min(first,last),high=Mathf.Max(first,last);
+            const float period=6f,dashLength=3.6f;
+            for(float dash=Mathf.Floor(low/period)*period;dash<high;dash+=period)
+            {
+                float from=Mathf.Max(low,dash+.4f),to=Mathf.Min(high,dash+dashLength);
+                if(to-from<.2f)continue;
+                Strip(Vector3.Lerp(lowPoint,highPoint,(from-low)/(high-low)),Vector3.Lerp(lowPoint,highPoint,(to-low)/(high-low)),width,vertices,triangles);
+            }
+        }
+        var seen=new HashSet<long>();
         for(int i=0;i<network.Nodes.Length;i++)
         {
             var node=network.Nodes[i];if(node.component!=0)continue;
             foreach(int next in node.links)
             {
-                if(next<i)continue;var other=network.Nodes[next];if(node.junction||other.junction)continue;
-                Vector3 direction=(other.position-node.position).normalized,right=Vector3.Cross(Vector3.up,direction);
-                float width=Mathf.Min(node.width,other.width)*.35f;
-                Strip(node.position+right*width,other.position+right*width,.1f);Strip(node.position-right*width,other.position-right*width,.1f);
-                if(i%2==0)Strip(Vector3.Lerp(node.position,other.position,.15f),Vector3.Lerp(node.position,other.position,.75f),.12f);
-                if(node.width>=13&&other.width>=13&&i%2==0)
-                {Strip(Vector3.Lerp(node.position,other.position,.2f)+right*3.1f,Vector3.Lerp(node.position,other.position,.7f)+right*3.1f,.1f);Strip(Vector3.Lerp(node.position,other.position,.2f)-right*3.1f,Vector3.Lerp(node.position,other.position,.7f)-right*3.1f,.1f);}
+                int low=Mathf.Min(i,next),high=Mathf.Max(i,next);long key=((long)low<<32)|(uint)high;if(!seen.Add(key))continue;
+                var other=network.Nodes[next];if(node.junction||other.junction||node.roundabout||other.roundabout)continue;
+                Vector3 direction=other.position-node.position;direction.y=0f;if(direction.sqrMagnitude<.01f)continue;direction.Normalize();
+                Vector3 right=Vector3.Cross(Vector3.up,direction);float roadWidth=Mathf.Min(node.width,other.width);
+                float edge=Mathf.Max(.8f,roadWidth*.5f-.35f);
+                Strip(node.position+right*edge,other.position+right*edge,.12f,whiteVertices,whiteTriangles);
+                Strip(node.position-right*edge,other.position-right*edge,.12f,whiteVertices,whiteTriangles);
+                bool passing=node.allowPassing&&other.allowPassing&&roadWidth>=13f;
+                if(passing)Dashed(node.position,other.position,.14f,yellowVertices,yellowTriangles);
+                else
+                {
+                    Strip(node.position+right*.13f,other.position+right*.13f,.13f,yellowVertices,yellowTriangles);
+                    Strip(node.position-right*.13f,other.position-right*.13f,.13f,yellowVertices,yellowTriangles);
+                }
+                if(roadWidth>=13f)
+                {
+                    Dashed(node.position+right*3.1f,other.position+right*3.1f,.1f,whiteVertices,whiteTriangles);
+                    Dashed(node.position-right*3.1f,other.position-right*3.1f,.1f,whiteVertices,whiteTriangles);
+                }
             }
         }
         foreach(var junction in Object.FindObjectsByType<CityIntersection>())
@@ -254,16 +305,46 @@ public static class KombiCityInfrastructureUpgrade
             if(junction.roundabout)continue;
             foreach(var forward in new[]{Vector3.forward,Vector3.back,Vector3.left,Vector3.right})
             {
-                Vector3 left=-Vector3.Cross(Vector3.up,forward);Vector3 centre=junction.transform.position-forward*9+left*1.55f;
-                Strip(centre-left*1.35f,centre+left*1.35f,.25f);
-                if(junction.signalised)for(int stripe=0;stripe<5;stripe++)
-                {Vector3 p=junction.transform.position-forward*(5+stripe*.6f);Strip(p-left*3,p+left*3,.3f);}
-                Strip(centre-forward*5,centre-forward*2,.12f);
-                Strip(centre-forward*2,centre-forward*3+left*.65f,.12f);Strip(centre-forward*2,centre-forward*3-left*.65f,.12f);
+                float roadWidth=ApproachWidth(network,junction.transform.position,forward);
+                Vector3 left=-Vector3.Cross(Vector3.up,forward);
+                float laneOffset=roadWidth>=13f?4.65f:Mathf.Min(roadWidth*.22f,1.55f);
+                float stopDistance=junction.radius+1f;
+                if(junction.signalised||junction.stopControlled)
+                {
+                    int laneCount=roadWidth>=13f?2:1;
+                    for(int lane=0;lane<laneCount;lane++)
+                    {
+                        Vector3 stop=junction.transform.position-forward*stopDistance+left*(laneOffset-lane*3.1f);
+                        Strip(stop-left*1.5f,stop+left*1.5f,.28f,whiteVertices,whiteTriangles);
+                    }
+                }
+                if(junction.signalised)
+                {
+                    for(int stripe=0;stripe<5;stripe++)
+                    {
+                        Vector3 crossing=junction.transform.position-forward*(stopDistance+1.5f+stripe*.58f);
+                        Strip(crossing-left*(roadWidth*.5f-.25f),crossing+left*(roadWidth*.5f-.25f),.28f,whiteVertices,whiteTriangles);
+                    }
+                }
             }
         }
-        var mesh=new Mesh{name="City carriage markings",indexFormat=IndexFormat.UInt32};mesh.SetVertices(vertices);mesh.SetTriangles(triangles,0);mesh.RecalculateNormals();
-        string path=Generated+"/CityMarkings.asset";var asset=AssetDatabase.LoadAssetAtPath<Mesh>(path);if(asset==null){AssetDatabase.CreateAsset(mesh,path);asset=mesh;}else{EditorUtility.CopySerialized(mesh,asset);Object.DestroyImmediate(mesh);}
-        var go=new GameObject("Shared white marking mesh",typeof(MeshFilter),typeof(MeshRenderer));go.transform.SetParent(group,false);go.GetComponent<MeshFilter>().sharedMesh=asset;var white=AssetDatabase.LoadAssetAtPath<Material>("Assets/KombiShift2/Generated/City/City Road Marking.mat");white.SetColor("_Color",new Color(.9f,.92f,.9f));white.enableInstancing=true;EditorUtility.SetDirty(white);go.GetComponent<MeshRenderer>().sharedMaterial=white;
+        var white=AssetDatabase.LoadAssetAtPath<Material>("Assets/KombiShift2/Generated/City/City Road Marking.mat");
+        var yellow=AssetDatabase.LoadAssetAtPath<Material>(Generated+"/City Road Marking Yellow.mat");
+        if(yellow==null){yellow=new Material(white){name="City Road Marking Yellow"};AssetDatabase.CreateAsset(yellow,Generated+"/City Road Marking Yellow.mat");}
+        white.SetColor("_Color",new Color(.9f,.92f,.9f));white.enableInstancing=true;EditorUtility.SetDirty(white);
+        yellow.SetColor("_Color",new Color(1f,.78f,.08f));yellow.enableInstancing=true;EditorUtility.SetDirty(yellow);
+        var whiteMesh=SaveMarkingMesh(whiteVertices,whiteTriangles,"City white road markings",Generated+"/CityMarkings.asset");
+        var yellowMesh=SaveMarkingMesh(yellowVertices,yellowTriangles,"City yellow road markings",Generated+"/CityMarkingsYellow.asset");
+        var whiteObject=new GameObject("Shared white marking mesh",typeof(MeshFilter),typeof(MeshRenderer));whiteObject.transform.SetParent(group,false);
+        whiteObject.GetComponent<MeshFilter>().sharedMesh=whiteMesh;whiteObject.GetComponent<MeshRenderer>().sharedMaterial=white;
+        var yellowObject=new GameObject("Shared yellow marking mesh",typeof(MeshFilter),typeof(MeshRenderer));yellowObject.transform.SetParent(group,false);
+        yellowObject.GetComponent<MeshFilter>().sharedMesh=yellowMesh;yellowObject.GetComponent<MeshRenderer>().sharedMaterial=yellow;
+    }
+    static Mesh SaveMarkingMesh(List<Vector3> vertices,List<int> triangles,string name,string path)
+    {
+        var mesh=new Mesh{name=name,indexFormat=IndexFormat.UInt32};mesh.SetVertices(vertices);mesh.SetTriangles(triangles,0);mesh.RecalculateNormals();mesh.RecalculateBounds();
+        var asset=AssetDatabase.LoadAssetAtPath<Mesh>(path);
+        if(asset==null){AssetDatabase.CreateAsset(mesh,path);return mesh;}
+        EditorUtility.CopySerialized(mesh,asset);Object.DestroyImmediate(mesh);return asset;
     }
 }

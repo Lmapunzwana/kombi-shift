@@ -14,6 +14,7 @@ public static class KombiCityNetworkSceneAudit
     [Serializable] public class Record
     {
         public int cityRenderers,roadSurfaces,physicalPotholes,nodes,links,unsupportedLaneSamples,blockedLaneSegments;
+        public int markingMeshes,markingTriangles,markingColliders,signalisedJunctions,trafficSignalPosts,misplacedTrafficSignalPosts;
         public List<string> details=new();
         public List<LaneIssue> laneIssues=new();
         public int reachableTrips;
@@ -31,6 +32,24 @@ public static class KombiCityNetworkSceneAudit
         var report=new Record();
         report.cityRenderers=Object.FindObjectsByType<MeshFilter>().Count(m=>AssetDatabase.GetAssetPath(m.sharedMesh).Contains("Environment/City")||m.GetComponent<CityRoadSurface>()!=null);
         var roads=Object.FindObjectsByType<CityRoadSurface>();report.roadSurfaces=roads.Length;report.physicalPotholes=roads.Sum(r=>r.potholes.Length);report.nodes=graph.Nodes.Length;
+        var markingRoot=GameObject.Find("City road markings");
+        if(markingRoot!=null)
+        {
+            var markings=markingRoot.GetComponentsInChildren<MeshFilter>();
+            report.markingMeshes=markings.Length;report.markingTriangles=markings.Where(m=>m.sharedMesh!=null).Sum(m=>m.sharedMesh.triangles.Length/3);
+            report.markingColliders=markings.Count(m=>m.GetComponent<Collider>()!=null);
+        }
+        foreach(var junction in Object.FindObjectsByType<CityIntersection>())
+        {
+            if(!junction.signalised)continue;
+            report.signalisedJunctions++;
+            foreach(Transform post in junction.GetComponentsInChildren<Transform>().Where(t=>t.name=="Traffic signal post"))
+            {
+                report.trafficSignalPosts++;
+                Vector3 delta=post.position-junction.transform.position;delta.y=0f;
+                if(delta.magnitude<junction.radius||Mathf.Min(Mathf.Abs(delta.x),Mathf.Abs(delta.z))<2.5f)report.misplacedTrafficSignalPosts++;
+            }
+        }
         foreach(var road in roads)
         {
             foreach(var hole in road.potholes)
@@ -69,6 +88,8 @@ public static class KombiCityNetworkSceneAudit
             var path=graph.FindTripPath(trip);
             if(path.Count<2)report.details.Add("Unreachable selected trip "+trip.destination);else report.reachableTrips++;
         }
+        if(report.markingMeshes<2||report.markingTriangles==0||report.markingColliders>0)report.details.Add("Road marking meshes are missing, empty, or collidable.");
+        if(report.misplacedTrafficSignalPosts>0||report.trafficSignalPosts!=report.signalisedJunctions*4)report.details.Add("Traffic signals are missing or placed inside the junction/road.");
         Directory.CreateDirectory("Docs/Validation/CityInfrastructure");File.WriteAllText("Docs/Validation/CityInfrastructure/scene-road-audit.json",JsonUtility.ToJson(report,true));
         Debug.Log("KOMBI_CITY_SCENE_AUDIT "+JsonUtility.ToJson(report));
     }

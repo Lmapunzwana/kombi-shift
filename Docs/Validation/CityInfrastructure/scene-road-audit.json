@@ -6,6 +6,12 @@
     "links": 8466,
     "unsupportedLaneSamples": 0,
     "blockedLaneSegments": 0,
+    "markingMeshes": 2,
+    "markingTriangles": 31788,
+    "markingColliders": 0,
+    "signalisedJunctions": 41,
+    "trafficSignalPosts": 164,
+    "misplacedTrafficSignalPosts": 0,
     "details": [],
     "laneIssues": [],
     "reachableTrips": 9

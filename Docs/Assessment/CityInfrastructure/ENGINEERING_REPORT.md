@@ -1,10 +1,10 @@
 # Engineering report — Kombi Shift 2 existing-city infrastructure
 
-Updated 2026-11-11T08:32:37.117340+00:00. Implementation source commit: `0798f97` (later evidence/documentation commits may follow). Unity **6000.6.2f1**, branch `feat/kombishift2-unity6`.
+Updated 2026-11-11T11:55:35+00:00. Validated source base: `e9c4f0e` plus the uncommitted changes recorded in this worktree. Unity **6000.6.2f1**, branch `feat/kombishift2-unity6`.
 
 ## Outcome and scope
 
-The existing NYBlock02 city remains the playable environment. The implementation adds shared textured asphalt across its 25 identified road meshes, copied physical pothole surfaces, a derived and physically audited navigation network, physical pooled civilian traffic, junction controls, nine real selectable fictional routes, route fares, individual drop-off guidance, and integrated passenger/vehicle consequences. The existing RCC controller, imported city sources, 12-seat layout, two challenge stages and working menus remain in use.
+The existing NYBlock02 city remains the playable environment. The implementation adds shared textured asphalt across its 25 identified road meshes, copied physical pothole surfaces, a derived and physically audited navigation network, physical pooled civilian traffic, junction controls, nine real selectable fictional routes, route fares, individual drop-off guidance, and integrated passenger/vehicle consequences. The follow-up rebuilds white edge/lane and yellow center markings over the playable graph, places signal posts at roadside corners, and lets safely spaced same-direction traffic platoons proceed while retaining red-light and cross-traffic gating. The existing RCC controller, imported city sources, 12-seat layout, two challenge stages and working menus remain in use.
 
 This is a substantial playable city upgrade, not a claim that every extracted fragment or every commercial driving-simulator behaviour is complete. The validated playable component has **4191 nodes** and **8466 directional links**. Unsafe links and inaccessible fragments remain excluded and documented. Fictional Harare labels do not make the New York geometry geographically Harare, and fares/fines are game values.
 
@@ -12,7 +12,7 @@ This is a substantial playable city upgrade, not a claim that every extracted fr
 
 The source comparison uses pre-city commit `7a6a733`. The original city prefab instance remains present, imported city assets have no modifications, and no unexpected original transform/property overrides were found. Allowed changes are road mesh/material references and foliage collision enable states. The runtime/editor inventory still contains **12,611 city mesh renderers**.
 
-The final actual-scene road audit reports **0 unsupported links**, **0 blocked links**, **9 reachable configured trips**, and **34 physical potholes** across **25 road surfaces**. The body envelope is 1.9 m wide, 0.9 m high, centred 0.95 m above the path; road support is sampled at both endpoints and the midpoint. This is an authored-network clearance check, not exhaustive proof of every dynamic turning trajectory.
+The final actual-scene road audit reports **0 unsupported links**, **0 blocked links**, **9 reachable configured trips**, and **34 physical potholes** across **25 road surfaces**. The regenerated paint has **31,788 triangles** across two non-collidable meshes; all **164 signal posts** across 41 signalised junctions pass the roadside-placement check. The body envelope is 1.9 m wide, 0.9 m high, centred 0.95 m above the path; road support is sampled at both endpoints and the midpoint. This is an authored-network clearance check, not exhaustive proof of every dynamic turning trajectory.
 
 The raw extraction contains 4533 nodes. 342 lie outside the final playable component, and 205 directional exclusions are recorded. Tree-card walls were replaced with narrow trunks while preserving their artwork; actual trunks, kerbs, buildings and unsupported road fragments are not deleted merely to make a path pass. Original flat road collision is replaced by the copied depressed surface, so it does not fill the potholes.
 
@@ -22,13 +22,13 @@ Evidence: [scene audit](../../Validation/CityInfrastructure/scene-road-audit.jso
 
 | Scenario | Result | Machine record |
 |---|---|---|
-| Morning selected-trip scenario | 27 passed; 0 failed | `city-service-results.json` |
-| Rush Hour selected-trip scenario | 27 passed; 0 failed | `city-service-rush.json` |
+| Morning selected-trip scenario | 30 passed; 0 failed | `city-service-results.json` |
+| Rush Hour selected-trip scenario | 30 passed; 0 failed | `city-service-rush.json` |
 | Real menu → Borrowdale startup | 15 passed; 0 failed | `trip-market-results.json` |
 | Actual RCC pothole crossing | 7 passed; 0 failed | `pothole-physics.json` |
 | Existing passenger-service regression | 26 passed; 0 failed | `passenger-regression.json` |
 
-The selected-trip fixtures use real scene objects, shared passenger queues, actual boarding/alighting coroutines, actual fares, physical traffic and complete terminal outcomes. The vehicle is deliberately positioned between stops for service assertions; these are not human or autonomous full-route driving sessions. The native control smoke and pothole fixture separately exercise real vehicle physics. No unit/component coverage run is claimed: Unit Test MCP was unavailable, and the repository prohibits substituting terminal unit-test commands.
+The updated runs include direct red-signal entry rejection and same-direction platoon admission checks. The selected-trip fixtures use real scene objects, shared passenger queues, actual boarding/alighting coroutines, actual fares, physical traffic and complete terminal outcomes. The vehicle is deliberately positioned between stops for service assertions; these are not human or autonomous full-route driving sessions. The native control smoke and pothole fixture separately exercise real vehicle physics. No unit/component coverage run is claimed: Unit Test MCP was unavailable, and the repository prohibits substituting terminal unit-test commands.
 
 The menu fixture found and fixed cached route lists being cleared when switching cards. Scene reload initially duplicated the verification runner; a singleton guard was added and Rush Hour was rerun independently. The final records above are the passing runs. Later visual refinements keep actors crouched during cabin entry/egress and ground stops on actual pavement without treating furniture as ground.
 
@@ -47,12 +47,12 @@ Unity models WheelCollider suspension through spring/damper behaviour; the imple
 
 | Stage | Window | Vehicles | Mean frame ms | P95 frame ms | Physics marker ms | Last AI decision ms | Editor allocated MiB |
 |---|---|---:|---:|---:|---:|---:|---:|
-| Morning | comparison AI 20ms + full city visibility | 28 | 3.151 | 5.813 | 1.273 | 0.0588 | 785.5 |
-| Morning | AI 120ms + city distance culling | 28 | 2.901 | 5.252 | 1.266 | 0.0578 | 785.5 |
-| RushHour | comparison AI 20ms + full city visibility | 48 | 3.734 | 7.128 | 1.712 | 0.0576 | 816.9 |
-| RushHour | AI 120ms + city distance culling | 48 | 3.582 | 6.566 | 1.737 | 0.0585 | 816.9 |
+| Morning | comparison AI 20ms + full city visibility | 28 | 19.766 | 34.271 | 4.440 | 0.263 | 822.6 |
+| Morning | AI 120ms + city distance culling | 28 | 22.085 | 38.808 | 5.455 | 0.302 | 822.6 |
+| RushHour | comparison AI 20ms + full city visibility | 48 | 126.028 | 203.001 | 38.177 | 0.237 | 705.1 |
+| RushHour | AI 120ms + city distance culling | 48 | 29.128 | 47.514 | 8.928 | 0.246 | 705.1 |
 
-Hardware reported by the fixtures: Mesa Intel Graphics (RPL-P). Each window lasts 15 seconds. The comparison uses 20 ms AI decisions and full city visibility; the optimized window uses 120 ms decisions and distance culling. Traffic continues to move between consecutive windows, so these are observed Editor measurements rather than a perfectly controlled causal benchmark. Frame timing is not a guaranteed player FPS; allocated memory includes the Editor, and the AI column measures individual decision work rather than total per-frame AI cost. The physics column comes from available `Physics.Simulate` profiler samples. [Unity ProfilerRecorder](https://docs.unity.com/en-us/engine/6000.6/script-reference/unity/profiling/profilerrecorder).
+Hardware reported by the current run: Mesa Intel UHD Graphics 620. Each window lasts 15 seconds. The comparison uses 20 ms AI decisions and full city visibility; the optimized window uses 120 ms decisions and distance culling. Traffic continues to move between consecutive windows, so these are observed Editor measurements rather than a perfectly controlled causal benchmark. The current Rush Hour comparison window had unusually high frame/physics times; the optimized window improved, but still showed spikes. Frame timing is not a guaranteed player FPS; allocated memory includes the Editor, and the AI column measures individual decision work rather than total per-frame AI cost. The physics column comes from available `Physics.Simulate` profiler samples. [Unity ProfilerRecorder](https://docs.unity.com/en-us/engine/6000.6/script-reference/unity/profiling/profilerrecorder).
 
 Pooling, bounded physics buffers, reusable materials, cached map rasterisation and distant simulation sleeping reduce repeated work. No benchmark is invented and no weakest-device result is assumed.
 
@@ -60,10 +60,10 @@ Pooling, bounded physics buffers, reusable materials, cached map rasterisation a
 
 | Target | Build result | Errors | Warnings | Size | Build time |
 |---|---|---:|---:|---:|---:|
-| StandaloneLinux64 | Succeeded | 0 | 76 | 386.8 MiB | 23.9 s |
+| StandaloneLinux64 | Succeeded | 0 | 39 | 387.2 MiB | 228.8 s |
 | WebGL | Succeeded | 0 | 44 | 195.2 MiB | 169.2 s |
 
-Linux player smoke: **PASS**. The explicit `--kombi-smoke` entry loads the selected city and tests acceleration, steering, braking, reverse and grounded stability using the actual executable. OpenGL Core was forced for this Linux/Intel check. Binary/managed assembly hashes and the exact native result are recorded in [native-smoke.json](../../Validation/CityInfrastructure/native-smoke.json).
+Linux player smoke: **PASS**. The explicit `--kombi-smoke` entry loaded the selected city and tested acceleration (32.03 m), steering (46.7°), braking (35.6→0.8 km/h), reverse (9.39 m) and grounded stability using the new executable. OpenGL Core was forced on Mesa Intel UHD 620. Binary/managed assembly hashes and the exact native result are recorded in [native-smoke.json](../../Validation/CityInfrastructure/native-smoke.json).
 
 Web browser status: **Partial: main menu and Trip Market rendered; gameplay keyboard check pending**. A successful WebGL compilation alone is not browser compatibility evidence. Refer to the current browser record for the actual load/start/input observations and limitations.
 

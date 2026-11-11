@@ -1,13 +1,14 @@
 {
-  "utc": "2026-11-11T05:43:15.595280+00:00",
-  "sourceCommit": "0798f975ac05a684b9afa67f3c8148b694ded6a8",
+  "utc": "2026-11-11T11:55:35+00:00",
+  "sourceCommit": "e9c4f0e910024367fefed26c880c037c7e727c55",
+  "workingTree": "Uncommitted scene and source changes included in the tested build.",
   "result": "PASS",
   "rendererFlag": "-force-glcore",
   "scope": "Actual Linux player, selected city startup, controlled acceleration/steering/braking/reverse sequence; not human full-route playtesting.",
-  "summary": "KOMBI_RCC_SMOKE PASS accel=True forward=31.94m drift=0.04m accelSpeed=35.0kph steer=True heading=46.5deg brake=True speed=35.6->0.9kph reverse=True reverseDistance=9.52m direction=-1 upright=1.00 grounded=True engine=True rpm=3683 gear=0.",
+  "summary": "KOMBI_RCC_SMOKE PASS accel=True forward=32.03m drift=0.01m accelSpeed=35.1kph steer=True heading=46.7deg brake=True speed=35.6->0.8kph reverse=True reverseDistance=9.39m direction=-1 upright=1.00 grounded=True engine=True rpm=3683 gear=0.",
   "hashes": {
     "KombiShift2.x86_64": "acca1b8568202670d3dba8f06c2fc82be8e7d33b9674655ab3d6fbb4dd0eae59",
-    "KombiShift2_Data/Managed/Assembly-CSharp.dll": "0935dce1be943dd89b5884e164466fa962deaa41301518e659d1236b19c58f16",
-    "KombiShift2_Data/level1": "3268ebe4fd8644c8f6fda75ea59b717a7a245753744d5830a61b3ad9ce24c15e"
+    "KombiShift2_Data/Managed/Assembly-CSharp.dll": "d395e31930ac1582986fd9ecf3f611b7a96a42f02f568be22d380ee5a7d323fe",
+    "KombiShift2_Data/level1": "f8cbde14caa73e78b03bf99a65e1041365a0ae88e8389e7bd8c7708f4cd53682"
   }
 }

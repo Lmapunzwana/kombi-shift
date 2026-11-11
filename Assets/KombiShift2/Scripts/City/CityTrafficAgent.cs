@@ -68,7 +68,7 @@ namespace KombiShift2.City
                         if(!Obstacle(passOrigin,transform.forward,Mathf.Max(35,speed*4),out _)&&!Obstacle(passOrigin,-transform.forward,20,out _)&&CityIntersection.Near(target)==null)
                         {passing=true;passingUntil=Time.time+7;offset=-3.1f;}
                     }
-                    if(Time.time-blockedAt>20&&!node.junction){ChooseDestination(nodeIndex);blockedAt=Time.time;}
+                    if(Time.time-blockedAt>20){ChooseDestination(nodeIndex);blockedAt=Time.time;}
                 }
                 else blockedAt=0;
                 if(passing)

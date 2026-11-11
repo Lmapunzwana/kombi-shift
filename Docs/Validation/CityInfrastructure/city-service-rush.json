@@ -1,10 +1,13 @@
 {
-    "utc": "2026-11-11T03:18:05.9621330Z",
+    "utc": "2026-11-11T12:03:35.4408220Z",
     "unity": "6000.6.2f1",
-    "gpu": "Mesa Intel(R) Graphics (RPL-P)",
+    "gpu": "Mesa Intel(R) UHD Graphics 620 (KBL GT2)",
     "stage": "RushHour",
     "passed": [
         "Existing city graph is loaded in actual gameplay",
+        "Signal verification reaches a stable green phase",
+        "Traffic control rejects entry on red",
+        "Safe same-direction traffic platoons can clear a signal without serial deadlock",
         "Selected Trip Market destination controls actual stops",
         "Selected route creates its actual intermediate stations",
         "Selected trip timer accounts for route distance and stops",
@@ -37,26 +40,26 @@
         {
             "mode": "comparison AI 20ms + full city visibility",
             "traffic": 48,
-            "samples": 4019,
-            "meanFrameMs": 3.734492063522339,
-            "p95FrameMs": 7.127621650695801,
-            "meanDecisionMs": 0.057618748396635056,
-            "meanPhysicsMs": 1.7123026847839355,
-            "physicsSamples": 750,
+            "samples": 210,
+            "meanFrameMs": 71.16804504394531,
+            "p95FrameMs": 167.77175903320313,
+            "meanDecisionMs": 0.2691958248615265,
+            "meanPhysicsMs": 22.193639755249023,
+            "physicsSamples": 208,
             "physicsMarker": "Physics.Simulate",
-            "allocatedBytes": 856611230
+            "allocatedBytes": 739682804
         },
         {
             "mode": "AI 120ms + city distance culling",
             "traffic": 48,
-            "samples": 4189,
-            "meanFrameMs": 3.5816006660461426,
-            "p95FrameMs": 6.5664896965026855,
-            "meanDecisionMs": 0.05848750099539757,
-            "meanPhysicsMs": 1.7374546527862549,
-            "physicsSamples": 747,
+            "samples": 432,
+            "meanFrameMs": 34.79786682128906,
+            "p95FrameMs": 70.71484375,
+            "meanDecisionMs": 0.29479584097862244,
+            "meanPhysicsMs": 11.935968399047852,
+            "physicsSamples": 432,
             "physicsMarker": "Physics.Simulate",
-            "allocatedBytes": 856619038
+            "allocatedBytes": 739684788
         }
     ]
 }

@@ -40,12 +40,39 @@ public sealed class CityInfrastructureVerification : MonoBehaviour
     void Start(){if(owner!=this)return;DontDestroyOnLoad(gameObject);started=Time.realtimeSinceStartup;report.utc=DateTime.UtcNow.ToString("o");report.unity=Application.unityVersion;report.gpu=SystemInfo.graphicsDeviceName;report.stage=KombiChallenge.Selected.ToString();StartCoroutine(Run());}
     void Update(){if(!done&&Time.realtimeSinceStartup-started>360){Check(false,"City scenario timed out");Finish();}}
     void Check(bool condition,string name){(condition?report.passed:report.failed).Add(name);Debug.Log("KOMBI_CITY_CHECK "+(condition?"PASS ":"FAIL ")+name);}
+    IEnumerator VerifySignalReservations(Rigidbody playerBody)
+    {
+        var fixture=new GameObject("Traffic signal rule verification");fixture.transform.position=new Vector3(10000,1000,10000);
+        var junction=fixture.AddComponent<CityIntersection>();junction.signalised=true;junction.radius=8f;
+        float deadline=Time.time+16f;
+        while((junction.Amber||junction.AllRed)&&Time.time<deadline)yield return null;
+        bool phaseReady=!junction.Amber&&!junction.AllRed;
+        Check(phaseReady,"Signal verification reaches a stable green phase");
+        Vector3 green=junction.Phase==0?Vector3.right:Vector3.forward;
+        Vector3 red=junction.Phase==0?Vector3.forward:Vector3.right;
+        Check(junction.MustStop(red)&&!junction.MayEnter(playerBody,red,junction.transform.position+red*16f),"Traffic control rejects entry on red");
+        Vector3 left=-Vector3.Cross(Vector3.up,green);
+        var lead=new GameObject("Traffic platoon lead",typeof(BoxCollider),typeof(Rigidbody));lead.transform.SetParent(fixture.transform,false);
+        lead.transform.position=junction.transform.position-green*12f+left*1.55f;lead.GetComponent<BoxCollider>().size=new Vector3(1.8f,1f,4f);
+        var leadBody=lead.GetComponent<Rigidbody>();leadBody.isKinematic=true;leadBody.useGravity=false;
+        var follower=new GameObject("Traffic platoon follower",typeof(BoxCollider),typeof(Rigidbody));follower.transform.SetParent(fixture.transform,false);
+        follower.transform.position=junction.transform.position-green*21f+left*1.55f;follower.GetComponent<BoxCollider>().size=new Vector3(1.8f,1f,4f);
+        var followerBody=follower.GetComponent<Rigidbody>();followerBody.isKinematic=true;followerBody.useGravity=false;
+        Physics.SyncTransforms();
+        Vector3 exit=junction.transform.position+green*16f;
+        bool leadEntered=junction.MayEnter(leadBody,green,exit);
+        bool followerEntered=junction.MayEnter(followerBody,green,exit);
+        Check(leadEntered&&followerEntered,"Safe same-direction traffic platoons can clear a signal without serial deadlock");
+        Destroy(fixture);
+        yield return null;
+    }
     IEnumerator Run()
     {
         yield return null;yield return null;
         int expectedQueue=KombiChallenge.Selected==KombiStage.RushHour?8:6;
         var graph=FindFirstObjectByType<CityRoadNetwork>();var director=FindFirstObjectByType<KombiShiftGameDirector>();var player=director.Vehicle;
         Check(graph.Nodes.Length>4000,"Existing city graph is loaded in actual gameplay");
+        yield return VerifySignalReservations(player.GetComponent<Rigidbody>());
         Check(CityTripSession.Active&&director.Stations.Last().name.Contains("Mbare"),"Selected Trip Market destination controls actual stops");
         Check(director.Stations.Length==CityTripSelection.Selected.stopNodes.Length,"Selected route creates its actual intermediate stations");
         Check(director.Duration>=CityTripSelection.Distance/7f,"Selected trip timer accounts for route distance and stops");

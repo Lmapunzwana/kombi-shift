@@ -1,11 +1,11 @@
 {
-    "utc": "2026-11-11T05:40:00.1518030Z",
+    "utc": "2026-11-11T11:47:43.8937890Z",
     "unity": "6000.6.2f1",
     "platform": "StandaloneLinux64",
     "result": "Succeeded",
-    "output": "/home/jayden-mapasure/Documents/ChatGPT/kombi shift game/Builds/CityInfrastructure2026/Linux/KombiShift2.x86_64",
+    "output": "/home/euclide/Downloads/GAME DEV/Builds/CityInfrastructure2026/Linux/KombiShift2.x86_64",
     "errors": 0,
-    "warnings": 76,
-    "bytes": 405638595,
-    "seconds": 23.922601
+    "warnings": 39,
+    "bytes": 406075482,
+    "seconds": 228.83506
 }
