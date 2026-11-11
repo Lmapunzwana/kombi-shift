@@ -9,7 +9,7 @@ namespace KombiShift2.Gameplay
     {
         public StationPassenger passenger;
         public int boardingStation, destination;
-        public int fare = 2;
+        public float fare = 2f;
         public float happiness = 100f, patienceSeconds = 240f, boardedAt;
         public TripState state;
         public bool requested, missed;

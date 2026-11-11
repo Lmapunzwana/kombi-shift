@@ -26,7 +26,7 @@ namespace KombiShift2.Gameplay
         private Vector3 standingBody;
         private float phase;
         private float standingHipHeight;
-        private bool routeAborted;
+        private bool routeAborted, enteringCabin;
         private float seatedBlend = 1f;
         private Transform stationParent;
         private bool sitOnArrival = true;
@@ -73,7 +73,7 @@ namespace KombiShift2.Gameplay
 
         private void LateUpdate()
         {
-            float desired = State == PassengerState.Seated || State == PassengerState.Onboard || (State == PassengerState.Delivered && sitOnArrival) ? 1f : 0f;
+            float desired = State == PassengerState.Seated || State == PassengerState.Onboard || enteringCabin || (State == PassengerState.Delivered && sitOnArrival) ? 1f : 0f;
             seatedBlend = Mathf.MoveTowards(seatedBlend, desired, Time.deltaTime * 3.5f);
             if (State == PassengerState.Walking || State == PassengerState.Returning || State == PassengerState.Alighting) phase += Time.deltaTime * 7f;
             ApplyPose();
@@ -106,8 +106,8 @@ namespace KombiShift2.Gameplay
             // Every rig's pelvis must be centred over its actual seat, including its X/Z offsets.
             // Adjusting only Y left different character rigs hanging outside their seat anchors.
             Vector3 standingHip = hips.position;
-            standingHip.y = transform.position.y + standingHipHeight;
-            Vector3 seatedHip = transform.position + Vector3.up * (State == PassengerState.Onboard ? .5f * transform.lossyScale.y : .58f);
+            standingHip.y = transform.position.y + standingHipHeight * (walkingScale.y > 0f ? transform.lossyScale.y / walkingScale.y : 1f);
+            Vector3 seatedHip = transform.position + Vector3.up * ((State == PassengerState.Onboard || enteringCabin) ? .5f * transform.lossyScale.y : .58f);
             hips.position = Vector3.Lerp(standingHip, seatedHip, seatedBlend);
             PoseSeatLeg(HumanBodyBones.LeftUpperLeg, HumanBodyBones.LeftLowerLeg, HumanBodyBones.LeftFoot, HumanBodyBones.LeftToes);
             PoseSeatLeg(HumanBodyBones.RightUpperLeg, HumanBodyBones.RightLowerLeg, HumanBodyBones.RightFoot, HumanBodyBones.RightToes);
@@ -157,6 +157,8 @@ namespace KombiShift2.Gameplay
                 yield return null;
             }
             // Walk through the doorway before taking a seat inside the vehicle.
+            enteringCabin = true;seatedBlend = 1f;
+            transform.localScale = walkingScale * KombiShift2.Vehicle.KombiPassengerCabin.PassengerScale;
             float step = 0f;
             Vector3 start = transform.position;
             while (step < 1f)
@@ -168,7 +170,8 @@ namespace KombiShift2.Gameplay
             }
             transform.SetParent(vehicleSeat, false);
             transform.localPosition = Vector3.zero; transform.localRotation = Quaternion.identity;
-            State = PassengerState.Onboard;
+            transform.localScale = walkingScale;
+            enteringCabin = false;State = PassengerState.Onboard;
         }
 
         private IEnumerator WalkTo(Vector3 target, Func<bool> mayContinue)
@@ -182,6 +185,7 @@ namespace KombiShift2.Gameplay
 
         private IEnumerator ReturnToBench()
         {
+            enteringCabin=false;transform.localScale=walkingScale;
             State = PassengerState.Returning;
             while (waitingSeat != null && Vector3.Distance(transform.position, waitingSeat.position) > .12f)
             { Move(waitingSeat.position); yield return null; }
@@ -198,17 +202,21 @@ namespace KombiShift2.Gameplay
             transform.position = Vector3.MoveTowards(transform.position, target, walkingSpeed * Time.deltaTime);
         }
 
-        public void LeaveAt(Transform destination, bool seatedAtDestination = true)
+        public void LeaveAt(Transform destination, bool seatedAtDestination = true, Transform doorway = null, float delay = 0f)
         {
             sitOnArrival = seatedAtDestination;
-            transform.SetParent(null, true);
-            transform.localScale = walkingScale;
-            StartCoroutine(Alight(destination));
+            StartCoroutine(Alight(destination, doorway, delay));
         }
 
-        private IEnumerator Alight(Transform destination)
+        private IEnumerator Alight(Transform destination, Transform doorway, float delay)
         {
+            if(delay>0f)yield return new WaitForSeconds(delay);
+            transform.SetParent(null,true);
+            enteringCabin=doorway!=null;
             State = PassengerState.Alighting;
+            while (doorway != null && Vector3.Distance(transform.position, doorway.position) > .14f)
+            { Move(doorway.position); yield return null; }
+            enteringCabin=false;transform.localScale = walkingScale;
             while (destination != null && Vector3.Distance(transform.position, destination.position) > .15f)
             { Move(destination.position); yield return null; }
             if(destination!=null)

@@ -71,7 +71,7 @@ public sealed class KombiAssessmentVerification : MonoBehaviour
         Check(director.MinimumPassengers==(stage==KombiStage.Morning?1:6),"Distinct stage delivery target");
         Check(director.Rivals.Length==2&&director.Rivals.All(x=>Mathf.Approximately(x.Speed,KombiChallenge.RivalSpeed(stage))),"Both rivals use stage-specific speed");
         Check(director.Rivals.All(x=>x.DepartureDelay>=KombiChallenge.RivalDelay(stage)),"Rival head start follows stage rules");
-        int pauseEvents=0,fares=0,outcomes=0;bool outcome=false;
+        int pauseEvents=0,outcomes=0;float fares=0;bool outcome=false;
         director.OnPauseChanged+=_=>pauseEvents++;director.OnFareEarned+=amount=>fares+=amount;director.OnShiftFinished+=won=>{outcomes++;outcome=won;};
         director.SetPaused(true);float timer=director.TimeRemaining;
         yield return new WaitForSecondsRealtime(.15f);

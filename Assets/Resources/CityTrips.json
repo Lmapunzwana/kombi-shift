@@ -1,0 +1,202 @@
+{
+  "trips": [
+    {
+      "id": "mbare",
+      "origin": "CBD",
+      "destination": "Mbare",
+      "description": "Fictional Harare route on the existing imported city; no geographic equivalence is claimed.",
+      "originNode": 3379,
+      "destinationNode": 2284,
+      "stopNodes": [
+        3379,
+        2987,
+        3048,
+        3112,
+        3186,
+        2284
+      ],
+      "expectedPassengers": 30,
+      "difficulty": 4,
+      "baseFare": 1.0,
+      "perKilometre": 0.3,
+      "minFare": 1.0,
+      "maxFare": 5.0,
+      "peakMultiplier": 1.25
+    },
+    {
+      "id": "avondale",
+      "origin": "CBD",
+      "destination": "Avondale",
+      "description": "Fictional Harare route on the existing imported city; no geographic equivalence is claimed.",
+      "originNode": 3379,
+      "destinationNode": 3705,
+      "stopNodes": [
+        3379,
+        2987,
+        3048,
+        3112,
+        3705
+      ],
+      "expectedPassengers": 24,
+      "difficulty": 3,
+      "baseFare": 1.0,
+      "perKilometre": 0.3,
+      "minFare": 1.0,
+      "maxFare": 5.0,
+      "peakMultiplier": 1.25
+    },
+    {
+      "id": "borrowdale",
+      "origin": "CBD",
+      "destination": "Borrowdale",
+      "description": "Fictional Harare route on the existing imported city; no geographic equivalence is claimed.",
+      "originNode": 3379,
+      "destinationNode": 4235,
+      "stopNodes": [
+        3379,
+        2987,
+        3048,
+        3328,
+        4004,
+        4373,
+        4460,
+        4235
+      ],
+      "expectedPassengers": 30,
+      "difficulty": 5,
+      "baseFare": 1.0,
+      "perKilometre": 0.3,
+      "minFare": 1.0,
+      "maxFare": 5.0,
+      "peakMultiplier": 1.25
+    },
+    {
+      "id": "highfield",
+      "origin": "CBD",
+      "destination": "Highfield",
+      "description": "Fictional Harare route on the existing imported city; no geographic equivalence is claimed.",
+      "originNode": 3379,
+      "destinationNode": 4107,
+      "stopNodes": [
+        3379,
+        2987,
+        3445,
+        4107
+      ],
+      "expectedPassengers": 18,
+      "difficulty": 3,
+      "baseFare": 1.0,
+      "perKilometre": 0.3,
+      "minFare": 1.0,
+      "maxFare": 5.0,
+      "peakMultiplier": 1.25
+    },
+    {
+      "id": "glen view",
+      "origin": "CBD",
+      "destination": "Glen View",
+      "description": "Fictional Harare route on the existing imported city; no geographic equivalence is claimed.",
+      "originNode": 3379,
+      "destinationNode": 2546,
+      "stopNodes": [
+        3379,
+        2987,
+        2546
+      ],
+      "expectedPassengers": 12,
+      "difficulty": 2,
+      "baseFare": 1.0,
+      "perKilometre": 0.3,
+      "minFare": 1.0,
+      "maxFare": 5.0,
+      "peakMultiplier": 1.25
+    },
+    {
+      "id": "budiriro",
+      "origin": "CBD",
+      "destination": "Budiriro",
+      "description": "Fictional Harare route on the existing imported city; no geographic equivalence is claimed.",
+      "originNode": 3379,
+      "destinationNode": 1370,
+      "stopNodes": [
+        3379,
+        2987,
+        1370
+      ],
+      "expectedPassengers": 12,
+      "difficulty": 2,
+      "baseFare": 1.0,
+      "perKilometre": 0.3,
+      "minFare": 1.0,
+      "maxFare": 5.0,
+      "peakMultiplier": 1.25
+    },
+    {
+      "id": "kuwadzana",
+      "origin": "CBD",
+      "destination": "Kuwadzana",
+      "description": "Fictional Harare route on the existing imported city; no geographic equivalence is claimed.",
+      "originNode": 3379,
+      "destinationNode": 338,
+      "stopNodes": [
+        3379,
+        2987,
+        1645,
+        338
+      ],
+      "expectedPassengers": 18,
+      "difficulty": 3,
+      "baseFare": 1.0,
+      "perKilometre": 0.3,
+      "minFare": 1.0,
+      "maxFare": 5.0,
+      "peakMultiplier": 1.25
+    },
+    {
+      "id": "hatfield",
+      "origin": "CBD",
+      "destination": "Hatfield",
+      "description": "Fictional Harare route on the existing imported city; no geographic equivalence is claimed.",
+      "originNode": 3379,
+      "destinationNode": 245,
+      "stopNodes": [
+        3379,
+        2987,
+        1790,
+        1337,
+        581,
+        245
+      ],
+      "expectedPassengers": 30,
+      "difficulty": 4,
+      "baseFare": 1.0,
+      "perKilometre": 0.3,
+      "minFare": 1.0,
+      "maxFare": 5.0,
+      "peakMultiplier": 1.25
+    },
+    {
+      "id": "chitungwiza",
+      "origin": "CBD",
+      "destination": "Chitungwiza",
+      "description": "Fictional Harare route on the existing imported city; no geographic equivalence is claimed.",
+      "originNode": 3379,
+      "destinationNode": 591,
+      "stopNodes": [
+        3379,
+        2987,
+        1790,
+        1337,
+        777,
+        591
+      ],
+      "expectedPassengers": 30,
+      "difficulty": 4,
+      "baseFare": 1.0,
+      "perKilometre": 0.3,
+      "minFare": 1.0,
+      "maxFare": 5.0,
+      "peakMultiplier": 1.25
+    }
+  ]
+}

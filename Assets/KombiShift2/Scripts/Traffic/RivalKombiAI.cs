@@ -1,4 +1,5 @@
 using System;
+using KombiShift2.City;
 using System.Collections;
 using System.Collections.Generic;
 using KombiShift2.Gameplay;
@@ -24,6 +25,11 @@ namespace KombiShift2.Traffic
         private int routeIndex, destinationIndex, direction = 1;
         private float startedAt, nextEvaluation, nextDeparture, blockedTime;
         private bool shiftEnded;
+        private CityRivalNavigation cityNavigation;
+        private bool passing;
+        private float passUntil,passOffset,nextPass,cityStoppedAt;
+        private CityIntersection cityStop;
+        private bool cityStopCompleted;
         private readonly Dictionary<KombiRoadRuleZone, float> stoppedAt = new();
         private readonly RaycastHit[] obstacles = new RaycastHit[64];
         private readonly Collider[] congestion = new Collider[32];
@@ -80,6 +86,7 @@ namespace KombiShift2.Traffic
         {
             routeIndex = NearestRouteIndex(transform.position); startedAt = Time.time;
             signals = FindObjectsByType<TrafficSignalController>(FindObjectsSortMode.None);
+            if(CityTripSession.Active)cityNavigation=gameObject.AddComponent<CityRivalNavigation>();
         }
         private void FixedUpdate()
         {
@@ -114,6 +121,12 @@ namespace KombiShift2.Traffic
         private void CruiseRoute() => FollowRoute();
         private void FollowRoute()
         {
+            if(cityNavigation!=null && target!=null)
+            {
+                routeIndex=NearestRouteIndex(transform.position);
+                Drive(cityNavigation.Point(target.ServicePoint),speed*profile.speedMultiplier);
+                return;
+            }
             if (FlatDistance(route[routeIndex].position, transform.position) < 5f)
             {
                 if (routeIndex == route.Length - 1) direction = -1;
@@ -180,6 +193,11 @@ namespace KombiShift2.Traffic
         }
         private void Drive(Vector3 point, float desiredSpeed)
         {
+            var road=cityNavigation!=null?cityNavigation.Node:null;
+            passOffset=Mathf.MoveTowards(passOffset,passing?3.1f:0f,Time.fixedDeltaTime*1.2f);
+            point+=transform.right*passOffset;
+            var condition=GetComponent<KombiShift2.Vehicle.KombiVehicleCondition>();
+            if(condition!=null)desiredSpeed*=condition.PowerFactor;
             Vector3 delta = point - transform.position; delta.y = 0f;
             float steering = Vector3.SignedAngle(transform.forward, delta, Vector3.up);
             desiredSpeed *= Mathf.Lerp(1f, .25f, Mathf.InverseLerp(10f, 65f, Mathf.Abs(steering)));
@@ -187,8 +205,35 @@ namespace KombiShift2.Traffic
             float actualSpeed = body.linearVelocity.magnitude;
             bool clear = Clear(origin, transform.forward, Mathf.Max(7f, actualSpeed * profile.followingSeconds + 3f), out var obstacle);
             blockedTime = clear ? 0f : blockedTime + Time.fixedDeltaTime;
-            // Left-lane-only policy: all personalities queue rather than enter opposing traffic.
+            // Passing is restricted to a second same-direction lane in the baked road metadata.
+            var junction=CityIntersection.Near(point);
+            if(road!=null)
+            {
+                desiredSpeed=Mathf.Min(desiredSpeed,road.speedLimit/3.6f*(profile.personality==RivalPersonality.Aggressive?1.1f:1));
+                if(!passing && profile.allowOvertaking && road.allowPassing && road.width>=13f && junction==null && !clear && obstacle.rigidbody!=null && obstacle.distance>5f && blockedTime>2f && Mathf.Abs(steering)<8f && Time.time>nextPass)
+                {
+                    Vector3 lane=origin+transform.right*3.1f;
+                    if(Clear(lane,transform.forward,45f,out _) && Clear(lane,-transform.forward,20f,out _)){passing=true;passUntil=Time.time+7;Say("Passing slow traffic in a clear same-direction lane");}
+                }
+                if(passing && (Time.time>passUntil||!road.allowPassing||junction!=null))
+                {
+                    Vector3 lane=origin-transform.right*3.1f;
+                    if(Clear(lane,transform.forward,12f,out _)&&Clear(lane,-transform.forward,12f,out _)){passing=false;nextPass=Time.time+6;}
+                }
+            }
             if (!clear) desiredSpeed=Mathf.Min(desiredSpeed,Mathf.Max(0f,(obstacle.distance-4f)/profile.followingSeconds));
+            if(junction!=cityStop){cityStop=junction;cityStopCompleted=false;cityStoppedAt=0;}
+            if(junction!=null)
+            {
+                bool occasionalRollingStop=profile.personality==RivalPersonality.Aggressive&&Mathf.RoundToInt(Mathf.Abs(junction.transform.position.x+junction.transform.position.z))%7==0;
+                bool stopRequired=junction.stopControlled&&!occasionalRollingStop;
+                if(stopRequired&&!cityStopCompleted)
+                {
+                    if(actualSpeed<.3f){if(cityStoppedAt==0)cityStoppedAt=Time.time;cityStopCompleted=Time.time-cityStoppedAt>.7f;}
+                    desiredSpeed=0;
+                }
+                if(stopRequired&&!cityStopCompleted || !junction.MayEnter(body,transform.forward,point+transform.forward*12f))desiredSpeed=0;
+            }
             if (blockedTime > 25f && Time.time >= nextEvaluation)
             { target = null; ChooseTarget(); Say("Blocked route: reassessing demand; waiting for clearance"); }
             foreach (var signal in signals)

@@ -11,3 +11,7 @@ Use DEPENDENCY_INVENTORY.csv as a review starting point, together with Docs/ASSE
 ## 9 November expansion
 
 Codex assisted the new service-trip, quality, damage, traffic-law, rival-wheel-physics, route-upgrade and verification code. Three additional stops clone existing shelter and passenger assets; existing bz0/bz1 road geometry is reused. New art consists of a shallow procedural hump mesh/material, runtime road-sign text and a locally generated request tone. No external speech service, paid dependency, vendor DLL edit or decompilation was used. Existing asset rights and genuine student understanding still require the team's review.
+
+## 11 November existing-city infrastructure
+
+Codex assisted the existing-road inventory, derived graph and route data, copied physical road meshes, traffic controllers, Trip Market, integration fixtures and documentation. The existing NYBlock02 city and source assets were preserved. Road surfacing reuses the already included Poly Haven worn-asphalt textures and licence; no new city, OpenStreetMap data or proprietary ETS code/assets were imported. New navigation, shared marking meshes, road-condition geometry, signal/sign objects and UI code are project-owned additions. Source control and validation records identify the changes; they do not establish personal contributions or understanding by every member. Actual tester feedback was requested after the user confirmed it exists, but no three-person records are invented.

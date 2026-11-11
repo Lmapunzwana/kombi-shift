@@ -1,0 +1,11 @@
+{
+    "utc": "2026-11-11T05:24:49.5511390Z",
+    "unity": "6000.6.2f1",
+    "platform": "StandaloneLinux64",
+    "result": "Succeeded",
+    "output": "/home/jayden-mapasure/Documents/ChatGPT/kombi shift game/Builds/CityInfrastructure2026/Linux/KombiShift2.x86_64",
+    "errors": 0,
+    "warnings": 39,
+    "bytes": 405638595,
+    "seconds": 65.750947
+}

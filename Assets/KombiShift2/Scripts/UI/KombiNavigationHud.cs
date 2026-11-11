@@ -1,4 +1,5 @@
 using System;
+using KombiShift2.City;
 using BezierSolution;
 using KombiShift2.Gameplay;
 using UnityEngine;
@@ -54,9 +55,20 @@ namespace KombiShift2.UI
             if (vehicle == null || (gameDirector != null && (gameDirector.Paused || gameDirector.Finished)) || Time.unscaledTime < nextMapUpdate) return;
             nextMapUpdate = Time.unscaledTime + .15f;
             Array.Copy(background,pixels,pixels.Length);
+            var city=CityRoadNetwork.Active;
+            if(city!=null)
+            {
+                for(int n=0;n<city.Nodes.Length;n++)
+                {
+                    var node=city.Nodes[n];if((node.position-vehicle.transform.position).sqrMagnitude>220000)continue;
+                    foreach(int next in node.links)if(next>n)Line(ToMap(node.position),ToMap(city.Nodes[next].position),new Color32(90,116,125,255),2);
+                }
+                var guidance=city.GetComponent<CityNavigation>();
+                if(guidance!=null)for(int n=1;n<guidance.Path.Count;n++)Line(ToMap(city.Nodes[guidance.Path[n-1]].position),ToMap(city.Nodes[guidance.Path[n]].position),new Color32(255,208,78,255),3);
+            }
             foreach (var road in roads)
                 for (int i=1;i<road.Length;i++) Line(ToMap(road[i-1]),ToMap(road[i]),new Color32(126,151,162,255),2);
-            if (routePoints != null && routePoints.Length > 1 && gameDirector != null)
+            if (!CityTripSession.Active && routePoints != null && routePoints.Length > 1 && gameDirector != null)
             {
                 int from=NearestRoutePoint(vehicle.transform.position),to=NearestRoutePoint(gameDirector.CurrentTarget);
                 int low=Mathf.Min(from,to),high=Mathf.Max(from,to);
@@ -143,9 +155,11 @@ namespace KombiShift2.UI
             GUI.Label(new Rect(30,47,layout.Objective.width-24,22),$"{gameDirector.Passengers} aboard   ·   Rivals collected {gameDirector.RivalPassengers}",label);
             GUI.Label(new Rect(30,70,layout.Objective.width-24,20),gameDirector.Notice,small);
             int seconds=Mathf.CeilToInt(gameDirector.TimeRemaining);
-            GUI.Label(new Rect(layout.Stats.x+14,23,180,24),$"${gameDirector.Earnings} fares    {seconds/60:00}:{seconds%60:00}",label);
+            GUI.Label(new Rect(layout.Stats.x+14,23,180,24),$"${gameDirector.Earnings:0.00} net    {seconds/60:00}:{seconds%60:00}",label);
             GUI.Label(new Rect(layout.Stats.x+14,48,180,22),$"{KombiChallenge.Name(gameDirector.Stage)} / {gameDirector.MinimumPassengers}+",small);
             GUI.color=Color.white; GUI.DrawTexture(layout.Map,map);
+            var guidance=CityRoadNetwork.Active!=null?CityRoadNetwork.Active.GetComponent<CityNavigation>():null;
+            if(guidance!=null)GUI.Label(new Rect(245,Screen.height-65,420,45),guidance.Instruction+"  /  "+Mathf.RoundToInt(guidance.Remaining)+" m",small);
             float distance=Vector3.Distance(vehicle.transform.position,gameDirector.CurrentTarget);
             GUI.Label(new Rect(24,layout.Map.yMax+2,208,22),$"NEXT STOP   {distance:0} m",heading);
             GUI.color=new Color(.21f,.79f,.85f);GUI.DrawTexture(new Rect(24,layout.Map.yMax+27,6,6),pixel);GUI.color=Color.white;

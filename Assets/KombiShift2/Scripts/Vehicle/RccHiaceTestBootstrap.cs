@@ -17,6 +17,7 @@ namespace KombiShift2.Vehicle
         [System.NonSerialized] public bool verificationPark;
 #endif
         private KombiVehicleCondition condition;
+        private KombiShift2.Gameplay.KombiShiftGameDirector director;
         private bool interactiveInputEnabled;
         private float smoothedSteering;
         private float smoothedThrottle;
@@ -141,14 +142,16 @@ namespace KombiShift2.Vehicle
             condition ??= vehicle.GetComponent<KombiVehicleCondition>();
             RCCP_Inputs inputs = new()
             {
-                throttleInput = (condition != null ? condition.PowerFactor : 1f) * smoothedThrottle * KombiPowertrain.ThrottleFactor(vehicle.absoluteSpeed, vehicle.direction<0),
-                steerInput = smoothedSteering,
+                throttleInput = (condition != null ? condition.PowerFactor : 1f) * smoothedThrottle * KombiPowertrain.ThrottleFactor(condition!=null&&vehicle.direction>=0?vehicle.absoluteSpeed*105f/condition.MaximumSpeed:vehicle.absoluteSpeed, vehicle.direction<0),
+                steerInput = Mathf.Clamp(smoothedSteering * (condition != null ? condition.SteeringFactor : 1f) + (condition != null ? condition.AlignmentPull : 0f),-1f,1f),
                 brakeInput = smoothedBrake * (condition != null ? condition.BrakeFactor : 1f),
                 handbrakeInput = Input.GetKey(KeyCode.Space) ? 1f : 0f
             };
 #if UNITY_EDITOR
             if(verificationInput)inputs.handbrakeInput=verificationPark?1f:0f;
 #endif
+            director??=FindFirstObjectByType<KombiShift2.Gameplay.KombiShiftGameDirector>();
+            if(director!=null&&director.Alighting){inputs.throttleInput=0;inputs.brakeInput=1;inputs.handbrakeInput=1;}
             if(inputs.handbrakeInput>.1f)inputs.throttleInput=0f;
             vehicle.Inputs.OverrideInputs(inputs);
         }
@@ -162,6 +165,8 @@ namespace KombiShift2.Vehicle
                 brakeInput = brake,
                 handbrakeInput = 0f
             };
+            director??=FindFirstObjectByType<KombiShift2.Gameplay.KombiShiftGameDirector>();
+            if(director!=null&&director.Alighting){inputs.throttleInput=0;inputs.brakeInput=1;inputs.handbrakeInput=1;}
             if(inputs.handbrakeInput>.1f)inputs.throttleInput=0f;
             vehicle.Inputs.OverrideInputs(inputs);
         }

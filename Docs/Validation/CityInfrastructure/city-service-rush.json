@@ -1,0 +1,62 @@
+{
+    "utc": "2026-11-11T03:18:05.9621330Z",
+    "unity": "6000.6.2f1",
+    "gpu": "Mesa Intel(R) Graphics (RPL-P)",
+    "stage": "RushHour",
+    "passed": [
+        "Existing city graph is loaded in actual gameplay",
+        "Selected Trip Market destination controls actual stops",
+        "Selected route creates its actual intermediate stations",
+        "Selected trip timer accounts for route distance and stops",
+        "Reachable city trip: Mbare",
+        "Reachable city trip: Avondale",
+        "Reachable city trip: Borrowdale",
+        "Reachable city trip: Highfield",
+        "Reachable city trip: Glen View",
+        "Reachable city trip: Budiriro",
+        "Reachable city trip: Kuwadzana",
+        "Reachable city trip: Hatfield",
+        "Reachable city trip: Chitungwiza",
+        "Peak fares and limits apply to configured routes",
+        "Pooled civilian traffic spawns on the selected city network",
+        "Nearby civilian traffic uses physical suspension and solid bodies",
+        "Selected trip physically boards its stage-specific queue into unique cabin seats",
+        "City trip boarding preserves unique seat ownership",
+        "Individual destinations belong to selected reachable stops",
+        "Expected route gross is not paid before actual delivery",
+        "Approaching a selected destination raises an individual drop-off request",
+        "Circular stopping marker is integrated into actual gameplay",
+        "Walking through the door and delivering earns actual fractional fares",
+        "Passengers regain their original size after leaving the cabin",
+        "Pause preserves the selected trip timer",
+        "Actual city traffic frame time, AI decision cost and memory were sampled",
+        "Selected RushHour trip completes after actual passenger alighting"
+    ],
+    "failed": [],
+    "performance": [
+        {
+            "mode": "comparison AI 20ms + full city visibility",
+            "traffic": 48,
+            "samples": 4019,
+            "meanFrameMs": 3.734492063522339,
+            "p95FrameMs": 7.127621650695801,
+            "meanDecisionMs": 0.057618748396635056,
+            "meanPhysicsMs": 1.7123026847839355,
+            "physicsSamples": 750,
+            "physicsMarker": "Physics.Simulate",
+            "allocatedBytes": 856611230
+        },
+        {
+            "mode": "AI 120ms + city distance culling",
+            "traffic": 48,
+            "samples": 4189,
+            "meanFrameMs": 3.5816006660461426,
+            "p95FrameMs": 6.5664896965026855,
+            "meanDecisionMs": 0.05848750099539757,
+            "meanPhysicsMs": 1.7374546527862549,
+            "physicsSamples": 747,
+            "physicsMarker": "Physics.Simulate",
+            "allocatedBytes": 856619038
+        }
+    ]
+}

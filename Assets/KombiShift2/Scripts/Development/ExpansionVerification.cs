@@ -88,7 +88,7 @@ public sealed class KombiExpansionVerification : MonoBehaviour
         FindFirstObjectByType<RccHiaceTestBootstrap>().enabled = false;
         car.GetComponent<KombiVehicleStability>().enabled = false;
         var rb = car.GetComponent<Rigidbody>(); rb.isKinematic = true;
-        int fareEvents = 0; director.OnFareEarned += amount => fareEvents += amount;
+        float fareEvents = 0; director.OnFareEarned += amount => fareEvents += amount;
         var first = director.Stations[0];
         car.transform.SetPositionAndRotation(first.ServicePoint.position, first.ServicePoint.rotation);
         Time.timeScale = 4f; deadline = Time.realtimeSinceStartup + 40f;

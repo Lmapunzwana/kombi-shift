@@ -16,7 +16,7 @@ namespace KombiShift2.Traffic
         public float speedMultiplier = 1f;
         public static RivalDrivingProfile For(RivalPersonality kind) => new() {
             personality = kind,
-            allowOvertaking = false,
+            allowOvertaking = kind != RivalPersonality.Conservative,
             speedMultiplier = kind == RivalPersonality.Aggressive ? 1.42f : kind == RivalPersonality.Competitive ? 1.28f : .9f,
             followingSeconds = kind == RivalPersonality.Aggressive ? .8f : kind == RivalPersonality.Competitive ? 1f : 2f,
             reassessSeconds = kind == RivalPersonality.Aggressive ? 1f : kind == RivalPersonality.Competitive ? 1.5f : 4f,

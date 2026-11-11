@@ -1,0 +1,38 @@
+{
+    "unity": "6000.6.2f1",
+    "utc": "2026-11-11T03:26:46.2525680Z",
+    "trials": [
+        {
+            "startSpeed": 3.0,
+            "travel": 8.738372802734375,
+            "peakVerticalSpeed": 0.16114464402198792,
+            "peakRollPitch": 6.0379319190979,
+            "contactDepression": 0.1779022216796875,
+            "healthLost": 0.0,
+            "peakWheelForce": 13024.4921875,
+            "impacts": 0,
+            "contacts": 1004
+        },
+        {
+            "startSpeed": 12.0,
+            "travel": 9.155120849609375,
+            "peakVerticalSpeed": 0.47386640310287476,
+            "peakRollPitch": 3.667356491088867,
+            "contactDepression": 0.17572784423828125,
+            "healthLost": 0.1951141357421875,
+            "peakWheelForce": 25660.83203125,
+            "impacts": 2,
+            "contacts": 180
+        }
+    ],
+    "passed": [
+        "Pothole has an actual depressed collision surface",
+        "RCC wheels maintain contacts while physically crossing the city defect",
+        "Wheel contacts follow the road depression rather than a flat overlay",
+        "The unrestrained chassis pitches or rolls with suspension response",
+        "Actual wheel contact records a high-speed pothole impact",
+        "High-speed crossing causes more cumulative wear than slow crossing",
+        "Pothole interaction remains bounded without launching the kombi"
+    ],
+    "failed": []
+}

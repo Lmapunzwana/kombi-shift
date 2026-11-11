@@ -14,7 +14,8 @@ namespace KombiShift2.Vehicle
         {
             controller=GetComponent<RCCP_CarController>();body=GetComponent<Rigidbody>();wheels=GetComponentsInChildren<WheelCollider>();
             ConfigureDriving();
-            body.constraints|=RigidbodyConstraints.FreezeRotationX|RigidbodyConstraints.FreezeRotationZ;
+            body.constraints &= ~(RigidbodyConstraints.FreezeRotationX|RigidbodyConstraints.FreezeRotationZ);
+            body.angularDamping=2f;
             body.collisionDetectionMode=CollisionDetectionMode.ContinuousDynamic;
             safePosition=transform.position;safeRotation=Quaternion.Euler(0,transform.eulerAngles.y,0);groundY=transform.position.y-.1f;
         }
@@ -36,11 +37,10 @@ namespace KombiShift2.Vehicle
         void FixedUpdate()
         {
             if(body.isKinematic)return;
-            // RCC helpers can write a rotation directly despite frozen physics axes.
-            // Keep the arcade chassis upright after those helpers have run.
-            body.constraints=RigidbodyConstraints.FreezeRotationX|RigidbodyConstraints.FreezeRotationZ;
-            body.rotation=Quaternion.Euler(0,body.rotation.eulerAngles.y,0);
-            body.angularVelocity=new Vector3(0,body.angularVelocity.y,0);
+            // Allow real suspension pitch/roll. Add bounded assistance only near a rollover.
+            float tilt=Vector3.Angle(transform.up,Vector3.up);
+            if(tilt>25f && tilt<80f)
+                body.AddTorque(Vector3.Cross(transform.up,Vector3.up)*Mathf.Min(4f,(tilt-25f)*.08f),ForceMode.Acceleration);
             // Apply parking torque directly so automatic brake-to-reverse logic is not triggered.
             if(controller!=null&&controller.handbrakeInput_V>.1f)
                 foreach(var wheel in wheels)wheel.brakeTorque=Mathf.Max(wheel.brakeTorque,5000f);
@@ -61,7 +61,7 @@ namespace KombiShift2.Vehicle
             if(best<4f)groundY=candidate;
             bool unsafePose=body.position.y<groundY-.45f||Vector3.Dot(transform.up,Vector3.up)<.35f;
             unsafeTime=unsafePose?unsafeTime+Time.fixedDeltaTime:0;
-            if(unsafeTime>.2f)
+            if(unsafeTime>2f)
             {
                 body.position=new Vector3(safePosition.x,Mathf.Max(safePosition.y,groundY+.14f),safePosition.z);
                 body.rotation=safeRotation;body.linearVelocity=Vector3.zero;body.angularVelocity=Vector3.zero;unsafeTime=0;Recoveries++;

@@ -13,9 +13,10 @@ namespace KombiShift2.UI
         AudioSource audioSource;AudioClip hoverClip,clickClip;
         readonly float[] highlights=new float[3];
         int selected=-1;Vector3 lastMouse;float enterTime,transition,volume,sensitivity,cameraDistance;
+        KombiTripMarket market;
         bool settings,controls,starting;int lastSound=-1;
-        readonly string[] titles={"START SHIFT","HOW TO PLAY","SETTINGS"};
-        readonly string[] details={"CBD TO MBARE  /  10 MINUTES","KEYBOARD + MOUSE","AUDIO + CAMERA"};
+        readonly string[] titles={"TRIP MARKET","HOW TO PLAY","SETTINGS"};
+        readonly string[] details={"CHOOSE A CITY ROUTE","KEYBOARD + MOUSE","AUDIO + CAMERA"};
         public int SelectedItem=>selected;
         public bool Starting=>starting;
         public bool SettingsOpen=>settings;
@@ -40,7 +41,7 @@ namespace KombiShift2.UI
         {
             float step=Time.unscaledDeltaTime;
             for(int i=0;i<3;i++)highlights[i]=Mathf.MoveTowards(highlights[i],selected==i&&!settings&&!controls?1:0,step*7f);
-            if(starting)return;
+            if(starting || (market!=null&&market.IsOpen))return;
             if(Input.GetKeyDown(KeyCode.Escape)){settings=controls=false;return;}
             if(settings||controls)return;
             if(Input.GetKeyDown(KeyCode.F2)) KombiChallenge.Selected = KombiChallenge.Selected == KombiStage.Morning ? KombiStage.RushHour : KombiStage.Morning;
@@ -56,7 +57,11 @@ namespace KombiShift2.UI
         public void Activate(int index)
         {
             if(starting)return;audioSource.PlayOneShot(clickClip,.3f);
-            if(index==0)StartCoroutine(StartShift());
+            if(index==0)
+            {
+                if(market==null){market=gameObject.AddComponent<KombiTripMarket>();market.StartRequested+=()=>StartCoroutine(StartShift());}
+                market.Open();
+            }
             else if(index==1)controls=true;
             else settings=true;
         }
@@ -69,6 +74,7 @@ namespace KombiShift2.UI
         }
         void OnGUI()
         {
+            if(market!=null&&market.IsOpen)return;
             Styles();float scale=Mathf.Min(Screen.width/1280f,Screen.height/H);
             float w=Screen.width/scale,h=Screen.height/scale;
             var previous=GUI.matrix;GUI.matrix=Matrix4x4.Scale(Vector3.one*scale);GUI.color=Color.white;
@@ -84,7 +90,7 @@ namespace KombiShift2.UI
             Text(new Rect(60,397,440,40),"BE FIRST AT THE RANK.",section,Color.white);
             Text(new Rect(60,442,400,60),"Pick up the passengers. Outrun your rivals.\nBring the fares home.",body,new Color(.74f,.81f,.81f));
             Text(new Rect(w-390,115,330,30),"TOYOTA HIACE  /  COMMUTER",tiny,new Color(.82f,.86f,.85f));
-            Text(new Rect(w-390,150,330,36),"CBD  /  MBARE",section,Color.white);
+            Text(new Rect(w-390,150,330,36),"CITY  /  ROUTES",section,Color.white);
             float rowY=h-226;
             if(!starting&&!settings&&!controls)
             {
@@ -151,7 +157,7 @@ namespace KombiShift2.UI
             }
             else
             {
-                Text(new Rect(panel.x+34,panel.y+105,565,300),"W / S     Accelerate, brake and reverse\nA / D     Steer       SPACE     Handbrake\nRMB DRAG     Orbit or look around\nMOUSE WHEEL     Zoom chase camera\nC / CAMERA BUTTON     Change view\n\nStop below 2 km/h. Hold Space while boarding.\nListen for stop requests; stop to let passengers alight.\nFinish at MBARE. $2 Morning / $3 Rush per delivery.\nT repairs at stops. Fines reduce earnings and XP.\nF2 on title changes stage. Escape pauses. R restarts.",body,new Color(.84f,.89f,.88f));
+                Text(new Rect(panel.x+34,panel.y+105,565,300),"W / S     Accelerate, brake and reverse\nA / D     Steer       SPACE     Handbrake\nRMB DRAG     Orbit or look around\nMOUSE WHEEL     Zoom chase camera\nC / CAMERA BUTTON     Change view\n\nStop below 2 km/h. Hold Space while boarding.\nListen for stop requests; stop to let passengers alight.\nChoose a route in Trip Market. Fares pay on delivery.\nT repairs at stops. Fines reduce earnings and XP.\nF2 on title changes stage. Escape pauses. R restarts.",body,new Color(.84f,.89f,.88f));
             }
             Rect back=new(panel.x+34,panel.yMax-58,572,36);
             Fill(back,back.Contains(Event.current.mousePosition)?new Color(.72f,.48f,.15f):new Color(.13f,.24f,.27f));

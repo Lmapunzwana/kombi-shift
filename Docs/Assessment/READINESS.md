@@ -1,28 +1,9 @@
-# Current source readiness — 9 November expansion
+# Current source readiness — 11 November city infrastructure
 
-Read [EXPANSION_ENGINEERING_REPORT.md](EXPANSION_ENGINEERING_REPORT.md) for current executed checks, build status and limitations. The 8 November PDFs, deck, submission folders and release evidence remain historical snapshots; do not present them as evidence for the new systems.
+Read [CityInfrastructure/ENGINEERING_REPORT.md](CityInfrastructure/ENGINEERING_REPORT.md) for current executed checks, build status and limitations. The earlier expansion report, PDFs, deck and submission snapshots are historical; they do not validate this implementation.
 
-## Implemented in current source
+The current source adds existing-city asphalt/collision authoring, a physically audited branching road graph, real potholes, pooled physical traffic, connected trip selection, route fares, legal navigation, junction controls and the preserved passenger/condition systems. See [DESIGN_AND_ARCHITECTURE.md](CityInfrastructure/DESIGN_AND_ARCHITECTURE.md).
 
-- Physical WheelCollider rival driving, utility station evaluation, faster competitive profiles, signed lane offsets with clearance-checked passes, identifiable colours and activity feedback.
-- A connected approximately 1.25 km itinerary using existing roads, seven stations, extended traffic/rival/minimap navigation and shallow physical speed humps.
-- Individual player passenger trips, intermediate drop-off requests and animation, recovery from missed stops, delivery fares and cumulative delivered totals.
-- Separate happiness and XP, rate-limited reactions, severity-based impact condition, bounded RCC input modifiers and paid stopped-service repair.
-- Configurable traffic-law zones, speed grace and continuous incidents, fine records and secondary HUD metrics.
-- Stage settings assets, lower Morning traffic, greater Rush pressure and higher Rush delivery fares.
-- Rule/component, Unity Test Framework, actual-scene integration, RCC hump and existing regression fixtures; new evidence is kept under Docs/Validation/Expansion.
+Human tester details and same-task retests, genuine member contributions, course-reading evidence and defence practice remain human evidence. The user confirmed tester feedback exists; the actual records have been requested. Do not fill the tester CSVs from automated results. Imported dependency redistribution review remains as documented in the asset declaration.
 
-## Required human work
-
-1. At least three authentic tester sessions on identified builds/devices.
-2. Severity analysis and at least three actual observation-linked fixes plus same-task retests.
-3. Real member contributions/understanding, live walkthrough/change practice and Q&A.
-4. Actual assigned-book editions/sections and design connections.
-5. Native Windows, weakest-machine, browser audio/input/accessibility and fresh import/extraction checks.
-6. Imported dependency/source hand-in permission, including the existing RCC source redistribution restriction.
-7. Any genuine early feedback that exists; current design and storyboard are not backdated evidence.
-8. Use the current dated expansion PDF/report; refresh the deck and final submission snapshots after human review.
-
-## Engineering limitations to review
-
-The road itinerary is not a general branching lane graph. Full intersection right-of-way, robust endpoint turning/alternate-route recovery and prolonged blockage need further validation. Give-way is caution/speed control rather than a complete yield-violation classifier. Rival offences are only partially recorded. Dedicated severe-damage smoke/engine audio and complete whole-game before/after CPU/GPU profiling are not claimed. Actual platform results and any remaining test failures belong in the engineering report.
+Platform and automated status must be taken from the current report/JSON, not assumed from an old release. Unit Test MCP was unavailable in this session, so no new unit/component coverage run is claimed.

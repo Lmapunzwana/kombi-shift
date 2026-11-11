@@ -4,8 +4,8 @@ using UnityEngine;
 
 namespace KombiShift2.Gameplay
 {
-    // Value 2 remains unused to preserve existing serialized road-rule values.
-    public enum RoadRule { SpeedLimit = 0, Stop = 1, NoEntry = 3, NoOvertaking = 4, Crossing = 5, Roadworks = 6, Hump = 7, Direction = 8 }
+    // Give Way reuses its original serialized value; existing rule values stay stable.
+    public enum RoadRule { SpeedLimit = 0, Stop = 1, GiveWay = 2, NoEntry = 3, NoOvertaking = 4, Crossing = 5, Roadworks = 6, Hump = 7, Direction = 8 }
     [RequireComponent(typeof(BoxCollider))]
     public sealed class KombiRoadRuleZone : MonoBehaviour
     {

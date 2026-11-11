@@ -1,4 +1,5 @@
 using System;
+using KombiShift2.City;
 using System.Collections.Generic;
 using UnityEngine;
 
@@ -14,9 +15,12 @@ namespace KombiShift2.Gameplay
         private readonly List<TrafficOffence> offences = new();
         private readonly Dictionary<KombiRoadRuleZone, float> limits = new();
         private KombiShiftGameDirector director;
-        private float speedingSeconds;
+        private float speedingSeconds,nextCitySample;
+        private float cityLimit=50f;
+        private CityIntersection lastJunction;
+        private bool stoppedForJunction,enteredJunction;
         private bool speedingIncident;
-        public float SpeedLimit { get { float limit = defaultLimit; foreach (var value in limits.Values) limit = Mathf.Min(limit, value); return limit; } }
+        public float SpeedLimit { get { float limit = Mathf.Min(defaultLimit,cityLimit); foreach (var value in limits.Values) limit = Mathf.Min(limit, value); return limit; } }
         public int TotalFines { get; private set; }
         public IReadOnlyList<TrafficOffence> Offences => offences;
         public void Configure(KombiShiftGameDirector value) => director = value;
@@ -46,9 +50,39 @@ namespace KombiShift2.Gameplay
             }
             else { speedingSeconds = 0f; if (kph < SpeedLimit) speedingIncident = false; }
         }
+        private void SampleCity()
+        {
+            var graph=CityRoadNetwork.Active;if(graph==null)return;
+            int index=graph.Nearest(transform.position,0);if(index<0)return;var node=graph.Nodes[index];cityLimit=node.speedLimit;
+            var junction=CityIntersection.Near(transform.position);
+            if(junction!=lastJunction){lastJunction=junction;stoppedForJunction=false;enteredJunction=false;}
+            float speed=director.Vehicle.absoluteSpeed;
+            if(junction!=null)
+            {
+                if(speed<1f)stoppedForJunction=true;
+                float distance=Vector3.Distance(transform.position,junction.transform.position);
+                if(distance<junction.radius*.7f&&!enteredJunction&&speed>1.5f)
+                {
+                    enteredJunction=true;
+                    if(junction.MustStop(transform.forward))Record("city-red:"+junction.GetEntityId(),"Red traffic signal",5);
+                    if(junction.stopControlled&&!stoppedForJunction)Record("city-stop:"+junction.GetEntityId(),"Failed to stop at the junction",3);
+                }
+            }
+            else if(speed>8f && Vector3.Distance(node.position,transform.position)<10f)
+            {
+                float best=-1;Vector3 forward=transform.forward;
+                foreach(int next in node.links){var f=(graph.Nodes[next].position-node.position).normalized;float dot=Vector3.Dot(f,transform.forward);if(dot>best){best=dot;forward=f;}}
+                float right=Vector3.Dot(transform.position-node.position,Vector3.Cross(Vector3.up,forward));
+                if(best>.7f&&right>1f)Record("city-wrong-way","Driving against the signed left-hand lanes",4);
+            }
+        }
         private void Update()
         {
-            if (director != null) SampleSpeed(director.Vehicle.absoluteSpeed, Time.deltaTime);
+            if (director != null)
+            {
+                SampleSpeed(director.Vehicle.absoluteSpeed, Time.deltaTime);
+                if(Time.time>=nextCitySample && !director.Paused && !director.Finished){nextCitySample=Time.time+.2f;SampleCity();}
+            }
         }
     }
 }

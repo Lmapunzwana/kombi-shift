@@ -11,6 +11,17 @@ namespace KombiShift2.Vehicle
         private float nextImpact;
         private KombiShiftGameDirector director;
         public float Health { get; private set; } = 100f;
+        public float SuspensionHealth { get; private set; } = 100f;
+        public float WheelHealth { get; private set; } = 100f;
+        public float AlignmentPull => WheelHealth<85f?(100f-WheelHealth)*.0015f:0f;
+        public float SteeringFactor => Mathf.Lerp(.65f,1f,WheelHealth/100f);
+        public void ApplyRoadWear(float severity)
+        {
+            SuspensionHealth=Mathf.Max(20f,SuspensionHealth-severity);
+            WheelHealth=Mathf.Max(25f,WheelHealth-severity*.65f);
+            ApplyDamage(severity*.35f);
+        }
+        public float MaximumSpeed => Mathf.Lerp(55f,105f,Health/100f);
         public float PowerFactor => Mathf.Lerp(.45f, 1f, Health / 100f);
         public float BrakeFactor => Mathf.Lerp(.75f, 1f, Health / 100f);
         public event Action<float> Damaged;
@@ -24,19 +35,19 @@ namespace KombiShift2.Vehicle
         }
         private void OnCollisionEnter(Collision collision)
         {
-            if (director == null || director.Paused || director.Finished || Time.time < nextImpact) return;
+            if ((director != null && (director.Paused || director.Finished)) || Time.time < nextImpact) return;
             var rb = GetComponent<Rigidbody>();
             float speed = collision.relativeVelocity.magnitude;
             float amount = ImpactDamage(speed, collision.impulse.magnitude / Mathf.Max(1f, rb.mass), harmlessImpact, damageScale);
             if (amount <= 0f) return;
             nextImpact = Time.time + 1f; ApplyDamage(amount);
-            director.Quality.Apply("collision", speed >= severeImpact ? "Passenger: That was a serious crash!" : "Passenger: Please drive carefully!", -amount * .5f, -Mathf.CeilToInt(amount * .3f), 1f);
+            if(director!=null)director.Quality.Apply("collision", speed >= severeImpact ? "Passenger: That was a serious crash!" : "Passenger: Please drive carefully!", -amount * .5f, -Mathf.CeilToInt(amount * .3f), 1f);
         }
         public int RepairPrice => Mathf.CeilToInt((100f - Health) * repairCostPerPoint);
         public bool Repair()
         {
             if (director == null || director.Finished || Health >= 100f || director.Vehicle.absoluteSpeed >= 2f || !director.AtServicePoint || !director.TrySpend(RepairPrice)) return false;
-            Health = 100f; return true;
+            Health = SuspensionHealth = WheelHealth = 100f; return true;
         }
     }
 }

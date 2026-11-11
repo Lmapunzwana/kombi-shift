@@ -79,3 +79,6 @@ mono_crash.*
 
 # Local reversible scene-repair backups
 /Review/BeforeSeatingLane-*/
+
+# Local city-authoring backups
+/Review/BeforeCityInfrastructure/
