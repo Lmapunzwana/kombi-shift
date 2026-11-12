@@ -1,0 +1,292 @@
+using System;
+using KombiShift2.City;
+using System.Collections;
+using System.Collections.Generic;
+using System.Linq;
+using KombiShift2.Traffic;
+using KombiShift2.Vehicle;
+using UnityEngine;
+using UnityEngine.SceneManagement;
+
+namespace KombiShift2.Gameplay
+{
+    public sealed class KombiShiftGameDirector : MonoBehaviour
+    {
+        [SerializeField] private RCCP_CarController vehicle;
+        [SerializeField] private Transform[] stops;
+        [SerializeField] private float stopRadius = 10f;
+        [SerializeField] private float shiftSeconds = 600f;
+        private int stopIndex;
+        readonly KombiShiftLedger ledger = new();
+        KombiPassengerService passengerService;
+        KombiShiftConfiguration configuration;
+        public float GrossEarnings => ledger.GrossEarnings;
+        public int RepairExpenses => ledger.RepairExpenses;
+        public float TimeBonus => ledger.TimeBonus;
+        float earnings => ledger.NetEarnings;
+        private float timeRemaining;
+        private bool finished;
+        private bool success;
+        private bool paused;
+        bool servicing => passengerService != null && passengerService.Busy;
+        private string notice;
+        private PassengerStation[] stations;
+        private RivalKombiAI[] rivals;
+        private KombiPassengerCabin cabin;
+        private readonly List<StationPassenger> onboard = new();
+        private GUIStyle title, body;
+        [SerializeField] private List<PassengerTrip> trips = new();
+        [SerializeField] private float requestRadius = 90f, missedStopPenalty = 20f;
+        [SerializeField] private int missedStopXP = 10;
+        private int delivered;
+        private float nextTripSample;
+        private AudioSource serviceAudio;
+        private AudioClip requestTone;
+        public IReadOnlyList<PassengerTrip> Trips => trips;
+        public KombiServiceQuality Quality { get; private set; }
+        public KombiVehicleCondition Condition { get; private set; }
+        public KombiTrafficLaw Law { get; private set; }
+        public float Happiness
+        {
+            get { float total=0;int count=0;foreach(var trip in trips)if(trip.state!=TripState.Completed){total+=trip.happiness;count++;}return count>0?total/count:100f; }
+        }
+        public int Delivered => delivered;
+        public string DropRequest
+        {
+            get { foreach(var trip in trips)if(trip.requested&&trip.state!=TripState.Completed&&ValidDestination(trip))return "STOP REQUESTED - "+stations[trip.destination].name;return ""; }
+        }
+        bool ValidDestination(PassengerTrip trip) => stations!=null&&trip.destination>=0&&trip.destination<stations.Length&&stations[trip.destination]!=null;
+        public bool AtServicePoint => vehicle != null && stations != null && stations.Any(x => x != null && Vector3.Distance(vehicle.transform.position, x.ServicePoint.position) < stopRadius);
+        public bool TrySpend(int amount) => ledger.TryRepair(amount);
+        public void DeductFine(int amount) => ledger.Fine(amount);
+        public event Action<PassengerTrip> TripChanged;
+        public void Announce(string message) { notice = message; }
+
+        public event Action<float> OnFareEarned;
+        public event Action<bool> OnPauseChanged;
+        public event Action<bool> OnShiftFinished;
+        public KombiStage Stage { get; private set; }
+        public bool Success => finished && success;
+        KombiShiftConfiguration Configuration => configuration ??= new KombiShiftConfiguration(Stage);
+        public int MinimumPassengers => CityTripSession.Active ? Configuration.TripTarget(Configuration.TripDemand(StopCount)) : Configuration.DeliveryTarget;
+        public string TerminalName => CityTripSession.Active && CityTripSelection.Selected != null ? CityTripSelection.Selected.destination : "Mbare";
+        public bool ParkingBrakeHeld => vehicle != null && vehicle.handbrakeInput_V > .1f;
+        public float Duration => shiftSeconds;
+        public float StoppingRadius => stopRadius;
+        public void SetPaused(bool value)
+        {
+            if (finished || paused == value) return;
+            paused = value; Time.timeScale = paused ? 0f : 1f;
+            OnPauseChanged?.Invoke(paused);
+        }
+        public void ReturnToMenu() { Time.timeScale = 1f; SceneManager.LoadScene("KombiMainMenu"); }
+        public void RestartShift() { Time.timeScale = 1f; SceneManager.LoadScene(SceneManager.GetActiveScene().name); }
+        public void NextStage() { KombiChallenge.Selected = KombiStage.RushHour; RestartShift(); }
+        public RCCP_CarController Vehicle => vehicle;
+        public int CurrentStop => stopIndex;
+        public int StopCount => stops?.Length ?? 0;
+        public int Passengers => onboard.Count;
+        public float Earnings => earnings;
+        public float TimeRemaining => timeRemaining;
+        public bool Paused => paused;
+        public bool Finished => finished;
+        public bool Servicing => servicing;
+        public bool Alighting => passengerService != null && passengerService.Alighting;
+        public PassengerStation[] Stations => stations;
+        public RivalKombiAI[] Rivals => rivals;
+        public int RivalPassengers => rivals == null ? 0 : rivals.Sum(x => x != null ? x.PassengersTaken : 0);
+        public string Notice => servicing ? (Alighting ? "ALIGHTING — KEEP THE KOMBI STOPPED" : "BOARDING — KEEP THE KOMBI STOPPED") : notice;
+        public Vector3 CurrentTarget {
+            get {
+                PassengerTrip request=null;float nearest=float.MaxValue;
+                if(vehicle!=null)foreach(var trip in trips)
+                {
+                    if(!trip.requested||trip.state==TripState.Completed||!ValidDestination(trip))continue;
+                    float distance=(stations[trip.destination].ServicePoint.position-vehicle.transform.position).sqrMagnitude;
+                    if(distance<nearest){nearest=distance;request=trip;}
+                }
+                if(request!=null)return stations[request.destination].ServicePoint.position;
+                if (StopCount == 0) return transform.position;
+                int index = Mathf.Min(stopIndex, StopCount - 1);
+                return stations != null && index < stations.Length && stations[index] != null
+                    ? stations[index].ServicePoint.position : stops[index].position;
+            }
+        }
+        public void Configure(RCCP_CarController player, Transform[] routeStops, float serviceRadius = -1f) { vehicle = player; stops = routeStops; if(serviceRadius>0){stopRadius=serviceRadius;requestRadius=250f;} }
+        float FareForTrip(int origin, int destination) => CityTripSession.Active
+            ? CityTripSession.FareForTrip(origin, destination, Stage) : configuration.Fare;
+
+        private void Start()
+        {
+            Time.timeScale = 1f;
+            Stage = KombiChallenge.Selected;
+            if(vehicle==null){Debug.LogError("Shift director requires the player vehicle.",this);enabled=false;return;}
+            configuration = CityTripSession.Active ? CityTripSession.Configuration : new KombiShiftConfiguration(Stage);
+            shiftSeconds = CityTripSession.Active ? CityTripSession.SelectedDuration : configuration.Duration;
+            timeRemaining = shiftSeconds;
+            var traffic = FindObjectsByType<KombiTrafficVehicle>(FindObjectsSortMode.None);
+            Array.Sort(traffic, (a,b) => string.CompareOrdinal(a.name,b.name));
+            float fraction = configuration.TrafficFraction;
+            for (int i = Mathf.CeilToInt(traffic.Length * fraction); i < traffic.Length; i++) traffic[i].gameObject.SetActive(false);
+            cabin = vehicle != null ? vehicle.GetComponent<KombiPassengerCabin>() : null;
+            stations = stops == null ? Array.Empty<PassengerStation>() : stops.Select(x => x != null ? x.GetComponent<PassengerStation>() : null).ToArray();
+            passengerService = new KombiPassengerService(this, cabin, onboard, trips, FareForTrip,
+                trip => TripChanged?.Invoke(trip), CompleteDelivery);
+            rivals = FindObjectsByType<RivalKombiAI>(FindObjectsSortMode.None);
+            for (int i = 0; i < rivals.Length; i++)
+            {
+                rivals[i].SetPersonality(Stage==KombiStage.Morning ? (i%2==0?RivalPersonality.Competitive:RivalPersonality.Conservative) : (i%2==0?RivalPersonality.Aggressive:RivalPersonality.Competitive), i % 2 == 0 ? new Color(.95f,.35f,.22f) : new Color(.35f,.6f,1f));
+                rivals[i].ActivityChanged += RivalActivity;
+                rivals[i].SetChallenge(configuration.RivalSpeed, configuration.RivalDelay + i * 6f);
+            }
+            Quality = vehicle.GetComponent<KombiServiceQuality>() ?? vehicle.gameObject.AddComponent<KombiServiceQuality>(); Quality.Configure(this);
+            Condition = vehicle.GetComponent<KombiVehicleCondition>() ?? vehicle.gameObject.AddComponent<KombiVehicleCondition>(); Condition.Configure(this);
+            Law = vehicle.GetComponent<KombiTrafficLaw>() ?? vehicle.gameObject.AddComponent<KombiTrafficLaw>(); Law.Configure(this);
+            serviceAudio = gameObject.AddComponent<AudioSource>(); serviceAudio.spatialBlend = 0f;
+            requestTone = AudioClip.Create("Passenger request bell", 11025, 1, 22050, false);
+            var samples = new float[11025];
+            for (int n = 0; n < samples.Length; n++) samples[n] = Mathf.Sin(n * 2f * Mathf.PI * 660f / 22050f) * .12f * (1f - n / (float)samples.Length);
+            requestTone.SetData(samples, 0);
+            Quality.Changed += QualityChanged;
+            notice = $"{KombiChallenge.Name(Stage)} — deliver {MinimumPassengers}+ passengers to {(CityTripSession.Active?CityTripSelection.Selected.destination:"Mbare")}.";
+        }
+
+        private void Update()
+        {
+            if (Input.GetKeyDown(KeyCode.Escape) && !finished) SetPaused(!paused);
+            if (Input.GetKeyDown(KeyCode.R)) RestartShift();
+            if (paused || finished || vehicle == null || StopCount == 0) return;
+            timeRemaining = Mathf.Max(0f, timeRemaining - Time.deltaTime);
+            if (timeRemaining <= 0f) { Finish(false); return; }
+            if (Input.GetKeyDown(KeyCode.T)) notice = Condition.Repair() ? "Vehicle repaired." : $"Repair at a stop, below 2 km/h: ${Condition.RepairPrice}";
+            if (Time.time >= nextTripSample) { SampleTrips(); nextTripSample = Time.time + .5f; }
+            if (servicing) return;
+            // The selected terminal remains a valid destination even after skipped pickups.
+            if(CityTripSession.Active)
+            {
+                var terminal=stations.FirstOrDefault(s=>s!=null&&s.Terminal);
+                if(terminal!=null&&vehicle.absoluteSpeed<2f&&terminal.MatchesApproach(vehicle.transform)&&Vector3.Distance(vehicle.transform.position,terminal.ServicePoint.position)<stopRadius)
+                {StartCoroutine(DropOff(terminal));return;}
+            }
+            // Drop-off service is independent of pickup progression and reservations.
+            foreach (var drop in stations)
+            {
+                if (drop == null || drop.Terminal || !trips.Any(x => x.state != TripState.Completed && (stations[x.destination] == drop || x.missed))) continue;
+                if (vehicle.absoluteSpeed < 2f && drop.MatchesApproach(vehicle.transform) && Vector3.Distance(vehicle.transform.position, drop.ServicePoint.position) < stopRadius)
+                { StartCoroutine(AlightAt(drop, false)); return; }
+            }
+            // A full vehicle must deliver instead of waiting forever at another pickup.
+            if (cabin != null && onboard.Count >= cabin.Seats.Length)
+                stopIndex = CityTripSession.Active ? trips.Where(t=>t.state!=TripState.Completed).Select(t=>t.destination).DefaultIfEmpty(StopCount-1).Min() : StopCount - 1;
+            while (stopIndex < StopCount - 1 && stations[stopIndex] != null && !stations[stopIndex].HasWaiting && !stations[stopIndex].Reserved && !trips.Any(x => x.destination == stopIndex && x.state != TripState.Completed))
+            {
+                stopIndex++;
+                notice = "Next stop — rivals can take waiting passengers.";
+            }
+            var station = stations[stopIndex];
+            if (station == null || cabin == null) return;
+            Vector3 distance = vehicle.transform.position - station.ServicePoint.position; distance.y = 0f;
+            if (distance.magnitude > stopRadius || vehicle.absoluteSpeed >= 2f) return;
+            if (!station.MatchesApproach(vehicle.transform)) { notice="Use the left lane and face the stop direction to serve passengers."; return; }
+            if (station.Terminal) { StartCoroutine(DropOff(station)); return; }
+            if (station.Reserved) { notice = "A rival reached this stop first."; return; }
+            if (onboard.Count < cabin.Seats.Length && station.HasWaiting)
+            {
+                if (!ParkingBrakeHeld) { notice = "Hold Space to board passengers."; return; }
+                StartCoroutine(Board(station));
+            }
+        }
+
+        private IEnumerator Board(PassengerStation station) { yield return passengerService.Board(station); }
+
+        void CompleteDelivery(PassengerTrip trip)
+        {
+            if (!ledger.CreditDelivery(trip)) return;
+            delivered++;
+            OnFareEarned?.Invoke(trip.fare);
+            Quality.Apply("delivery:" + trip.passenger.GetEntityId(), trip.missed ? "Passenger delivered at a recovery stop." : "Passenger: Thank you for the safe arrival!", 0f, trip.missed ? 2 : 10, 0f);
+            TripChanged?.Invoke(trip);
+        }
+
+        private void SampleTrips()
+        {
+            foreach (var trip in trips)
+            {
+                if (trip.state == TripState.Completed || trip.state == TripState.Alighting || trip.passenger==null || !ValidDestination(trip)) continue;
+                float distance = Vector3.Distance(vehicle.transform.position, stations[trip.destination].ServicePoint.position);
+                if (trip.Request(distance, requestRadius))
+                { notice = $"Passenger requests drop-off: {stations[trip.destination].name} — {Mathf.RoundToInt(distance)} m"; serviceAudio.PlayOneShot(requestTone); TripChanged?.Invoke(trip); }
+                if (trip.CheckMissed(distance, CityTripSession.Active?45f:requestRadius))
+                { Quality.Apply("missed:" + trip.passenger.GetEntityId(), "Passenger: You missed my stop! Stop at a nearby station.", 0f, -missedStopXP, 0f); trip.Adjust(20f - missedStopPenalty); TripChanged?.Invoke(trip); }
+                if (Time.time - trip.boardedAt > trip.patienceSeconds)
+                    Quality.Apply("waiting", "Passenger: We have been waiting too long.", -3f, -1, 30f);
+            }
+        }
+
+        private IEnumerator DropOff(PassengerStation station)
+        {
+            yield return AlightAt(station, true);
+            if (!finished && onboard.Count == 0) Finish(delivered >= MinimumPassengers);
+        }
+
+        private IEnumerator AlightAt(PassengerStation station, bool terminal) { yield return passengerService.Alight(station, terminal); }
+
+        void RivalActivity(RivalKombiAI rival, string activity) => Announce(rival.name + ": " + activity);
+        void QualityChanged(string message, int xp)
+        {
+            notice = message + $"  XP {xp:+0;-0;0}";
+            serviceAudio.PlayOneShot(requestTone, .45f);
+        }
+        private void OnDestroy()
+        {
+            if (rivals != null) foreach (var rival in rivals) if (rival != null) rival.ActivityChanged -= RivalActivity;
+            if (Quality != null) Quality.Changed -= QualityChanged;
+            if (requestTone != null) Destroy(requestTone);
+        }
+
+        private void Finish(bool completed)
+        {
+            if (finished) return;
+            success = completed; finished = true;
+            if (success)
+            {
+                ledger.AwardTimeBonus(timeRemaining);
+                KombiChallenge.SaveBest(Stage, Mathf.RoundToInt(earnings));
+            }
+            if (vehicle != null) RCCP.SetControl(vehicle, false);
+            if(rivals!=null)foreach (var rival in rivals) if (rival != null) rival.StopForShiftEnd();
+            Time.timeScale = 0f;
+            OnShiftFinished?.Invoke(success);
+        }
+
+        private void OnGUI()
+        {
+            if (!paused && !finished) return;
+            title ??= new GUIStyle(GUI.skin.label) { fontSize = 26, fontStyle = FontStyle.Bold, alignment = TextAnchor.MiddleCenter };
+            body ??= new GUIStyle(GUI.skin.label) { fontSize = 17, alignment = TextAnchor.MiddleCenter, wordWrap = true };
+            title.normal.textColor = body.normal.textColor = Color.white;
+            float width = Mathf.Min(560f, Screen.width - 24f);
+            Rect panel = new(Screen.width * .5f - width * .5f, Screen.height * .5f - 210f, width, 420f);
+            GUI.Box(panel, GUIContent.none);
+            GUI.Label(new Rect(panel.x + 12, panel.y + 22, width - 24, 42), paused ? "SHIFT PAUSED" : success ? "YOU WON" : "YOU LOST", title);
+            string outcome = success
+                ? $"{TerminalName} reached. {delivered} passengers delivered; target {MinimumPassengers} reached."
+                : timeRemaining <= 0f
+                    ? $"TIME EXPIRED. {TerminalName} was not reached. {delivered} passengers delivered; target {MinimumPassengers}."
+                    : $"TARGET MISSED at {TerminalName}. {delivered} passengers delivered; {MinimumPassengers} required.";
+            string stats = $"Passengers delivered: {delivered} / {MinimumPassengers}\nRivals collected: {RivalPassengers}\nGross fares: ${GrossEarnings:0.00}  Repairs: ${RepairExpenses}  Fines: ${Law.TotalFines}\nNet: ${earnings:0.00} (time bonus ${TimeBonus:0.00})   Best: ${KombiChallenge.Best(Stage)}";
+            string message = paused ? $"{KombiChallenge.Name(Stage)}\nDeliver {MinimumPassengers}+ passengers to {TerminalName}.\nEscape — resume    R — restart" : $"{KombiChallenge.Name(Stage)}\n{outcome}\n\n{stats}";
+            GUI.Label(new Rect(panel.x + 20, panel.y + 78, width - 40, paused ? 110 : 220), message, body);
+            if (paused)
+            {
+                GUI.Label(new Rect(panel.x + 20, panel.y + 220, width - 40, 24), "MASTER VOLUME", body);
+                AudioListener.volume = GUI.HorizontalSlider(new Rect(panel.x + 30, panel.y + 252, width - 60, 24), AudioListener.volume, 0f, 1f);
+                PlayerPrefs.SetFloat("KombiShift.MasterVolume", AudioListener.volume);
+            }
+            if (GUI.Button(new Rect(panel.x + 16, panel.y + 332, width / 2 - 24, 32), paused ? "RESUME" : "REPLAY"))
+            { if (paused) SetPaused(false); else RestartShift(); }
+            if (GUI.Button(new Rect(panel.center.x + 8, panel.y + 332, width / 2 - 24, 32), "MAIN MENU")) ReturnToMenu();
+            if (success && Stage == KombiStage.Morning && GUI.Button(new Rect(panel.x + 16, panel.y + 374, width - 32, 30), "NEXT: RUSH HOUR")) NextStage();
+        }
+    }
+}

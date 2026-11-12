@@ -1,0 +1,15 @@
+{
+  "date": "2026-11-11",
+  "result": "Partial: main menu and Trip Market rendered; gameplay keyboard check pending",
+  "browser": "Codex in-app Chromium browser",
+  "url": "http://127.0.0.1:8765",
+  "observed": [
+    "WebGL player loaded the actual main menu over local HTTP",
+    "Trip Market opened and displayed selectable routes and map"
+  ],
+  "limitations": [
+    "Browser tab was unavailable after continuation; no completed browser gameplay/input assertion",
+    "Audio, long sessions and additional devices not verified"
+  ],
+  "sourceCommit": "0798f97"
+}

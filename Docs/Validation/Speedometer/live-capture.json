@@ -1,0 +1,14 @@
+{
+    "unity": "6000.6.2f1",
+    "scope": "Rendered actual gameplay; controlled RCC acceleration/braking, not a human playtest",
+    "movingSpeed": 38.408409118652344,
+    "distance": 57.80068588256836,
+    "maximum": 39.87367630004883,
+    "average": 14.4299898147583,
+    "elapsed": 14.42013931274414,
+    "stopped": 6.2599945068359375,
+    "speedChanged": true,
+    "distanceAdvanced": true,
+    "brakingStopped": true,
+    "stoppedTimeAdvanced": true
+}

@@ -1,0 +1,133 @@
+park 0: pos=(-499.51, 24.54, 574.31) angles=(0.00, 357.92, 0.00) up=1 constraints=80 com=(0.00, -0.25, -0.26) speed=0.0001744337 direction=1 engineTorque=12.38141 diffTorque=0
+ axle=RCCP_Axle_Rear power=True steer=False
+ axle=RCCP_Axle_Front power=False steer=True
+ wheel=WheelCollider_L local=(-0.60, 0.26, -1.03) grounded=True contact=Asphalt Street bz2 force=6651.64 motor=0 pose=(-500.07, 24.70, 573.26) radius=0.265
+ wheel=WheelCollider_R local=(0.60, 0.26, -1.03) grounded=True contact=Asphalt Street bz2 force=6628.203 motor=0 pose=(-498.87, 24.70, 573.31) radius=0.265
+ wheel=WheelCollider_L local=(-0.60, 0.26, 1.02) grounded=True contact=Asphalt Street bz2 force=1660.766 motor=0 pose=(-500.15, 24.66, 575.31) radius=0.265
+ wheel=WheelCollider_R local=(0.60, 0.26, 1.02) grounded=True contact=Asphalt Street bz2 force=1650.014 motor=0 pose=(-498.95, 24.66, 575.36) radius=0.265
+park 1: pos=(-499.51, 24.54, 574.31) angles=(0.00, 357.92, 0.00) up=1 constraints=80 com=(0.00, -0.25, -0.26) speed=0.0001741746 direction=1 engineTorque=12.38141 diffTorque=0
+ axle=RCCP_Axle_Rear power=True steer=False
+ axle=RCCP_Axle_Front power=False steer=True
+ wheel=WheelCollider_L local=(-0.60, 0.26, -1.03) grounded=True contact=Asphalt Street bz2 force=6643.314 motor=0 pose=(-500.07, 24.70, 573.26) radius=0.265
+ wheel=WheelCollider_R local=(0.60, 0.26, -1.03) grounded=True contact=Asphalt Street bz2 force=6627.352 motor=0 pose=(-498.87, 24.70, 573.31) radius=0.265
+ wheel=WheelCollider_L local=(-0.60, 0.26, 1.02) grounded=True contact=Asphalt Street bz2 force=1660.163 motor=0 pose=(-500.15, 24.66, 575.31) radius=0.265
+ wheel=WheelCollider_R local=(0.60, 0.26, 1.02) grounded=True contact=Asphalt Street bz2 force=1649.283 motor=0 pose=(-498.95, 24.66, 575.36) radius=0.265
+park 2: pos=(-499.51, 24.54, 574.31) angles=(0.00, 357.92, 0.00) up=1 constraints=80 com=(0.00, -0.25, -0.26) speed=0.0001749704 direction=1 engineTorque=12.38141 diffTorque=0
+ axle=RCCP_Axle_Rear power=True steer=False
+ axle=RCCP_Axle_Front power=False steer=True
+ wheel=WheelCollider_L local=(-0.60, 0.26, -1.03) grounded=True contact=Asphalt Street bz2 force=6643.562 motor=0 pose=(-500.07, 24.70, 573.26) radius=0.265
+ wheel=WheelCollider_R local=(0.60, 0.26, -1.03) grounded=True contact=Asphalt Street bz2 force=6626.977 motor=0 pose=(-498.87, 24.70, 573.31) radius=0.265
+ wheel=WheelCollider_L local=(-0.60, 0.26, 1.02) grounded=True contact=Asphalt Street bz2 force=1668.383 motor=0 pose=(-500.15, 24.66, 575.31) radius=0.265
+ wheel=WheelCollider_R local=(0.60, 0.26, 1.02) grounded=True contact=Asphalt Street bz2 force=1656.759 motor=0 pose=(-498.95, 24.66, 575.36) radius=0.265
+park 3: pos=(-499.51, 24.54, 574.31) angles=(0.00, 357.92, 0.00) up=1 constraints=80 com=(0.00, -0.25, -0.26) speed=0.0001717952 direction=1 engineTorque=12.38141 diffTorque=0
+ axle=RCCP_Axle_Rear power=True steer=False
+ axle=RCCP_Axle_Front power=False steer=True
+ wheel=WheelCollider_L local=(-0.60, 0.26, -1.03) grounded=True contact=Asphalt Street bz2 force=6643.928 motor=0 pose=(-500.07, 24.70, 573.26) radius=0.265
+ wheel=WheelCollider_R local=(0.60, 0.26, -1.03) grounded=True contact=Asphalt Street bz2 force=6626.848 motor=0 pose=(-498.87, 24.70, 573.31) radius=0.265
+ wheel=WheelCollider_L local=(-0.60, 0.26, 1.02) grounded=True contact=Asphalt Street bz2 force=1660.655 motor=0 pose=(-500.15, 24.66, 575.31) radius=0.265
+ wheel=WheelCollider_R local=(0.60, 0.26, 1.02) grounded=True contact=Asphalt Street bz2 force=1648.663 motor=0 pose=(-498.95, 24.66, 575.36) radius=0.265
+drive 0: pos=(-499.51, 24.54, 574.31) angles=(0.00, 357.92, 0.00) up=1 constraints=80 com=(0.00, -0.25, -0.26) speed=0.0001772846 direction=1 engineTorque=12.38141 diffTorque=0
+ axle=RCCP_Axle_Rear power=True steer=False
+ axle=RCCP_Axle_Front power=False steer=True
+ wheel=WheelCollider_L local=(-0.60, 0.26, -1.03) grounded=True contact=Asphalt Street bz2 force=6644.176 motor=0 pose=(-500.07, 24.70, 573.26) radius=0.265
+ wheel=WheelCollider_R local=(0.60, 0.26, -1.03) grounded=True contact=Asphalt Street bz2 force=6626.353 motor=0 pose=(-498.87, 24.70, 573.31) radius=0.265
+ wheel=WheelCollider_L local=(-0.60, 0.26, 1.02) grounded=True contact=Asphalt Street bz2 force=1661.151 motor=0 pose=(-500.15, 24.66, 575.31) radius=0.265
+ wheel=WheelCollider_R local=(0.60, 0.26, 1.02) grounded=True contact=Asphalt Street bz2 force=1648.167 motor=0 pose=(-498.95, 24.66, 575.36) radius=0.265
+drive 1: pos=(-499.54, 24.52, 575.11) angles=(0.00, 357.93, 0.01) up=1 constraints=80 com=(0.00, -0.25, -0.26) speed=7.566213 direction=1 engineTorque=159.7309 diffTorque=3326.034
+ axle=RCCP_Axle_Rear power=True steer=False
+ axle=RCCP_Axle_Front power=False steer=True
+ wheel=WheelCollider_L local=(-0.60, 0.26, -1.03) grounded=True contact=Asphalt Street bz2 force=6363.932 motor=974.3408 pose=(-500.10, 24.68, 574.04) radius=0.265
+ wheel=WheelCollider_R local=(0.60, 0.26, -1.03) grounded=True contact=Asphalt Street bz2 force=6329.584 motor=972.9035 pose=(-498.90, 24.68, 574.09) radius=0.265
+ wheel=WheelCollider_L local=(-0.60, 0.26, 1.02) grounded=True contact=Asphalt Street bz2 force=1975.538 motor=0 pose=(-500.18, 24.65, 576.09) radius=0.265
+ wheel=WheelCollider_R local=(0.60, 0.26, 1.02) grounded=True contact=Asphalt Street bz2 force=1960.977 motor=0 pose=(-498.97, 24.65, 576.14) radius=0.265
+drive 2: pos=(-499.70, 24.46, 579.69) angles=(0.00, 357.94, 0.01) up=1 constraints=80 com=(0.00, -0.25, -0.26) speed=26.37051 direction=1 engineTorque=203.9505 diffTorque=4671.81
+ axle=RCCP_Axle_Rear power=True steer=False
+ axle=RCCP_Axle_Front power=False steer=True
+ wheel=WheelCollider_L local=(-0.60, 0.26, -1.03) grounded=True contact=Asphalt Street bz2 force=6381.681 motor=1965.393 pose=(-500.27, 24.62, 578.62) radius=0.265
+ wheel=WheelCollider_R local=(0.60, 0.26, -1.03) grounded=True contact=Asphalt Street bz2 force=6357.289 motor=1962.626 pose=(-499.06, 24.62, 578.66) radius=0.265
+ wheel=WheelCollider_L local=(-0.60, 0.26, 1.02) grounded=True contact=Asphalt Street bz2 force=2065.453 motor=0 pose=(-500.34, 24.59, 580.67) radius=0.265
+ wheel=WheelCollider_R local=(0.60, 0.26, 1.02) grounded=True contact=Asphalt Street bz2 force=2056.131 motor=0 pose=(-499.14, 24.59, 580.71) radius=0.265
+drive 3: pos=(-500.02, 24.31, 588.57) angles=(0.00, 357.93, 0.01) up=1 constraints=80 com=(0.00, -0.25, -0.26) speed=37.689 direction=1 engineTorque=210.2453 diffTorque=2750.67
+ axle=RCCP_Axle_Rear power=True steer=False
+ axle=RCCP_Axle_Front power=False steer=True
+ wheel=WheelCollider_L local=(-0.60, 0.26, -1.03) grounded=True contact=Asphalt Street bz2 force=6934.021 motor=1377.789 pose=(-500.58, 24.48, 587.42) radius=0.265
+ wheel=WheelCollider_R local=(0.60, 0.26, -1.03) grounded=True contact=Asphalt Street bz2 force=6914.458 motor=1377.698 pose=(-499.38, 24.48, 587.46) radius=0.265
+ wheel=WheelCollider_L local=(-0.60, 0.26, 1.02) grounded=True contact=Asphalt Street bz2 force=1605.21 motor=0 pose=(-500.66, 24.44, 589.47) radius=0.265
+ wheel=WheelCollider_R local=(0.60, 0.26, 1.02) grounded=True contact=Asphalt Street bz2 force=1590.793 motor=0 pose=(-499.46, 24.44, 589.51) radius=0.265
+drive 4: pos=(-500.48, 24.04, 601.19) angles=(0.00, 357.93, 0.01) up=1 constraints=80 com=(0.00, -0.25, -0.26) speed=49.46267 direction=1 engineTorque=0 diffTorque=0
+ axle=RCCP_Axle_Rear power=True steer=False
+ axle=RCCP_Axle_Front power=False steer=True
+ wheel=WheelCollider_L local=(-0.60, 0.26, -1.03) grounded=True contact=Asphalt Street bz2 force=7031.202 motor=0 pose=(-501.04, 24.21, 600.10) radius=0.265
+ wheel=WheelCollider_R local=(0.60, 0.26, -1.03) grounded=True contact=Asphalt Street bz2 force=7039.563 motor=0 pose=(-499.84, 24.21, 600.15) radius=0.265
+ wheel=WheelCollider_L local=(-0.60, 0.26, 1.02) grounded=True contact=Asphalt Street bz2 force=954.9738 motor=0 pose=(-501.12, 24.16, 602.15) radius=0.265
+ wheel=WheelCollider_R local=(0.60, 0.26, 1.02) grounded=True contact=Asphalt Street bz2 force=952.2128 motor=0 pose=(-499.91, 24.16, 602.20) radius=0.265
+drive 5: pos=(-501.03, 23.63, 616.46) angles=(0.00, 357.93, 0.01) up=1 constraints=80 com=(0.00, -0.25, -0.26) speed=58.8253 direction=1 engineTorque=208.7017 diffTorque=1811.416
+ axle=RCCP_Axle_Rear power=True steer=False
+ axle=RCCP_Axle_Front power=False steer=True
+ wheel=WheelCollider_L local=(-0.60, 0.26, -1.03) grounded=True contact=Asphalt Street bz2 force=7320.362 motor=906.5357 pose=(-501.59, 23.81, 615.17) radius=0.265
+ wheel=WheelCollider_R local=(0.60, 0.26, -1.03) grounded=True contact=Asphalt Street bz2 force=7326.632 motor=906.5578 pose=(-500.38, 23.81, 615.21) radius=0.265
+ wheel=WheelCollider_L local=(-0.60, 0.26, 1.02) grounded=True contact=Asphalt Street bz2 force=1235.488 motor=0 pose=(-501.66, 23.75, 617.22) radius=0.265
+ wheel=WheelCollider_R local=(0.60, 0.26, 1.02) grounded=True contact=Asphalt Street bz2 force=1247.321 motor=0 pose=(-500.46, 23.75, 617.26) radius=0.265
+drive 6: pos=(-501.67, 23.13, 634.23) angles=(0.00, 357.93, 0.01) up=1 constraints=80 com=(0.00, -0.25, -0.26) speed=68.50087 direction=1 engineTorque=197.9213 diffTorque=1718.009
+ axle=RCCP_Axle_Rear power=True steer=False
+ axle=RCCP_Axle_Front power=False steer=True
+ wheel=WheelCollider_L local=(-0.60, 0.26, -1.03) grounded=True contact=Asphalt Street bz2 force=7420.506 motor=859.8867 pose=(-502.23, 23.31, 632.98) radius=0.265
+ wheel=WheelCollider_R local=(0.60, 0.26, -1.03) grounded=True contact=Asphalt Street bz2 force=7428.843 motor=859.9089 pose=(-501.03, 23.31, 633.03) radius=0.265
+ wheel=WheelCollider_L local=(-0.60, 0.26, 1.02) grounded=True contact=Asphalt Street bz2 force=1182.75 motor=0 pose=(-502.31, 23.26, 635.03) radius=0.265
+ wheel=WheelCollider_R local=(0.60, 0.26, 1.02) grounded=True contact=Asphalt Street bz2 force=1195.99 motor=0 pose=(-501.10, 23.26, 635.08) radius=0.265
+drive 7: pos=(-501.75, 22.54, 654.73) angles=(359.61, 6.83, 5.12) up=0.9962958 constraints=80 com=(0.00, -0.25, -0.26) speed=73.2111 direction=1 engineTorque=202.9978 diffTorque=1209.948
+ axle=RCCP_Axle_Rear power=True steer=False
+ axle=RCCP_Axle_Front power=False steer=True
+ wheel=WheelCollider_L local=(-0.60, 0.26, -1.03) grounded=True contact=Asphalt Street bz2 force=11450.48 motor=579.4943 pose=(-502.51, 22.72, 653.39) radius=0.265
+ wheel=WheelCollider_R local=(0.60, 0.26, -1.03) grounded=True contact=Asphalt Street bz2 force=3899.18 motor=580.3503 pose=(-501.31, 22.73, 653.25) radius=0.265
+ wheel=WheelCollider_L local=(-0.60, 0.26, 1.02) grounded=True contact=Asphalt Street bz2 force=3920.562 motor=0 pose=(-502.27, 22.66, 655.43) radius=0.265
+ wheel=WheelCollider_R local=(0.60, 0.26, 1.02) grounded=True contact=Asphalt Street bz2 force=-1538.772 motor=0 pose=(-501.07, 22.67, 655.29) radius=0.265
+drive 8: pos=(-497.79, 21.97, 675.35) angles=(359.00, 12.00, 8.04) up=0.989554 constraints=80 com=(0.00, -0.25, -0.26) speed=77.48718 direction=1 engineTorque=194.4343 diffTorque=1254.923
+ axle=RCCP_Axle_Rear power=True steer=False
+ axle=RCCP_Axle_Front power=False steer=True
+ wheel=WheelCollider_L local=(-0.60, 0.26, -1.03) grounded=True contact= 1767 force=2889.417 motor=710.1741 pose=(-498.68, 22.02, 674.19) radius=0.265
+ wheel=WheelCollider_R local=(0.60, 0.26, -1.03) grounded=False contact=none force=2889.417 motor=-29.86258 pose=(-497.50, 22.06, 673.93) radius=0.265
+ wheel=WheelCollider_L local=(-0.60, 0.26, 1.02) grounded=True contact= 1767 force=-2497.695 motor=0 pose=(-498.23, 21.95, 676.20) radius=0.265
+ wheel=WheelCollider_R local=(0.60, 0.26, 1.02) grounded=False contact=none force=-2497.695 motor=0 pose=(-497.06, 22.10, 675.94) radius=0.265
+drive 9: pos=(-492.98, 21.26, 697.12) angles=(358.67, 14.60, 8.67) up=0.9884453 constraints=80 com=(0.00, -0.25, -0.26) speed=83.03049 direction=1 engineTorque=203.5833 diffTorque=1308.017
+ axle=RCCP_Axle_Rear power=True steer=False
+ axle=RCCP_Axle_Front power=False steer=True
+ wheel=WheelCollider_L local=(-0.60, 0.26, -1.03) grounded=True contact= 1767 force=13209.04 motor=663.8121 pose=(-493.90, 21.41, 696.08) radius=0.265
+ wheel=WheelCollider_R local=(0.60, 0.26, -1.03) grounded=True contact= 1767 force=2161.353 motor=644.0594 pose=(-492.73, 21.43, 695.78) radius=0.265
+ wheel=WheelCollider_L local=(-0.60, 0.26, 1.02) grounded=True contact= 1767 force=2403.881 motor=0 pose=(-493.37, 21.35, 698.06) radius=0.265
+ wheel=WheelCollider_R local=(0.60, 0.26, 1.02) grounded=False contact=none force=2403.881 motor=0 pose=(-492.20, 21.41, 697.76) radius=0.265
+drive 10: pos=(-486.68, 20.82, 720.58) angles=(358.62, 14.93, 8.14) up=0.989872 constraints=80 com=(0.00, -0.25, -0.26) speed=88.24798 direction=1 engineTorque=198.8033 diffTorque=1276.912
+ axle=RCCP_Axle_Rear power=True steer=False
+ axle=RCCP_Axle_Front power=False steer=True
+ wheel=WheelCollider_L local=(-0.60, 0.26, -1.03) grounded=True contact= 1768 force=12175.63 motor=646.1935 pose=(-487.68, 20.96, 719.28) radius=0.265
+ wheel=WheelCollider_R local=(0.60, 0.26, -1.03) grounded=True contact= 1768 force=3689.891 motor=630.3148 pose=(-486.51, 21.00, 718.97) radius=0.265
+ wheel=WheelCollider_L local=(-0.60, 0.26, 1.02) grounded=True contact= 1768 force=3492.266 motor=0 pose=(-487.14, 20.93, 721.26) radius=0.265
+ wheel=WheelCollider_R local=(0.60, 0.26, 1.02) grounded=True contact= 1768 force=3586.564 motor=0 pose=(-485.98, 20.98, 720.95) radius=0.265
+drive 11: pos=(-485.43, 19.93, 741.35) angles=(359.37, 356.24, 356.35) up=0.9979669 constraints=80 com=(0.00, -0.25, -0.26) speed=72.74019 direction=1 engineTorque=205.406 diffTorque=1315.947
+ axle=RCCP_Axle_Rear power=True steer=False
+ axle=RCCP_Axle_Front power=False steer=True
+ wheel=WheelCollider_L local=(-0.60, 0.26, -1.03) grounded=True contact= 1843 force=6011.325 motor=662.3428 pose=(-485.93, 20.15, 740.02) radius=0.265
+ wheel=WheelCollider_R local=(0.60, 0.26, -1.03) grounded=True contact= 1844 force=6648.462 motor=649.4399 pose=(-484.74, 20.03, 740.09) radius=0.265
+ wheel=WheelCollider_L local=(-0.60, 0.26, 1.02) grounded=True contact= 1843 force=1054.176 motor=0 pose=(-486.07, 20.08, 742.07) radius=0.265
+ wheel=WheelCollider_R local=(0.58, 0.26, 0.99) grounded=True contact= 1844 force=1372.252 motor=0 pose=(-484.90, 19.97, 742.11) radius=0.265
+drive 12: pos=(-488.22, 19.28, 762.14) angles=(359.06, 352.47, 354.59) up=0.9953567 constraints=80 com=(0.00, -0.25, -0.26) speed=77.66706 direction=1 engineTorque=200.1064 diffTorque=1291.628
+ axle=RCCP_Axle_Rear power=True steer=False
+ axle=RCCP_Axle_Front power=False steer=True
+ wheel=WheelCollider_L local=(-0.60, 0.26, -1.03) grounded=True contact= 1843 force=1335.958 motor=525.251 pose=(-488.65, 19.37, 760.86) radius=0.265
+ wheel=WheelCollider_R local=(0.60, 0.26, -1.03) grounded=True contact= 1843 force=9996.949 motor=711.0833 pose=(-487.45, 19.40, 761.02) radius=0.265
+ wheel=WheelCollider_L local=(-0.60, 0.26, 1.02) grounded=False contact=none force=9996.949 motor=0 pose=(-488.92, 19.39, 762.90) radius=0.265
+ wheel=WheelCollider_R local=(0.58, 0.26, 0.99) grounded=True contact= 1843 force=2258.007 motor=0 pose=(-487.75, 19.32, 763.02) radius=0.265
+drive 13: pos=(-491.70, 18.51, 784.49) angles=(358.47, 346.82, 352.08) up=0.9902711 constraints=80 com=(0.00, -0.25, -0.26) speed=83.77406 direction=1 engineTorque=203.5105 diffTorque=1309.07
+ axle=RCCP_Axle_Rear power=True steer=False
+ axle=RCCP_Axle_Front power=False steer=True
+ wheel=WheelCollider_L local=(-0.60, 0.26, -1.03) grounded=True contact= 1843 force=850.9271 motor=637.9474 pose=(-492.00, 18.65, 783.16) radius=0.265
+ wheel=WheelCollider_R local=(0.60, 0.26, -1.03) grounded=True contact= 1843 force=13385.85 motor=672.5453 pose=(-490.81, 18.66, 783.44) radius=0.265
+ wheel=WheelCollider_L local=(-0.60, 0.26, 1.02) grounded=False contact=none force=13385.85 motor=0 pose=(-492.47, 18.65, 785.16) radius=0.265
+ wheel=WheelCollider_R local=(0.58, 0.26, 0.99) grounded=True contact= 1843 force=2973.59 motor=0 pose=(-491.31, 18.61, 785.40) radius=0.265
+stop: pos=(-499.97, 17.26, 853.04) angles=(359.32, 359.95, 0.85) up=0.9998184 constraints=80 com=(0.00, -0.25, -0.26) speed=23.76718 direction=1 engineTorque=0 diffTorque=0
+ axle=RCCP_Axle_Rear power=True steer=False
+ axle=RCCP_Axle_Front power=False steer=True
+ wheel=WheelCollider_L local=(-0.60, 0.26, -1.03) grounded=True contact= 1842 force=6707.823 motor=0 pose=(-500.58, 17.40, 851.91) radius=0.265
+ wheel=WheelCollider_R local=(0.60, 0.26, -1.03) grounded=True contact= 1842 force=6381.992 motor=0 pose=(-499.37, 17.41, 851.91) radius=0.265
+ wheel=WheelCollider_L local=(-0.60, 0.26, 1.02) grounded=True contact= 1842 force=1754.013 motor=0 pose=(-500.58, 17.39, 853.96) radius=0.265
+ wheel=WheelCollider_R local=(0.58, 0.26, 0.99) grounded=True contact= 1842 force=1626.578 motor=0 pose=(-499.40, 17.40, 853.93) radius=0.265

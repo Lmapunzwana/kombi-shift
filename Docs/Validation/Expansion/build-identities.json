@@ -1,0 +1,22 @@
+{
+  "runtimeSystemsCommit": "593b134",
+  "finalSceneCommit": "aaa41b5",
+  "algorithm": "SHA256 of sorted relative paths and each file SHA256 digest",
+  "builds": {
+    "Linux": {
+      "files": 192,
+      "bytes": 394778802,
+      "contentTreeSha256": "c54b01f5a134a3b6a486dc9114ef251da276995efdcf724780ce92d184846dac"
+    },
+    "Windows": {
+      "files": 197,
+      "bytes": 395244885,
+      "contentTreeSha256": "3f136d9b4ec06dcd4f5df1728ac614888bd12c6111f3e99a0c3fc1d88370f8dd"
+    },
+    "Web": {
+      "files": 17,
+      "bytes": 200190952,
+      "contentTreeSha256": "5bd9b34749e8d938c111f591afa77fb3f2468d4ee2fc02a48d4a9bb6d01e023a"
+    }
+  }
+}

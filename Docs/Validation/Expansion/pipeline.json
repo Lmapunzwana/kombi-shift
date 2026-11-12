@@ -1,0 +1,50 @@
+[
+  {
+    "step": "integration-final",
+    "exit": 0,
+    "seconds": 89.24,
+    "log": "/tmp/kombi-integration-final.log"
+  },
+  {
+    "step": "regression-morning",
+    "exit": 0,
+    "seconds": 69.94,
+    "log": "/tmp/kombi-regression-morning.log"
+  },
+  {
+    "step": "regression-rush",
+    "exit": 0,
+    "seconds": 74.45,
+    "log": "/tmp/kombi-regression-rush.log"
+  },
+  {
+    "step": "powertrain",
+    "exit": 0,
+    "seconds": 61.94,
+    "log": "/tmp/kombi-powertrain.log"
+  },
+  {
+    "step": "visual",
+    "exit": 0,
+    "seconds": 68.08,
+    "log": "/tmp/kombi-visual.log"
+  },
+  {
+    "step": "build-linux",
+    "exit": 0,
+    "seconds": 86.04,
+    "log": "/tmp/kombi-build-linux.log"
+  },
+  {
+    "step": "build-windows",
+    "exit": 0,
+    "seconds": 98.58,
+    "log": "/tmp/kombi-build-windows.log"
+  },
+  {
+    "step": "build-web",
+    "exit": 0,
+    "seconds": 279.8,
+    "log": "/tmp/kombi-build-web.log"
+  }
+]

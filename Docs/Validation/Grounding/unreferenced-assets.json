@@ -1,0 +1,812 @@
+{
+    "assets": [
+        {
+            "path": "Assets/KombiShift2/Art/Characters/civiliian.fbx",
+            "bytes": 52834144
+        },
+        {
+            "path": "Assets/Characters/ImportedScavenger/Free_Scavenger/Textures/Scavenger_Normal.png",
+            "bytes": 34884375
+        },
+        {
+            "path": "Assets/KombiShift2/Art/Characters/Extracted/teacher/Ch22_1001_Normal.png",
+            "bytes": 22809147
+        },
+        {
+            "path": "Assets/Characters/ImportedScavenger/Free_Scavenger/Textures/Scavenger_AlbedoTransparency.png",
+            "bytes": 21398098
+        },
+        {
+            "path": "Assets/Environment/ParkProps/SoilSand0179_3_TileDiff.jpg",
+            "bytes": 11868132
+        },
+        {
+            "path": "Assets/Characters/ImportedScavenger/Free_Scavenger/Textures/Scavenger_MetallicSmoothness.png",
+            "bytes": 10220368
+        },
+        {
+            "path": "Assets/Characters/ImportedScavenger/Free_Scavenger/FBX/Scavenger.fbx",
+            "bytes": 9796314
+        },
+        {
+            "path": "Assets/Characters/ImportedScavenger/Free_Scavenger/Textures/Scavenger_AO.png",
+            "bytes": 7479916
+        },
+        {
+            "path": "Assets/KombiShift2/Art/Characters/Extracted/teacher/Ch22_1001_Glossiness.png",
+            "bytes": 6187527
+        },
+        {
+            "path": "Assets/KombiShift2/Art/Characters/Ch21_1001_Glossiness.png",
+            "bytes": 6089243
+        },
+        {
+            "path": "Assets/Characters/ImportedScavenger/Free_Scavenger/Textures/Scavenger_hair.tga",
+            "bytes": 4194348
+        },
+        {
+            "path": "Assets/KombiShift2/Art/Characters/Extracted/teacher/Ch22_1002_Normal.png",
+            "bytes": 3425163
+        },
+        {
+            "path": "Assets/Environment/ParkProps/vm_v3_062_suede_brown_diffuse.jpg",
+            "bytes": 2628966
+        },
+        {
+            "path": "Assets/KombiShift2/ThirdParty/PolyHaven/WornAsphalt/Textures/worn_asphalt_disp_2k.jpg",
+            "bytes": 2438807
+        },
+        {
+            "path": "Assets/KombiShift2/ThirdParty/GenericPassengerCars/textures/wheel_H_Diffuse.png",
+            "bytes": 2061630
+        },
+        {
+            "path": "Assets/KombiShift2/Art/Characters/Extracted/civilian/Boy01_FacialAnimMap.png",
+            "bytes": 1833847
+        },
+        {
+            "path": "Assets/KombiShift2/Art/Characters/Extracted/civilian/Boy01_normal.jpg",
+            "bytes": 1786048
+        },
+        {
+            "path": "Assets/KombiShift2/ThirdParty/GenericPassengerCars/textures/wheel_1_Diffuse.png",
+            "bytes": 1649365
+        },
+        {
+            "path": "Assets/KombiShift2/ThirdParty/GenericPassengerCars/textures/wheel_E_Diffuse.png",
+            "bytes": 1540855
+        },
+        {
+            "path": "Assets/KombiShift2/ThirdParty/GenericPassengerCars/textures/wheel_G_Diffuse.png",
+            "bytes": 1477409
+        },
+        {
+            "path": "Assets/KombiShift2/ThirdParty/GenericPassengerCars/textures/wheel_D_Diffuse.png",
+            "bytes": 1400287
+        },
+        {
+            "path": "Assets/KombiShift2/ThirdParty/GenericPassengerCars/textures/WagonBlue.png",
+            "bytes": 1281050
+        },
+        {
+            "path": "Assets/Environment/BusStops/map 1.jpg",
+            "bytes": 1270607
+        },
+        {
+            "path": "Assets/Realistic Car Controller Pro/Models/Prototype Vehicle/Skyline (Prototype)/Tex/skylineDetail2.png",
+            "bytes": 1192285
+        },
+        {
+            "path": "Assets/KombiShift2/ThirdParty/GenericPassengerCars/textures/HatchbackYellow.png",
+            "bytes": 1155981
+        },
+        {
+            "path": "Assets/KombiShift2/ThirdParty/GenericPassengerCars/textures/CoupeBlue.png",
+            "bytes": 1104726
+        },
+        {
+            "path": "Assets/KombiShift2/ThirdParty/GenericPassengerCars/textures/SedanYellow.png",
+            "bytes": 1053432
+        },
+        {
+            "path": "Assets/KombiShift2/ThirdParty/GenericPassengerCars/textures/SportRed.png",
+            "bytes": 908858
+        },
+        {
+            "path": "Assets/KombiShift2/ThirdParty/GenericPassengerCars/textures/MinivanRed.png",
+            "bytes": 862737
+        },
+        {
+            "path": "Assets/KombiShift2/ThirdParty/GenericPassengerCars/textures/PickupGreen.png",
+            "bytes": 796238
+        },
+        {
+            "path": "Assets/moma01.dae",
+            "bytes": 758552
+        },
+        {
+            "path": "Assets/Environment/BusStops/bus_stop_2mesh.jpg",
+            "bytes": 703849
+        },
+        {
+            "path": "Assets/Environment/BusStops/bus_stop_4_mesh.jpg",
+            "bytes": 691296
+        },
+        {
+            "path": "Assets/Environment/BusStops/bus_stop_3_mesh.jpg",
+            "bytes": 684814
+        },
+        {
+            "path": "Assets/KombiShift2/ThirdParty/GenericPassengerCars/textures/Wheel_A_Diffuse.png",
+            "bytes": 659616
+        },
+        {
+            "path": "Assets/Environment/BusStops/bus_stop_5.jpg",
+            "bytes": 659430
+        },
+        {
+            "path": "Assets/Environment/BusStops/bus_stop_2.jpg",
+            "bytes": 638878
+        },
+        {
+            "path": "Assets/Environment/ParkProps/Verevka_PM.jpg",
+            "bytes": 635571
+        },
+        {
+            "path": "Assets/KombiShift2/Art/Characters/Extracted/civilian/Boy01_spec.jpg",
+            "bytes": 594559
+        },
+        {
+            "path": "Assets/Environment/BusStops/bus_stop_1mesh.jpg",
+            "bytes": 592634
+        },
+        {
+            "path": "Assets/Realistic Car Controller Pro/Icon.png",
+            "bytes": 498966
+        },
+        {
+            "path": "Assets/Environment/BusStops/bus_stop_4.jpg",
+            "bytes": 473062
+        },
+        {
+            "path": "Assets/KombiShift2/ThirdParty/GenericPassengerCars/textures/SUVBlack.png",
+            "bytes": 468443
+        },
+        {
+            "path": "Assets/KombiShift2/ThirdParty/GenericPassengerCars/textures/OffroadGreen.png",
+            "bytes": 421329
+        },
+        {
+            "path": "Assets/Environment/BusStops/bus_stop_3.jpg",
+            "bytes": 409115
+        },
+        {
+            "path": "Assets/KombiShift2/ThirdParty/GenericPassengerCars/textures/DefaultMaterial_AO.jpg",
+            "bytes": 397952
+        },
+        {
+            "path": "Assets/Environment/BusStops/bus_stop_1.jpg",
+            "bytes": 361935
+        },
+        {
+            "path": "Assets/Realistic Car Controller Pro/Lensflares/Flare50mm.psd",
+            "bytes": 330753
+        },
+        {
+            "path": "Assets/Plugins/BezierSolution/Demo/OctopusArm.png",
+            "bytes": 264879
+        },
+        {
+            "path": "Assets/Realistic Car Controller Pro/Prefabs/Particles/RCCP_WheelSlipBurnout.prefab",
+            "bytes": 227201
+        },
+        {
+            "path": "Assets/KombiShift2/ThirdParty/GenericPassengerCars/textures/DefaultMaterial_albedo.jpg",
+            "bytes": 156253
+        },
+        {
+            "path": "Assets/KombiShift2/ThirdParty/Hiace2005/textures/logo_9.png",
+            "bytes": 154602
+        },
+        {
+            "path": "Assets/Realistic Car Controller Pro/Textures/UI/Marker.png",
+            "bytes": 135548
+        },
+        {
+            "path": "Assets/KombiShift2/ThirdParty/Hiace2005/textures/body_2.png",
+            "bytes": 105083
+        },
+        {
+            "path": "Assets/Environment/BusStops/Bus_stop.mat",
+            "bytes": 94208
+        },
+        {
+            "path": "Assets/Realistic Car Controller Pro/Prefabs/UI/RCCP_Canvas (API TEST).prefab",
+            "bytes": 81269
+        },
+        {
+            "path": "Assets/KombiShift2/ThirdParty/GenericPassengerCars/textures/wheel_1_Metallic.png",
+            "bytes": 68151
+        },
+        {
+            "path": "Assets/KombiShift2/Art/Characters/Extracted/teacher/Ch22_1001_Specular.png",
+            "bytes": 63478
+        },
+        {
+            "path": "Assets/Realistic Car Controller Pro/Models/Prototype Vehicle/Skyline (Prototype)/Tex/skylineEmmisive.png",
+            "bytes": 63033
+        },
+        {
+            "path": "Assets/Realistic Car Controller Pro/Textures/UI/Vignette.png",
+            "bytes": 61532
+        },
+        {
+            "path": "Assets/KombiShift2/ThirdParty/GenericPassengerCars/textures/wheel_1_Glossiness.png",
+            "bytes": 59655
+        },
+        {
+            "path": "Assets/KombiShift2/Art/Characters/Ch21_1001_Specular.png",
+            "bytes": 58789
+        },
+        {
+            "path": "Assets/KombiShift2/ThirdParty/GenericPassengerCars/textures/wheel_D_Glossiness.png",
+            "bytes": 57491
+        },
+        {
+            "path": "Assets/KombiShift2/ThirdParty/GenericPassengerCars/textures/wheel_C_Glossiness.png",
+            "bytes": 57489
+        },
+        {
+            "path": "Assets/KombiShift2/ThirdParty/GenericPassengerCars/textures/wheel_C_Metallic.png",
+            "bytes": 52959
+        },
+        {
+            "path": "Assets/Environment/ParkProps/SoilBeach0079_11_S.jpg",
+            "bytes": 51218
+        },
+        {
+            "path": "Assets/EasyRoads3D/SRP Support Packages/URP_7_3_1.unityPackage",
+            "bytes": 51071
+        },
+        {
+            "path": "Assets/Plugins/BezierSolution/Demo/OctopusArm.fbx",
+            "bytes": 51056
+        },
+        {
+            "path": "Assets/KombiShift2/ThirdParty/GenericPassengerCars/textures/wheel_D_Metallic.png",
+            "bytes": 50727
+        },
+        {
+            "path": "Assets/KombiShift2/ThirdParty/Hiace2005/textures/wheel_1.png",
+            "bytes": 50379
+        },
+        {
+            "path": "Assets/KombiShift2/ThirdParty/GenericPassengerCars/textures/wheel_H_Glossiness.png",
+            "bytes": 49262
+        },
+        {
+            "path": "Assets/KombiShift2/ThirdParty/GenericPassengerCars/textures/wheel_H_Metallic.png",
+            "bytes": 48333
+        },
+        {
+            "path": "Assets/Realistic Car Controller Pro/Lensflares/FlareStar.psd",
+            "bytes": 45349
+        },
+        {
+            "path": "Assets/KombiShift2/ThirdParty/GenericPassengerCars/textures/wheel_E_Metallic.png",
+            "bytes": 44090
+        },
+        {
+            "path": "Assets/KombiShift2/ThirdParty/GenericPassengerCars/textures/wheel_B_Metallic.png",
+            "bytes": 43441
+        },
+        {
+            "path": "Assets/KombiShift2/ThirdParty/GenericPassengerCars/textures/wheel_E_Glossiness.png",
+            "bytes": 42350
+        },
+        {
+            "path": "Assets/KombiShift2/ThirdParty/Hiace2005/textures/lights_7.png",
+            "bytes": 41375
+        },
+        {
+            "path": "Assets/KombiShift2/ThirdParty/GenericPassengerCars/textures/Wheel_A_Glossiness.png",
+            "bytes": 40817
+        },
+        {
+            "path": "Assets/KombiShift2/ThirdParty/GenericPassengerCars/textures/wheel_B_Glossiness.png",
+            "bytes": 40774
+        },
+        {
+            "path": "Assets/KombiShift2/ThirdParty/GenericPassengerCars/textures/Sedan_Metallic.png",
+            "bytes": 37129
+        },
+        {
+            "path": "Assets/KombiShift2/ThirdParty/GenericPassengerCars/textures/Wheel_A_Metallic.png",
+            "bytes": 36366
+        },
+        {
+            "path": "Assets/KombiShift2/ThirdParty/GenericPassengerCars/textures/wheel_G_Metallic.png",
+            "bytes": 35318
+        },
+        {
+            "path": "Assets/KombiShift2/ThirdParty/GenericPassengerCars/textures/wheel_G_Glossiness.png",
+            "bytes": 34644
+        },
+        {
+            "path": "Assets/KombiShift2/ThirdParty/GenericPassengerCars/textures/Sedan_Glossiness.png",
+            "bytes": 34259
+        },
+        {
+            "path": "Assets/Realistic Car Controller Pro/Textures/UI/LabelBackground.png",
+            "bytes": 33966
+        },
+        {
+            "path": "Assets/Realistic Car Controller Pro/Textures/Particles/Flare.png",
+            "bytes": 33339
+        },
+        {
+            "path": "Assets/Realistic Car Controller Pro/Textures/Particles/Smoke.png",
+            "bytes": 29676
+        },
+        {
+            "path": "Assets/KombiShift2/ThirdParty/GenericPassengerCars/textures/Offroad_Glossiness.png",
+            "bytes": 29309
+        },
+        {
+            "path": "Assets/KombiShift2/ThirdParty/GenericPassengerCars/textures/Sport_Glossiness.png",
+            "bytes": 25222
+        },
+        {
+            "path": "Assets/Realistic Car Controller Pro/Textures/UI/ButtonFade.png",
+            "bytes": 24754
+        },
+        {
+            "path": "Assets/KombiShift2/ThirdParty/GenericPassengerCars/textures/Sport_Metallic.png",
+            "bytes": 24724
+        },
+        {
+            "path": "Assets/KombiShift2/ThirdParty/GenericPassengerCars/textures/Hatchback_Glossiness.png",
+            "bytes": 24339
+        },
+        {
+            "path": "Assets/KombiShift2/ThirdParty/GenericPassengerCars/textures/Wagon_Metallic.png",
+            "bytes": 23997
+        },
+        {
+            "path": "Assets/KombiShift2/ThirdParty/GenericPassengerCars/textures/Wagon_Glossiness.png",
+            "bytes": 23799
+        },
+        {
+            "path": "Assets/KombiShift2/ThirdParty/GenericPassengerCars/textures/Minivan_Glossiness.png",
+            "bytes": 23414
+        },
+        {
+            "path": "Assets/KombiShift2/ThirdParty/GenericPassengerCars/textures/Hatchback_Metallic.png",
+            "bytes": 23308
+        },
+        {
+            "path": "Assets/KombiShift2/ThirdParty/GenericPassengerCars/textures/Compact_Glossiness.png",
+            "bytes": 22294
+        },
+        {
+            "path": "Assets/KombiShift2/ThirdParty/GenericPassengerCars/textures/Offroad_Metallic.png",
+            "bytes": 22042
+        },
+        {
+            "path": "Assets/KombiShift2/ThirdParty/GenericPassengerCars/textures/Pickup_Glossiness.png",
+            "bytes": 21855
+        },
+        {
+            "path": "Assets/KombiShift2/ThirdParty/GenericPassengerCars/textures/SUV_Glossiness.png",
+            "bytes": 21734
+        },
+        {
+            "path": "Assets/KombiShift2/ThirdParty/GenericPassengerCars/textures/Minivan_Metallic.png",
+            "bytes": 21706
+        },
+        {
+            "path": "Assets/KombiShift2/ThirdParty/GenericPassengerCars/textures/Pickup_Metallic.png",
+            "bytes": 21660
+        },
+        {
+            "path": "Assets/KombiShift2/ThirdParty/GenericPassengerCars/textures/SUV_Metallic.png",
+            "bytes": 21639
+        },
+        {
+            "path": "Assets/KombiShift2/ThirdParty/GenericPassengerCars/textures/Compact_Metallic.png",
+            "bytes": 21312
+        },
+        {
+            "path": "Assets/Environment/BusStops/Poster.uvw",
+            "bytes": 19856
+        },
+        {
+            "path": "Assets/KombiShift2/ThirdParty/GenericPassengerCars/textures/Coupe_Glossiness.png",
+            "bytes": 19541
+        },
+        {
+            "path": "Assets/KombiShift2/ThirdParty/GenericPassengerCars/textures/Coupe_Metallic.png",
+            "bytes": 19007
+        },
+        {
+            "path": "Assets/Realistic Car Controller Pro/Documentation/13_API.html",
+            "bytes": 16191
+        },
+        {
+            "path": "Assets/Realistic Car Controller Pro/Documentation/05_VehicleSystems.html",
+            "bytes": 15528
+        },
+        {
+            "path": "Assets/Realistic Car Controller Pro/Textures/Roads/Dev.png",
+            "bytes": 14189
+        },
+        {
+            "path": "Assets/Realistic Car Controller Pro/Documentation/15_Troubleshooting.html",
+            "bytes": 13926
+        },
+        {
+            "path": "Assets/Realistic Car Controller Pro/Font/good times rg LICENSE.html",
+            "bytes": 12590
+        },
+        {
+            "path": "Assets/Realistic Car Controller Pro/Documentation/04_DrivetrainComponents.html",
+            "bytes": 12567
+        },
+        {
+            "path": "Assets/Realistic Car Controller Pro/Documentation/14_LiteVsPro.html",
+            "bytes": 11749
+        },
+        {
+            "path": "Assets/Realistic Car Controller Pro/Documentation/12_Settings.html",
+            "bytes": 11184
+        },
+        {
+            "path": "Assets/Realistic Car Controller Pro/Documentation/07_InputSystem.html",
+            "bytes": 10513
+        },
+        {
+            "path": "Assets/Realistic Car Controller Pro/Documentation/03_VehicleSetup.html",
+            "bytes": 10015
+        },
+        {
+            "path": "Assets/Realistic Car Controller Pro/Documentation/09_Customization.html",
+            "bytes": 9632
+        },
+        {
+            "path": "Assets/Realistic Car Controller Pro/Documentation/10_UISystem.html",
+            "bytes": 9425
+        },
+        {
+            "path": "Assets/Realistic Car Controller Pro/Documentation/11_SceneManagement.html",
+            "bytes": 9341
+        },
+        {
+            "path": "Assets/Realistic Car Controller Pro/Documentation/08_AISystem.html",
+            "bytes": 9250
+        },
+        {
+            "path": "Assets/Realistic Car Controller Pro/Documentation/01_GettingStarted.html",
+            "bytes": 8811
+        },
+        {
+            "path": "Assets/Realistic Car Controller Pro/Textures/UI/Timer.png",
+            "bytes": 8309
+        },
+        {
+            "path": "Assets/Realistic Car Controller Pro/Documentation/06_CameraSystem.html",
+            "bytes": 8299
+        },
+        {
+            "path": "Assets/Realistic Car Controller Pro/Documentation/02_Installation.html",
+            "bytes": 8067
+        },
+        {
+            "path": "Assets/Realistic Car Controller Pro/Textures/UI/ItemBackground.png",
+            "bytes": 7539
+        },
+        {
+            "path": "Assets/Realistic Car Controller Pro/Prefabs/Misc/RCCP_RepairStation.prefab",
+            "bytes": 7157
+        },
+        {
+            "path": "Assets/Realistic Car Controller Pro/Prefabs/Misc/RCCP_GasStation.prefab",
+            "bytes": 7137
+        },
+        {
+            "path": "Assets/Realistic Car Controller Pro/Prefabs/Misc/RCCP_CustomizationStation.prefab",
+            "bytes": 7134
+        },
+        {
+            "path": "Assets/Realistic Car Controller Pro/Animators & Animations/UI/RCCP UI Button Anim.anim",
+            "bytes": 6383
+        },
+        {
+            "path": "Assets/KombiShift2/ThirdParty/Hiace2005/textures/lp_6.png",
+            "bytes": 6158
+        },
+        {
+            "path": "Assets/KombiShift2/Prefabs/Gameplay/Roads/Pothole_Hazard.prefab",
+            "bytes": 5356
+        },
+        {
+            "path": "Assets/Plugins/BezierSolution/README.txt",
+            "bytes": 5308
+        },
+        {
+            "path": "Assets/Realistic Car Controller Pro/Lensflares/50mmZoom.flare",
+            "bytes": 4248
+        },
+        {
+            "path": "Assets/Realistic Car Controller Pro/Textures/UI/Gradient.png",
+            "bytes": 4177
+        },
+        {
+            "path": "Assets/Characters/ImportedScavenger/Free_Scavenger/Animation/Free_scavenger.controller",
+            "bytes": 4042
+        },
+        {
+            "path": "Assets/Characters/ImportedScavenger/Free_Scavenger/Materials/Scavenger_hairs.mat",
+            "bytes": 3944
+        },
+        {
+            "path": "Assets/Characters/ImportedScavenger/Free_Scavenger/Prefab/Scavenger Variant.prefab",
+            "bytes": 3844
+        },
+        {
+            "path": "Assets/Realistic Car Controller Pro/License Agreement.txt",
+            "bytes": 3685
+        },
+        {
+            "path": "Assets/Realistic Car Controller Pro/Prefabs/Misc/RCCP_Teleporter.prefab",
+            "bytes": 3369
+        },
+        {
+            "path": "Assets/Environment/BusStops/Info_desk.uvw",
+            "bytes": 3360
+        },
+        {
+            "path": "Assets/Realistic Car Controller Pro/Prefabs/Misc/RCCP_SpikeStrip.prefab",
+            "bytes": 3304
+        },
+        {
+            "path": "Assets/KombiShift2/Prefabs/Gameplay/Roads/RoadSurface_Worn_Straight.prefab",
+            "bytes": 3226
+        },
+        {
+            "path": "Assets/Realistic Car Controller Pro/Textures/Decals/Shadow.png",
+            "bytes": 2941
+        },
+        {
+            "path": "Assets/Realistic Car Controller Pro/Textures/Particles/Spark1.png",
+            "bytes": 2941
+        },
+        {
+            "path": "Assets/Characters/ImportedScavenger/Free_Scavenger/Materials/Scavenger_Body.mat",
+            "bytes": 2675
+        },
+        {
+            "path": "Assets/Realistic Car Controller Pro/Prefabs/Misc/RCCP_Lightsphere.prefab",
+            "bytes": 2510
+        },
+        {
+            "path": "Assets/Realistic Car Controller Pro/Materials/RCCP_Marker.mat",
+            "bytes": 2351
+        },
+        {
+            "path": "Assets/Realistic Car Controller Pro/Materials/RCCP_Skybox.mat",
+            "bytes": 2346
+        },
+        {
+            "path": "Assets/Plugins/BezierSolution/Demo/OctopusArm.mat",
+            "bytes": 2233
+        },
+        {
+            "path": "Assets/KombiShift2/Generated/MenuRoad.mat",
+            "bytes": 2211
+        },
+        {
+            "path": "Assets/Environment/City/Pack02/NYBlock02/Readme.md",
+            "bytes": 2197
+        },
+        {
+            "path": "Assets/Environment/ParkProps/Playground.mat",
+            "bytes": 2181
+        },
+        {
+            "path": "Assets/Realistic Car Controller Pro/Materials/Dev_1.mat",
+            "bytes": 2180
+        },
+        {
+            "path": "Assets/Realistic Car Controller Pro/Materials/Dev.mat",
+            "bytes": 2169
+        },
+        {
+            "path": "Assets/Characters/ImportedScavenger/Free_Scavenger/Materials/Scavenger_eye_transparent.mat",
+            "bytes": 2164
+        },
+        {
+            "path": "Assets/Environment/BusStops/Materials/bus_stop_1.mat",
+            "bytes": 2156
+        },
+        {
+            "path": "Assets/Environment/BusStops/Materials/map 1.mat",
+            "bytes": 2151
+        },
+        {
+            "path": "Assets/Environment/City/Materials/Roof1.mat",
+            "bytes": 2144
+        },
+        {
+            "path": "Assets/Environment/City/Materials/Roof.mat",
+            "bytes": 2143
+        },
+        {
+            "path": "Assets/Environment/City/Materials/_________________EE__BV______BBCarnegieHall_021_copy_0.mat",
+            "bytes": 2143
+        },
+        {
+            "path": "Assets/Environment/City/Materials/_________________EE__BV______BBCarnegieHall_021_copy.mat",
+            "bytes": 2141
+        },
+        {
+            "path": "Assets/Environment/City/Materials/material.mat",
+            "bytes": 2124
+        },
+        {
+            "path": "Assets/Realistic Car Controller Pro/Materials/RCCP_Exhaust.mat",
+            "bytes": 2112
+        },
+        {
+            "path": "Assets/Environment/City/Materials/material_2.mat",
+            "bytes": 2099
+        },
+        {
+            "path": "Assets/Environment/City/Materials/Yellow.mat",
+            "bytes": 2095
+        },
+        {
+            "path": "Assets/Realistic Car Controller Pro/Animators & Animations/UI/Anim.controller",
+            "bytes": 2030
+        },
+        {
+            "path": "Assets/Realistic Car Controller Pro/Scenes/Lighting Settings/RCCP Lighting Settings.lighting",
+            "bytes": 1785
+        },
+        {
+            "path": "Assets/KombiShift2/Art/Roads/Materials/WornAsphalt.mat",
+            "bytes": 1537
+        },
+        {
+            "path": "Assets/EasyRoads3D/Quick Start.txt",
+            "bytes": 1522
+        },
+        {
+            "path": "Assets/EasyRoads3D/_URP & HDRP Readme.txt",
+            "bytes": 1257
+        },
+        {
+            "path": "Assets/Realistic Car Controller Pro/Documentation/00_Index.html",
+            "bytes": 1254
+        },
+        {
+            "path": "Assets/KombiShift2/README.md",
+            "bytes": 1205
+        },
+        {
+            "path": "Assets/Realistic Car Controller Pro/Lensflares/Sun.flare",
+            "bytes": 1172
+        },
+        {
+            "path": "Assets/EasyRoads3D/_readme .txt",
+            "bytes": 1066
+        },
+        {
+            "path": "Assets/Realistic Car Controller Pro/Materials/Particle Materials/RCCP_ParticleDuststorm.mat",
+            "bytes": 1053
+        },
+        {
+            "path": "Assets/Realistic Car Controller Pro/Lensflares/Flare50mm.mat",
+            "bytes": 798
+        },
+        {
+            "path": "Assets/Realistic Car Controller Pro/Lensflares/FlareSmall.flare",
+            "bytes": 792
+        },
+        {
+            "path": "Assets/EasyRoads3D/_Release Notes.txt",
+            "bytes": 757
+        },
+        {
+            "path": "Assets/KombiShift2/ThirdParty/Hiace2005/SOURCE.md",
+            "bytes": 676
+        },
+        {
+            "path": "Assets/EasyRoads3D/SRP Support Packages/_Readme.txt",
+            "bytes": 652
+        },
+        {
+            "path": "Assets/EasyRoads3D/shaders/_readme.txt",
+            "bytes": 498
+        },
+        {
+            "path": "Assets/KombiShift2/ThirdParty/GenericPassengerCars/SOURCE.md",
+            "bytes": 487
+        },
+        {
+            "path": "Assets/Realistic Car Controller Pro/Physics Materials/RCCP_BarrierCollider.physicMaterial",
+            "bytes": 353
+        },
+        {
+            "path": "Assets/KombiShift2/ThirdParty/PolyHaven/WornAsphalt/LICENSE.txt",
+            "bytes": 347
+        },
+        {
+            "path": "Assets/Realistic Car Controller Pro/Physics Materials/RCCP_CharacterFriction.physicMaterial",
+            "bytes": 339
+        },
+        {
+            "path": "Assets/Realistic Car Controller Pro/Physics Materials/RCCP_PlatformPhysics.physicMaterial",
+            "bytes": 337
+        },
+        {
+            "path": "Assets/Realistic Car Controller Pro/Physics Materials/RCCP_WallCollider.physicMaterial",
+            "bytes": 336
+        },
+        {
+            "path": "Assets/Realistic Car Controller Pro/Physics Materials/RCCP_ZeroFriction.physicMaterial",
+            "bytes": 334
+        },
+        {
+            "path": "Assets/Realistic Car Controller Pro/Physics Materials/RCCP_WheelSpike.physicMaterial",
+            "bytes": 332
+        },
+        {
+            "path": "Assets/Environment/City/Pack02/NYBlock02/Models/metadata.txt",
+            "bytes": 253
+        },
+        {
+            "path": "Assets/KombiShift2/ThirdParty/Hiace2005/textures/black_3.png",
+            "bytes": 158
+        },
+        {
+            "path": "Assets/KombiShift2/ThirdParty/Hiace2005/textures/body_n_0.png",
+            "bytes": 158
+        },
+        {
+            "path": "Assets/KombiShift2/ThirdParty/Hiace2005/textures/bumpmap_4.png",
+            "bytes": 103
+        },
+        {
+            "path": "Assets/KombiShift2/ThirdParty/Hiace2005/textures/chrome_5.png",
+            "bytes": 103
+        },
+        {
+            "path": "Assets/KombiShift2/ThirdParty/Hiace2005/textures/glass_8.png",
+            "bytes": 99
+        },
+        {
+            "path": "Assets/Realistic Car Controller Pro/Font/Font License.txt",
+            "bytes": 86
+        },
+        {
+            "path": "Assets/EasyRoads3D/prefab meshes/_custom prefabs.txt",
+            "bytes": 76
+        },
+        {
+            "path": "Assets/EasyRoads3D/prefab sources/_custom prefabs.txt",
+            "bytes": 73
+        },
+        {
+            "path": "Assets/EasyRoads3D/SRP Package Notes.txt",
+            "bytes": 53
+        },
+        {
+            "path": "Assets/Realistic Car Controller Pro/Fixed Meshes/Fixed Meshes.txt",
+            "bytes": 33
+        },
+        {
+            "path": "Assets/Realistic Car Controller Pro/Scripts/Shaders/Bulitin/Builtin Shaders.txt",
+            "bytes": 0
+        }
+    ]
+}

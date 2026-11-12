@@ -1,0 +1,28 @@
+{
+    "unity": "6000.6.2f1",
+    "platform": "LinuxEditor",
+    "utc": "2026-11-09T19:58:57.2253790Z",
+    "stage": "RushHour",
+    "scope": "Staged automated integration; vehicle positioned at stops; rivals isolated during boarding; not human driving/playtesting",
+    "passed": [
+        "Gameplay scene has director and vehicle",
+        "Selected stage applies its duration",
+        "Distinct stage delivery target",
+        "Both rivals use stage-specific speed",
+        "Rival head start follows stage rules",
+        "Pause freezes shift clock",
+        "Resume and pause events",
+        "Six actual seat arrivals create trips; fares deferred until delivery",
+        "Concurrent passengers occupy distinct seats",
+        "Target delivery produces one successful outcome event",
+        "Completed trips emit stage-configured fare events once",
+        "Ending waits until passengers reach terminal seats",
+        "Results freeze world",
+        "Successful stage score persists",
+        "Replay starts with clean passenger and fare state",
+        "Empty terminal delivery fails",
+        "Timer expiry fails the shift",
+        "Return to menu restores running time"
+    ],
+    "failed": []
+}

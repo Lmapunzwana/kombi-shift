@@ -1,0 +1,10 @@
+{
+    "platform": "WebGL",
+    "result": "Succeeded",
+    "unity": "6000.6.2f1",
+    "builtUtc": "2026-11-08T12:51:09.7227970Z",
+    "bytes": 200018012,
+    "errors": 0,
+    "warnings": 54,
+    "durationSeconds": 147.11472799999999
+}

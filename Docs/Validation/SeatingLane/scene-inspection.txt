@@ -1,0 +1,23 @@
+Roadside Passenger Stop: left lane 1.55m; supported positions 12
+Arterial Junction: left lane 1.55m; supported positions 12
+Roadside Passenger Stop: left lane 1.55m; supported positions 12
+Roadside Passenger Stop: left lane 1.55m; supported positions 12
+West Market: left lane 1.55m; supported positions 12
+Mbare Drop-off: left lane 1.55m; supported positions 12
+CBD Approach: left lane 1.55m; supported positions 12
+Hiace_RCC_Player: twelve unique cabin positions
+Rival Kombi — Mbare Express: twelve unique cabin positions
+Rival Kombi — City Shuttle: twelve unique cabin positions
+Cabin actor 0 Worker: Center: (-0.380, 0.688, 0.656), Extents: (0.113, 0.293, 0.163)
+Cabin actor 1 saleswoman: Center: (-0.023, 0.726, 0.597), Extents: (0.126, 0.321, 0.184)
+Cabin actor 2 teacher: Center: (0.380, 0.669, 0.663), Extents: (0.115, 0.301, 0.173)
+Cabin actor 3 Caretaker: Center: (-0.373, 0.714, -0.024), Extents: (0.112, 0.335, 0.207)
+Cabin actor 4 Teenager: Center: (0.000, 0.772, 0.023), Extents: (0.143, 0.416, 0.213)
+Cabin actor 5 Executive: Center: (0.380, 0.689, 0.064), Extents: (0.116, 0.305, 0.166)
+Cabin actor 6 Worker: Center: (-0.380, 0.688, -0.544), Extents: (0.113, 0.293, 0.163)
+Cabin actor 7 saleswoman: Center: (-0.023, 0.726, -0.603), Extents: (0.126, 0.321, 0.184)
+Cabin actor 8 teacher: Center: (0.380, 0.669, -0.537), Extents: (0.115, 0.301, 0.173)
+Cabin actor 9 Caretaker: Center: (-0.373, 0.714, -1.224), Extents: (0.112, 0.335, 0.207)
+Cabin actor 10 Teenager: Center: (0.000, 0.772, -1.177), Extents: (0.143, 0.416, 0.213)
+Cabin actor 11 Executive: Center: (0.380, 0.689, -1.136), Extents: (0.116, 0.305, 0.166)
+All 12 baked avatar bounds are disjoint and inside the cabin envelope. Preview staging was discarded.

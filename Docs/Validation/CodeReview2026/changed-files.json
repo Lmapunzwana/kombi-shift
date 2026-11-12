@@ -1,0 +1,241 @@
+{
+  "utc": "2026-11-12T11:15:03.445843+00:00",
+  "backup": "C:\\Users\\T490\\Downloads\\Compressed\\kombi-shift-feat-kombishift2-unity6_5\\_Backup_CodeReview_20261112_125945",
+  "changes": [
+    {
+      "path": "Assets/KombiShift2/Scripts/City/CityIntersection.cs",
+      "change": "modified",
+      "sha256": "0e2bfd6ba247805fc4ea66fb2719b8bce98f241d0be84b895f53124715db17f6"
+    },
+    {
+      "path": "Assets/KombiShift2/Scripts/City/CityNavigation.cs",
+      "change": "modified",
+      "sha256": "0628e8bc28eff2e1d853671a7b49050614adb203e184d4c79ebe7d44e2307572"
+    },
+    {
+      "path": "Assets/KombiShift2/Scripts/City/CityPhysicsQueries.cs",
+      "change": "added",
+      "sha256": "f3f7650d401ce34ab2f1ce6c2aa3350a9a53c4a99f2e188652e545982853b345"
+    },
+    {
+      "path": "Assets/KombiShift2/Scripts/City/CityPhysicsQueries.cs.meta",
+      "change": "added",
+      "sha256": "3064aa9f917fa96eb6b60dcc56aa1a9fd2c70d3d56f3c958521f15e072850b73"
+    },
+    {
+      "path": "Assets/KombiShift2/Scripts/City/CityRoadNetwork.cs",
+      "change": "modified",
+      "sha256": "a330bd26bc453818a7e19de7355994a7708a2f26b4ed64f90f6542a76ddd5596"
+    },
+    {
+      "path": "Assets/KombiShift2/Scripts/City/CityTrafficAgent.cs",
+      "change": "modified",
+      "sha256": "c6f48d3067119a96dacfc7c560549e159a010cd850592df5c089d64e25d2c678"
+    },
+    {
+      "path": "Assets/KombiShift2/Scripts/City/CityTrafficFleet.cs",
+      "change": "modified",
+      "sha256": "ae8c5554108fce0019a8f090d09eb287cc70009ff9ab5400d1c637e00eea686b"
+    },
+    {
+      "path": "Assets/KombiShift2/Scripts/City/CityTripCatalog.cs",
+      "change": "modified",
+      "sha256": "c42e1d91d8fa0091fb2e2cf8d7776a60c8acca17952b2368466c852366c3fac7"
+    },
+    {
+      "path": "Assets/KombiShift2/Scripts/City/CityTripPlan.cs",
+      "change": "added",
+      "sha256": "d9a5ff2c824c2a36c3431823cf31c94b5e2f078832a4e30553fa2e86bb8f09f0"
+    },
+    {
+      "path": "Assets/KombiShift2/Scripts/City/CityTripPlan.cs.meta",
+      "change": "added",
+      "sha256": "f7a2cbf5f24318f80cfe69fd00d395dc6053d43340062f8f717892517b96bfb6"
+    },
+    {
+      "path": "Assets/KombiShift2/Scripts/City/CityTripSession.cs",
+      "change": "modified",
+      "sha256": "b3585170130385df86e01ad2292cfa34b847b121362d28518f7fee703e1ed1f9"
+    },
+    {
+      "path": "Assets/KombiShift2/Scripts/Development/AssessmentVerification.cs",
+      "change": "modified",
+      "sha256": "61d78056b4176cd214f7582acecc34683d9e5b52f31a5571a08a075bab290a95"
+    },
+    {
+      "path": "Assets/KombiShift2/Scripts/Development/CityInfrastructureVerification.cs",
+      "change": "modified",
+      "sha256": "31edebb1dd18fccbf99e3837f9ec1310984d3de58fe5d7b67e840ffa0041ab9e"
+    },
+    {
+      "path": "Assets/KombiShift2/Scripts/Development/ExpansionVerification.cs",
+      "change": "modified",
+      "sha256": "d1e242cf4753ba2ce0844a007b4d18af5bb85967ffc0c7e5d6fe743353f3305d"
+    },
+    {
+      "path": "Assets/KombiShift2/Scripts/Development/PassengerServiceVerification.cs",
+      "change": "modified",
+      "sha256": "aaf8ca13ee4e7275d440ce643e6dddca2f0e8a6aea45664d128d4ff716ebeee7"
+    },
+    {
+      "path": "Assets/KombiShift2/Scripts/Gameplay/KombiChallenge.cs",
+      "change": "modified",
+      "sha256": "b3f770e8d62581ad4c87b8f4077d12d970a1edb992d92db60f8f9ce381bf40ab"
+    },
+    {
+      "path": "Assets/KombiShift2/Scripts/Gameplay/KombiPassengerService.cs",
+      "change": "added",
+      "sha256": "d32463e24d2315569f9227dfd3843c95db4e2081e764ae827adb79283770fda3"
+    },
+    {
+      "path": "Assets/KombiShift2/Scripts/Gameplay/KombiPassengerService.cs.meta",
+      "change": "added",
+      "sha256": "a007890fb7bec76002afc7c88f626224dd45baae586a6904e369df6550712c75"
+    },
+    {
+      "path": "Assets/KombiShift2/Scripts/Gameplay/KombiShiftConfiguration.cs",
+      "change": "added",
+      "sha256": "9bb3f829445c1500ab53d48df46e8b64a52cce68db26dfcae7bc474b79e95a93"
+    },
+    {
+      "path": "Assets/KombiShift2/Scripts/Gameplay/KombiShiftConfiguration.cs.meta",
+      "change": "added",
+      "sha256": "fe9ccf22d3559565b6af7ab0eb94552efa86321bbdef972d66ffa95aed5ee6fa"
+    },
+    {
+      "path": "Assets/KombiShift2/Scripts/Gameplay/KombiShiftGameDirector.cs",
+      "change": "modified",
+      "sha256": "8cd18101a9df022ae4e4828337732cc7804bf6785c1ab7ddec7ae347f22d7261"
+    },
+    {
+      "path": "Assets/KombiShift2/Scripts/Gameplay/KombiShiftLedger.cs",
+      "change": "added",
+      "sha256": "1dc51254641f7b24c5d08e059e66ed2439076ffd5d4452d09e16aa20274c1f4e"
+    },
+    {
+      "path": "Assets/KombiShift2/Scripts/Gameplay/KombiShiftLedger.cs.meta",
+      "change": "added",
+      "sha256": "0c61845ae75338057e790410e417111ab49afab71bae5a399ccf9036c39cfd94"
+    },
+    {
+      "path": "Assets/KombiShift2/Scripts/Gameplay/KombiStageSettings.cs",
+      "change": "modified",
+      "sha256": "d4a5266f31617bbf9c077ce777c3b4a1db507e27ec8b9d9dd4c85d6f2cce3082"
+    },
+    {
+      "path": "Assets/KombiShift2/Scripts/UI/KombiTripMarket.cs",
+      "change": "modified",
+      "sha256": "3af43c09d2618960844a05d4305f5ebeee4fb75da05627af5a3e1e278d392dbb"
+    },
+    {
+      "path": "Docs/PROJECT_GUIDE.md",
+      "change": "modified",
+      "sha256": "f61ede3172d00dce9bf62438fb8cf0ae43607986703f0149857079e8032418d4"
+    },
+    {
+      "path": "Docs/Assessment/AI_AND_ASSET_DECLARATION.md",
+      "change": "modified",
+      "sha256": "76b7206a5db280da48c28aa3657a14ca7d2dab0adfec9f6a1ddbcd49e44eafb6"
+    },
+    {
+      "path": "Docs/Assessment/CHANGELOG.md",
+      "change": "modified",
+      "sha256": "79fbbf361d4db82624378cd500ddbeaf80a954339e5a066b4407fd95911b5eb1"
+    },
+    {
+      "path": "Docs/Assessment/CODE_EXCERPTS.md",
+      "change": "modified",
+      "sha256": "de87ed4c74f390d67adfb70d3ffdd15b9c548e830a8104386feda4652c010147"
+    },
+    {
+      "path": "Docs/Assessment/CODE_REVIEW_IMPROVEMENTS.md",
+      "change": "added",
+      "sha256": "4dc748b26672f41614a23f958335963a17944a5b8c8bf2647be9c581fde2c531"
+    },
+    {
+      "path": "Docs/Assessment/CURRENT_DESIGN.md",
+      "change": "modified",
+      "sha256": "e4062d54bab6ad3b99538b0aa9a94ab5a0d31d671acd7e5536f09b11d624e11b"
+    },
+    {
+      "path": "Docs/Assessment/DIAGRAMS.md",
+      "change": "modified",
+      "sha256": "d1041758d3edf67ed0ec6e8a8361a4d51f72dfdf7ec1b76b72ed35a49f5b8e4c"
+    },
+    {
+      "path": "Docs/Assessment/EXPANSION_DEFENCE.md",
+      "change": "modified",
+      "sha256": "397c51b3ce30ebe8c9c187f2d4c15fc92b4aedd1f437cf241ecc0af2cae0861a"
+    },
+    {
+      "path": "Docs/Assessment/EXPANSION_ENGINEERING_REPORT.md",
+      "change": "modified",
+      "sha256": "a1ab11f8afee217b6c5586105ce5b2a1a6ea74a7e3a9ebaecd9be390fc15bda6"
+    },
+    {
+      "path": "Docs/Assessment/EXPANSION_TEST_PLAN.md",
+      "change": "modified",
+      "sha256": "6f147428c28f4cade005ee3eeb3385fa22356721f740513c63c51f41fd8f2ac3"
+    },
+    {
+      "path": "Docs/Assessment/LEARN_AND_DEFEND.md",
+      "change": "modified",
+      "sha256": "ce6d26bd1ce12c4e1cb10d7a02c443108bab6e2e9cf5904a08f398f6bdf62dd9"
+    },
+    {
+      "path": "Docs/Assessment/READINESS.md",
+      "change": "modified",
+      "sha256": "e696a04de90dadce222bdcb236c77ed00db34dae46c5d965b04139fea1a1ef88"
+    },
+    {
+      "path": "Docs/Assessment/REQUIREMENT_TRACEABILITY.csv",
+      "change": "modified",
+      "sha256": "9b7c077bf096954183ab3058a844d01cb0016b17fdd5f6b76ecfc6a31f9680b5"
+    },
+    {
+      "path": "Docs/Assessment/START_HERE.md",
+      "change": "modified",
+      "sha256": "7e34c707f3b7bfea8362997f1a1fe4f516cc8e3e1cbac1c268f3583c6fcaf152"
+    },
+    {
+      "path": "Docs/Assessment/UNITY_LEARNING_PATH.md",
+      "change": "modified",
+      "sha256": "34ea36a234a31da59509b01f8eed615f87958741356b79fd736da3e44280586f"
+    },
+    {
+      "path": "Docs/Validation/CodeReview2026/compilation.json",
+      "change": "added",
+      "sha256": "4af1f2aae066b43c865cbbeadcd2b91a34959159f54b1927d664b8a1d8947ab3"
+    },
+    {
+      "path": "Docs/Assessment/CityInfrastructure/DEFENCE_AND_STORYBOARD.md",
+      "change": "modified",
+      "sha256": "bc0c47fdb7876ae985eb4fbcedc3244a1799e6c4a3cea4903341196c55b06fda"
+    },
+    {
+      "path": "Docs/Assessment/CityInfrastructure/DESIGN_AND_ARCHITECTURE.md",
+      "change": "modified",
+      "sha256": "8394527687121a968625683f9c10353ab6430bb2a0c867fea558f9bda30c850a"
+    },
+    {
+      "path": "Docs/Assessment/CityInfrastructure/DIAGRAMS.md",
+      "change": "modified",
+      "sha256": "4ff00234fc491ab60039a559e215940b506485c5318d99fd7b7002b33c926bfa"
+    },
+    {
+      "path": "Docs/Assessment/CityInfrastructure/ENGINEERING_REPORT.md",
+      "change": "modified",
+      "sha256": "e7eaf5430b09c19fac37d918635f7add46b47e92768b3bf0c06b32b6152730ed"
+    },
+    {
+      "path": "README.md",
+      "change": "modified",
+      "sha256": "3f14afb65ef6f9e62536f02c119bd77fea96d37a82b2d3316c8b1e659eef978e"
+    },
+    {
+      "path": "AGENTS.md",
+      "change": "modified",
+      "sha256": "1cc932fe49177804363f621ede00b79e22404f6f81110330b04d21a6a9c04ed8"
+    }
+  ]
+}

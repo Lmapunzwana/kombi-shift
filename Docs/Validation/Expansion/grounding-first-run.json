@@ -1,0 +1,30 @@
+{
+    "passed": [
+        "All four wheels settle on the actual city road",
+        "Player has one physics body and no old camera joint",
+        "Rear axle receives engine power",
+        "Parking does not request reverse gear",
+        "Six passengers board while the kombi uses dynamic physics",
+        "Boarded passengers add no colliders that lift the vehicle",
+        "Throttle powers the wheels and accelerates the kombi",
+        "Handbrake stops the vehicle from city speed",
+        "Held brake prevents creeping while parked",
+        "Brake/reverse input drives the kombi backwards",
+        "Wheels regain road contact after crossing a 12cm kerb",
+        "Traffic-body collision does not leave the kombi floating",
+        "Body stays upright during turns, kerb crossing and impact",
+        "Speed stays within the configured emergency ceiling",
+        "No sustained loss of wheel contact",
+        "Wheel collider mounts do not move during steering",
+        "Driving tests complete without recovery teleporting"
+    ],
+    "failed": [
+        "Hard steering turns the vehicle"
+    ],
+    "minimumUpright": 0.9999999403953552,
+    "maximumSpeed": 21.531410217285156,
+    "maximumAirborneSeconds": 0.0,
+    "maximumWheelMountDrift": 0.0,
+    "peakMotorTorque": 2040.956787109375,
+    "recoveries": 0
+}

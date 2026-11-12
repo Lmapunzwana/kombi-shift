@@ -1,0 +1,1519 @@
+{
+    "cityRenderers": 12611,
+    "roadSurfaces": 25,
+    "physicalPotholes": 36,
+    "nodes": 4533,
+    "links": 9232,
+    "unsupportedLaneSamples": 139,
+    "blockedLaneSegments": 74,
+    "details": [
+        "Unsupported lane edge 23 -> 26",
+        "Unsupported lane edge 52 -> 47",
+        "Unsupported lane edge 84 -> 90",
+        "Blocked lane edge 130 -> 129 near (-514.00, 20.21, -288.65)",
+        "Unsupported lane edge 168 -> 169",
+        "Unsupported lane edge 169 -> 168",
+        "Blocked lane edge 169 -> 168 near (-326.00, 10.23, -282.65)",
+        "Unsupported lane edge 169 -> 170",
+        "Unsupported lane edge 170 -> 169",
+        "Blocked lane edge 170 -> 169 near (-320.00, 10.52, -282.65)",
+        "Unsupported lane edge 211 -> 209",
+        "Unsupported lane edge 211 -> 217",
+        "Unsupported lane edge 217 -> 211",
+        "Unsupported lane edge 217 -> 221",
+        "Unsupported lane edge 271 -> 276",
+        "Unsupported lane edge 283 -> 292",
+        "Unsupported lane edge 292 -> 283",
+        "Blocked lane edge 326 -> 317 near (-386.45, 17.99, -178.00)",
+        "Blocked lane edge 341 -> 342 near (-462.00, 22.25, -168.45)",
+        "Blocked lane edge 346 -> 345 near (-438.00, 21.88, -169.55)",
+        "Blocked lane edge 353 -> 364 near (6.45, 13.22, -166.00)",
+        "Blocked lane edge 555 -> 543 near (85.47, 14.95, -55.51)",
+        "Blocked lane edge 556 -> 568 near (162.45, 14.62, -56.00)",
+        "Blocked lane edge 585 -> 573 near (-232.45, 18.95, -40.00)",
+        "Blocked lane edge 611 -> 598 near (5.55, 15.93, -28.00)",
+        "Unsupported lane edge 680 -> 734",
+        "Unsupported lane edge 735 -> 719",
+        "Unsupported lane edge 736 -> 735",
+        "Unsupported lane edge 770 -> 798",
+        "Unsupported lane edge 797 -> 796",
+        "Unsupported lane edge 798 -> 797",
+        "Unsupported lane edge 800 -> 813",
+        "Unsupported lane edge 813 -> 812",
+        "Unsupported lane edge 830 -> 814",
+        "Unsupported lane edge 831 -> 830",
+        "Unsupported lane edge 833 -> 815",
+        "Unsupported lane edge 834 -> 854",
+        "Unsupported lane edge 854 -> 833",
+        "Unsupported lane edge 875 -> 874",
+        "Unsupported lane edge 876 -> 895",
+        "Unsupported lane edge 890 -> 891",
+        "Unsupported lane edge 894 -> 893",
+        "Unsupported lane edge 895 -> 894",
+        "Blocked lane edge 910 -> 943 near (-805.55, 24.58, 12.00)",
+        "Unsupported lane edge 947 -> 948",
+        "Blocked lane edge 963 -> 986 near (2.45, 16.92, 24.00)",
+        "Unsupported lane edge 965 -> 954",
+        "Unsupported lane edge 965 -> 966",
+        "Unsupported lane edge 966 -> 965",
+        "Unsupported lane edge 967 -> 966",
+        "Unsupported lane edge 969 -> 968",
+        "Unsupported lane edge 970 -> 969",
+        "Unsupported lane edge 972 -> 977",
+        "Unsupported lane edge 977 -> 972",
+        "Unsupported lane edge 977 -> 978",
+        "Unsupported lane edge 978 -> 977",
+        "Blocked lane edge 986 -> 1000 near (2.45, 17.08, 30.00)",
+        "Blocked lane edge 1012 -> 998 near (-802.45, 24.77, 42.00)",
+        "Blocked lane edge 1016 -> 1002 near (321.55, 14.33, 42.00)",
+        "Blocked lane edge 1050 -> 1036 near (-314.45, 21.75, 58.00)",
+        "Blocked lane edge 1054 -> 1040 near (-802.45, 24.97, 60.00)",
+        "Unsupported lane edge 1110 -> 1151",
+        "Blocked lane edge 1114 -> 1113 near (-706.00, 24.78, 80.45)",
+        "Blocked lane edge 1122 -> 1117 near (-681.51, 25.89, 82.53)",
+        "Blocked lane edge 1126 -> 1125 near (-658.00, 27.61, 82.45)",
+        "Blocked lane edge 1136 -> 1130 near (-627.51, 27.58, 84.53)",
+        "Unsupported lane edge 1139 -> 1140",
+        "Unsupported lane edge 1140 -> 1141",
+        "Blocked lane edge 1140 -> 1141 near (-604.00, 25.94, 87.55)",
+        "Unsupported lane edge 1141 -> 1140"
+    ],
+    "laneIssues": [
+        {
+            "from": 23,
+            "to": 26,
+            "unsupported": true,
+            "blocked": false,
+            "collider": ""
+        },
+        {
+            "from": 52,
+            "to": 47,
+            "unsupported": true,
+            "blocked": false,
+            "collider": ""
+        },
+        {
+            "from": 84,
+            "to": 90,
+            "unsupported": true,
+            "blocked": false,
+            "collider": ""
+        },
+        {
+            "from": 130,
+            "to": 129,
+            "unsupported": false,
+            "blocked": true,
+            "collider": "City tree trunk / "
+        },
+        {
+            "from": 168,
+            "to": 169,
+            "unsupported": true,
+            "blocked": false,
+            "collider": ""
+        },
+        {
+            "from": 169,
+            "to": 168,
+            "unsupported": true,
+            "blocked": true,
+            "collider": " 1969 / City Asphalt"
+        },
+        {
+            "from": 169,
+            "to": 170,
+            "unsupported": true,
+            "blocked": false,
+            "collider": ""
+        },
+        {
+            "from": 170,
+            "to": 169,
+            "unsupported": true,
+            "blocked": true,
+            "collider": " 1969 / City Asphalt"
+        },
+        {
+            "from": 211,
+            "to": 209,
+            "unsupported": true,
+            "blocked": false,
+            "collider": ""
+        },
+        {
+            "from": 211,
+            "to": 217,
+            "unsupported": true,
+            "blocked": false,
+            "collider": ""
+        },
+        {
+            "from": 217,
+            "to": 211,
+            "unsupported": true,
+            "blocked": false,
+            "collider": ""
+        },
+        {
+            "from": 217,
+            "to": 221,
+            "unsupported": true,
+            "blocked": false,
+            "collider": ""
+        },
+        {
+            "from": 271,
+            "to": 276,
+            "unsupported": true,
+            "blocked": false,
+            "collider": ""
+        },
+        {
+            "from": 283,
+            "to": 292,
+            "unsupported": true,
+            "blocked": false,
+            "collider": ""
+        },
+        {
+            "from": 292,
+            "to": 283,
+            "unsupported": true,
+            "blocked": false,
+            "collider": ""
+        },
+        {
+            "from": 326,
+            "to": 317,
+            "unsupported": false,
+            "blocked": true,
+            "collider": "City tree trunk / "
+        },
+        {
+            "from": 341,
+            "to": 342,
+            "unsupported": false,
+            "blocked": true,
+            "collider": " 1936 / marble1,window1,ortho06"
+        },
+        {
+            "from": 346,
+            "to": 345,
+            "unsupported": false,
+            "blocked": true,
+            "collider": " 1936 / marble1,window1,ortho06"
+        },
+        {
+            "from": 353,
+            "to": 364,
+            "unsupported": false,
+            "blocked": true,
+            "collider": "City tree trunk / "
+        },
+        {
+            "from": 555,
+            "to": 543,
+            "unsupported": false,
+            "blocked": true,
+            "collider": "City tree trunk / "
+        },
+        {
+            "from": 556,
+            "to": 568,
+            "unsupported": false,
+            "blocked": true,
+            "collider": "City tree trunk / "
+        },
+        {
+            "from": 585,
+            "to": 573,
+            "unsupported": false,
+            "blocked": true,
+            "collider": "City tree trunk / "
+        },
+        {
+            "from": 611,
+            "to": 598,
+            "unsupported": false,
+            "blocked": true,
+            "collider": "City tree trunk / "
+        },
+        {
+            "from": 680,
+            "to": 734,
+            "unsupported": true,
+            "blocked": false,
+            "collider": ""
+        },
+        {
+            "from": 735,
+            "to": 719,
+            "unsupported": true,
+            "blocked": false,
+            "collider": ""
+        },
+        {
+            "from": 736,
+            "to": 735,
+            "unsupported": true,
+            "blocked": false,
+            "collider": ""
+        },
+        {
+            "from": 770,
+            "to": 798,
+            "unsupported": true,
+            "blocked": false,
+            "collider": ""
+        },
+        {
+            "from": 797,
+            "to": 796,
+            "unsupported": true,
+            "blocked": false,
+            "collider": ""
+        },
+        {
+            "from": 798,
+            "to": 797,
+            "unsupported": true,
+            "blocked": false,
+            "collider": ""
+        },
+        {
+            "from": 800,
+            "to": 813,
+            "unsupported": true,
+            "blocked": false,
+            "collider": ""
+        },
+        {
+            "from": 813,
+            "to": 812,
+            "unsupported": true,
+            "blocked": false,
+            "collider": ""
+        },
+        {
+            "from": 830,
+            "to": 814,
+            "unsupported": true,
+            "blocked": false,
+            "collider": ""
+        },
+        {
+            "from": 831,
+            "to": 830,
+            "unsupported": true,
+            "blocked": false,
+            "collider": ""
+        },
+        {
+            "from": 833,
+            "to": 815,
+            "unsupported": true,
+            "blocked": false,
+            "collider": ""
+        },
+        {
+            "from": 834,
+            "to": 854,
+            "unsupported": true,
+            "blocked": false,
+            "collider": ""
+        },
+        {
+            "from": 854,
+            "to": 833,
+            "unsupported": true,
+            "blocked": false,
+            "collider": ""
+        },
+        {
+            "from": 875,
+            "to": 874,
+            "unsupported": true,
+            "blocked": false,
+            "collider": ""
+        },
+        {
+            "from": 876,
+            "to": 895,
+            "unsupported": true,
+            "blocked": false,
+            "collider": ""
+        },
+        {
+            "from": 890,
+            "to": 891,
+            "unsupported": true,
+            "blocked": false,
+            "collider": ""
+        },
+        {
+            "from": 894,
+            "to": 893,
+            "unsupported": true,
+            "blocked": false,
+            "collider": ""
+        },
+        {
+            "from": 895,
+            "to": 894,
+            "unsupported": true,
+            "blocked": false,
+            "collider": ""
+        },
+        {
+            "from": 910,
+            "to": 943,
+            "unsupported": false,
+            "blocked": true,
+            "collider": "City tree trunk / "
+        },
+        {
+            "from": 947,
+            "to": 948,
+            "unsupported": true,
+            "blocked": false,
+            "collider": ""
+        },
+        {
+            "from": 963,
+            "to": 986,
+            "unsupported": false,
+            "blocked": true,
+            "collider": "City tree trunk / "
+        },
+        {
+            "from": 965,
+            "to": 954,
+            "unsupported": true,
+            "blocked": false,
+            "collider": ""
+        },
+        {
+            "from": 965,
+            "to": 966,
+            "unsupported": true,
+            "blocked": false,
+            "collider": ""
+        },
+        {
+            "from": 966,
+            "to": 965,
+            "unsupported": true,
+            "blocked": false,
+            "collider": ""
+        },
+        {
+            "from": 967,
+            "to": 966,
+            "unsupported": true,
+            "blocked": false,
+            "collider": ""
+        },
+        {
+            "from": 969,
+            "to": 968,
+            "unsupported": true,
+            "blocked": false,
+            "collider": ""
+        },
+        {
+            "from": 970,
+            "to": 969,
+            "unsupported": true,
+            "blocked": false,
+            "collider": ""
+        },
+        {
+            "from": 972,
+            "to": 977,
+            "unsupported": true,
+            "blocked": false,
+            "collider": ""
+        },
+        {
+            "from": 977,
+            "to": 972,
+            "unsupported": true,
+            "blocked": false,
+            "collider": ""
+        },
+        {
+            "from": 977,
+            "to": 978,
+            "unsupported": true,
+            "blocked": false,
+            "collider": ""
+        },
+        {
+            "from": 978,
+            "to": 977,
+            "unsupported": true,
+            "blocked": false,
+            "collider": ""
+        },
+        {
+            "from": 986,
+            "to": 1000,
+            "unsupported": false,
+            "blocked": true,
+            "collider": "City tree trunk / "
+        },
+        {
+            "from": 1012,
+            "to": 998,
+            "unsupported": false,
+            "blocked": true,
+            "collider": "City tree trunk / "
+        },
+        {
+            "from": 1016,
+            "to": 1002,
+            "unsupported": false,
+            "blocked": true,
+            "collider": "City tree trunk / "
+        },
+        {
+            "from": 1050,
+            "to": 1036,
+            "unsupported": false,
+            "blocked": true,
+            "collider": "City tree trunk / "
+        },
+        {
+            "from": 1054,
+            "to": 1040,
+            "unsupported": false,
+            "blocked": true,
+            "collider": "City tree trunk / "
+        },
+        {
+            "from": 1110,
+            "to": 1151,
+            "unsupported": true,
+            "blocked": false,
+            "collider": ""
+        },
+        {
+            "from": 1114,
+            "to": 1113,
+            "unsupported": false,
+            "blocked": true,
+            "collider": "City tree trunk / "
+        },
+        {
+            "from": 1122,
+            "to": 1117,
+            "unsupported": false,
+            "blocked": true,
+            "collider": "geometryt040100010000000110110100010110110110110st4_ColiseumParkApartmentsNorth / brick4"
+        },
+        {
+            "from": 1126,
+            "to": 1125,
+            "unsupported": false,
+            "blocked": true,
+            "collider": "City tree trunk / "
+        },
+        {
+            "from": 1136,
+            "to": 1130,
+            "unsupported": false,
+            "blocked": true,
+            "collider": "City tree trunk / "
+        },
+        {
+            "from": 1139,
+            "to": 1140,
+            "unsupported": true,
+            "blocked": false,
+            "collider": ""
+        },
+        {
+            "from": 1140,
+            "to": 1141,
+            "unsupported": true,
+            "blocked": true,
+            "collider": " 2659 / City Asphalt"
+        },
+        {
+            "from": 1141,
+            "to": 1140,
+            "unsupported": true,
+            "blocked": false,
+            "collider": ""
+        },
+        {
+            "from": 1141,
+            "to": 1142,
+            "unsupported": true,
+            "blocked": false,
+            "collider": ""
+        },
+        {
+            "from": 1142,
+            "to": 1141,
+            "unsupported": true,
+            "blocked": true,
+            "collider": "geometryt040100010000000110110100010110110110110st1_ColiseumParkApartmentsSouth / brick4"
+        },
+        {
+            "from": 1151,
+            "to": 1110,
+            "unsupported": true,
+            "blocked": false,
+            "collider": ""
+        },
+        {
+            "from": 1153,
+            "to": 1169,
+            "unsupported": false,
+            "blocked": true,
+            "collider": "City tree trunk / "
+        },
+        {
+            "from": 1176,
+            "to": 1160,
+            "unsupported": false,
+            "blocked": true,
+            "collider": "City tree trunk / "
+        },
+        {
+            "from": 1232,
+            "to": 1253,
+            "unsupported": false,
+            "blocked": true,
+            "collider": "City tree trunk / "
+        },
+        {
+            "from": 1252,
+            "to": 1271,
+            "unsupported": false,
+            "blocked": true,
+            "collider": "City tree trunk / "
+        },
+        {
+            "from": 1270,
+            "to": 1251,
+            "unsupported": false,
+            "blocked": true,
+            "collider": "City tree trunk / "
+        },
+        {
+            "from": 1303,
+            "to": 1287,
+            "unsupported": false,
+            "blocked": true,
+            "collider": "City tree trunk / "
+        },
+        {
+            "from": 1305,
+            "to": 1283,
+            "unsupported": false,
+            "blocked": true,
+            "collider": "City tree trunk / "
+        },
+        {
+            "from": 1308,
+            "to": 1327,
+            "unsupported": false,
+            "blocked": true,
+            "collider": "City tree trunk / "
+        },
+        {
+            "from": 1312,
+            "to": 1294,
+            "unsupported": false,
+            "blocked": true,
+            "collider": "City tree trunk / "
+        },
+        {
+            "from": 1324,
+            "to": 1344,
+            "unsupported": false,
+            "blocked": true,
+            "collider": "City tree trunk / "
+        },
+        {
+            "from": 1331,
+            "to": 1312,
+            "unsupported": false,
+            "blocked": true,
+            "collider": "City tree trunk / "
+        },
+        {
+            "from": 1347,
+            "to": 1327,
+            "unsupported": false,
+            "blocked": true,
+            "collider": "City tree trunk / "
+        },
+        {
+            "from": 1385,
+            "to": 1366,
+            "unsupported": false,
+            "blocked": true,
+            "collider": "City tree trunk / "
+        },
+        {
+            "from": 1411,
+            "to": 1432,
+            "unsupported": false,
+            "blocked": true,
+            "collider": "City tree trunk / "
+        },
+        {
+            "from": 1413,
+            "to": 1393,
+            "unsupported": false,
+            "blocked": true,
+            "collider": "City tree trunk / "
+        },
+        {
+            "from": 1434,
+            "to": 1413,
+            "unsupported": false,
+            "blocked": true,
+            "collider": "City tree trunk / "
+        },
+        {
+            "from": 1446,
+            "to": 1467,
+            "unsupported": false,
+            "blocked": true,
+            "collider": "City tree trunk / "
+        },
+        {
+            "from": 1454,
+            "to": 1434,
+            "unsupported": false,
+            "blocked": true,
+            "collider": "City tree trunk / "
+        },
+        {
+            "from": 1454,
+            "to": 1474,
+            "unsupported": false,
+            "blocked": true,
+            "collider": "City tree trunk / "
+        },
+        {
+            "from": 1483,
+            "to": 1464,
+            "unsupported": false,
+            "blocked": true,
+            "collider": "City tree trunk / "
+        },
+        {
+            "from": 1547,
+            "to": 1527,
+            "unsupported": false,
+            "blocked": true,
+            "collider": "City tree trunk / "
+        },
+        {
+            "from": 1571,
+            "to": 1595,
+            "unsupported": false,
+            "blocked": true,
+            "collider": "City tree trunk / "
+        },
+        {
+            "from": 1595,
+            "to": 1615,
+            "unsupported": false,
+            "blocked": true,
+            "collider": "City tree trunk / "
+        },
+        {
+            "from": 1616,
+            "to": 1636,
+            "unsupported": true,
+            "blocked": false,
+            "collider": ""
+        },
+        {
+            "from": 1636,
+            "to": 1616,
+            "unsupported": true,
+            "blocked": false,
+            "collider": ""
+        },
+        {
+            "from": 1692,
+            "to": 1673,
+            "unsupported": false,
+            "blocked": true,
+            "collider": "City tree trunk / "
+        },
+        {
+            "from": 1714,
+            "to": 1764,
+            "unsupported": false,
+            "blocked": true,
+            "collider": "City tree trunk / "
+        },
+        {
+            "from": 1764,
+            "to": 1801,
+            "unsupported": false,
+            "blocked": true,
+            "collider": "City tree trunk / "
+        },
+        {
+            "from": 1834,
+            "to": 1856,
+            "unsupported": true,
+            "blocked": false,
+            "collider": ""
+        },
+        {
+            "from": 1835,
+            "to": 1834,
+            "unsupported": true,
+            "blocked": false,
+            "collider": ""
+        },
+        {
+            "from": 1838,
+            "to": 1837,
+            "unsupported": true,
+            "blocked": false,
+            "collider": ""
+        },
+        {
+            "from": 1839,
+            "to": 1838,
+            "unsupported": true,
+            "blocked": false,
+            "collider": ""
+        },
+        {
+            "from": 1840,
+            "to": 1899,
+            "unsupported": false,
+            "blocked": true,
+            "collider": "City tree trunk / "
+        },
+        {
+            "from": 1853,
+            "to": 1854,
+            "unsupported": false,
+            "blocked": true,
+            "collider": "City tree trunk / "
+        },
+        {
+            "from": 1872,
+            "to": 1839,
+            "unsupported": true,
+            "blocked": false,
+            "collider": ""
+        },
+        {
+            "from": 1873,
+            "to": 1894,
+            "unsupported": true,
+            "blocked": false,
+            "collider": ""
+        },
+        {
+            "from": 1874,
+            "to": 1873,
+            "unsupported": true,
+            "blocked": false,
+            "collider": ""
+        },
+        {
+            "from": 1876,
+            "to": 1895,
+            "unsupported": true,
+            "blocked": false,
+            "collider": ""
+        },
+        {
+            "from": 1895,
+            "to": 1876,
+            "unsupported": true,
+            "blocked": false,
+            "collider": ""
+        },
+        {
+            "from": 1895,
+            "to": 1931,
+            "unsupported": true,
+            "blocked": false,
+            "collider": ""
+        },
+        {
+            "from": 1896,
+            "to": 1915,
+            "unsupported": true,
+            "blocked": false,
+            "collider": ""
+        },
+        {
+            "from": 1897,
+            "to": 1896,
+            "unsupported": true,
+            "blocked": false,
+            "collider": ""
+        },
+        {
+            "from": 1905,
+            "to": 1906,
+            "unsupported": false,
+            "blocked": true,
+            "collider": "City tree trunk / "
+        },
+        {
+            "from": 1912,
+            "to": 1913,
+            "unsupported": false,
+            "blocked": true,
+            "collider": "City tree trunk / "
+        },
+        {
+            "from": 1913,
+            "to": 1935,
+            "unsupported": false,
+            "blocked": true,
+            "collider": "City tree trunk / "
+        },
+        {
+            "from": 1949,
+            "to": 1950,
+            "unsupported": false,
+            "blocked": true,
+            "collider": "City tree trunk / "
+        },
+        {
+            "from": 1958,
+            "to": 1959,
+            "unsupported": true,
+            "blocked": false,
+            "collider": ""
+        },
+        {
+            "from": 1958,
+            "to": 1973,
+            "unsupported": true,
+            "blocked": false,
+            "collider": ""
+        },
+        {
+            "from": 1959,
+            "to": 1958,
+            "unsupported": true,
+            "blocked": false,
+            "collider": ""
+        },
+        {
+            "from": 1959,
+            "to": 1960,
+            "unsupported": true,
+            "blocked": false,
+            "collider": ""
+        },
+        {
+            "from": 1964,
+            "to": 2024,
+            "unsupported": true,
+            "blocked": false,
+            "collider": ""
+        },
+        {
+            "from": 1974,
+            "to": 1993,
+            "unsupported": true,
+            "blocked": false,
+            "collider": ""
+        },
+        {
+            "from": 1975,
+            "to": 1974,
+            "unsupported": true,
+            "blocked": false,
+            "collider": ""
+        },
+        {
+            "from": 1976,
+            "to": 1975,
+            "unsupported": true,
+            "blocked": false,
+            "collider": ""
+        },
+        {
+            "from": 1978,
+            "to": 1977,
+            "unsupported": true,
+            "blocked": false,
+            "collider": ""
+        },
+        {
+            "from": 1979,
+            "to": 1978,
+            "unsupported": true,
+            "blocked": false,
+            "collider": ""
+        },
+        {
+            "from": 1995,
+            "to": 1994,
+            "unsupported": true,
+            "blocked": false,
+            "collider": ""
+        },
+        {
+            "from": 1996,
+            "to": 1995,
+            "unsupported": true,
+            "blocked": false,
+            "collider": ""
+        },
+        {
+            "from": 2038,
+            "to": 1979,
+            "unsupported": true,
+            "blocked": false,
+            "collider": ""
+        },
+        {
+            "from": 2042,
+            "to": 2091,
+            "unsupported": true,
+            "blocked": false,
+            "collider": ""
+        },
+        {
+            "from": 2061,
+            "to": 2100,
+            "unsupported": true,
+            "blocked": false,
+            "collider": ""
+        },
+        {
+            "from": 2107,
+            "to": 2129,
+            "unsupported": true,
+            "blocked": false,
+            "collider": ""
+        },
+        {
+            "from": 2119,
+            "to": 2096,
+            "unsupported": false,
+            "blocked": true,
+            "collider": "City tree trunk / "
+        },
+        {
+            "from": 2131,
+            "to": 2149,
+            "unsupported": true,
+            "blocked": false,
+            "collider": ""
+        },
+        {
+            "from": 2154,
+            "to": 2173,
+            "unsupported": false,
+            "blocked": true,
+            "collider": "City tree trunk / "
+        },
+        {
+            "from": 2280,
+            "to": 2286,
+            "unsupported": true,
+            "blocked": false,
+            "collider": ""
+        },
+        {
+            "from": 2374,
+            "to": 2366,
+            "unsupported": true,
+            "blocked": false,
+            "collider": ""
+        },
+        {
+            "from": 2383,
+            "to": 2374,
+            "unsupported": true,
+            "blocked": false,
+            "collider": ""
+        },
+        {
+            "from": 2384,
+            "to": 2383,
+            "unsupported": true,
+            "blocked": false,
+            "collider": ""
+        },
+        {
+            "from": 2487,
+            "to": 2486,
+            "unsupported": true,
+            "blocked": false,
+            "collider": ""
+        },
+        {
+            "from": 2514,
+            "to": 2515,
+            "unsupported": true,
+            "blocked": false,
+            "collider": ""
+        },
+        {
+            "from": 2528,
+            "to": 2529,
+            "unsupported": true,
+            "blocked": false,
+            "collider": ""
+        },
+        {
+            "from": 2528,
+            "to": 2550,
+            "unsupported": true,
+            "blocked": false,
+            "collider": ""
+        },
+        {
+            "from": 2548,
+            "to": 2536,
+            "unsupported": true,
+            "blocked": false,
+            "collider": ""
+        },
+        {
+            "from": 2549,
+            "to": 2548,
+            "unsupported": true,
+            "blocked": false,
+            "collider": ""
+        },
+        {
+            "from": 2550,
+            "to": 2549,
+            "unsupported": true,
+            "blocked": false,
+            "collider": ""
+        },
+        {
+            "from": 2570,
+            "to": 2569,
+            "unsupported": true,
+            "blocked": false,
+            "collider": ""
+        },
+        {
+            "from": 2571,
+            "to": 2570,
+            "unsupported": true,
+            "blocked": false,
+            "collider": ""
+        },
+        {
+            "from": 2601,
+            "to": 2602,
+            "unsupported": true,
+            "blocked": false,
+            "collider": ""
+        },
+        {
+            "from": 2601,
+            "to": 2621,
+            "unsupported": true,
+            "blocked": false,
+            "collider": ""
+        },
+        {
+            "from": 2607,
+            "to": 2619,
+            "unsupported": true,
+            "blocked": false,
+            "collider": ""
+        },
+        {
+            "from": 2654,
+            "to": 2653,
+            "unsupported": false,
+            "blocked": true,
+            "collider": "City tree trunk / "
+        },
+        {
+            "from": 2655,
+            "to": 2654,
+            "unsupported": false,
+            "blocked": true,
+            "collider": "City tree trunk / "
+        },
+        {
+            "from": 2697,
+            "to": 2686,
+            "unsupported": true,
+            "blocked": false,
+            "collider": ""
+        },
+        {
+            "from": 2749,
+            "to": 2787,
+            "unsupported": true,
+            "blocked": false,
+            "collider": ""
+        },
+        {
+            "from": 2783,
+            "to": 2782,
+            "unsupported": true,
+            "blocked": false,
+            "collider": ""
+        },
+        {
+            "from": 3032,
+            "to": 2995,
+            "unsupported": true,
+            "blocked": false,
+            "collider": ""
+        },
+        {
+            "from": 3124,
+            "to": 3170,
+            "unsupported": true,
+            "blocked": false,
+            "collider": ""
+        },
+        {
+            "from": 3172,
+            "to": 3222,
+            "unsupported": true,
+            "blocked": false,
+            "collider": ""
+        },
+        {
+            "from": 3183,
+            "to": 3182,
+            "unsupported": false,
+            "blocked": true,
+            "collider": "City tree trunk / "
+        },
+        {
+            "from": 3218,
+            "to": 3235,
+            "unsupported": true,
+            "blocked": false,
+            "collider": ""
+        },
+        {
+            "from": 3235,
+            "to": 3218,
+            "unsupported": true,
+            "blocked": true,
+            "collider": " 2290 / City Asphalt"
+        },
+        {
+            "from": 3235,
+            "to": 3245,
+            "unsupported": true,
+            "blocked": false,
+            "collider": ""
+        },
+        {
+            "from": 3245,
+            "to": 3218,
+            "unsupported": true,
+            "blocked": true,
+            "collider": " 2379 / sidewalk"
+        },
+        {
+            "from": 3245,
+            "to": 3235,
+            "unsupported": true,
+            "blocked": true,
+            "collider": " 2378 / City Asphalt"
+        },
+        {
+            "from": 3245,
+            "to": 3261,
+            "unsupported": true,
+            "blocked": true,
+            "collider": " 2379 / sidewalk"
+        },
+        {
+            "from": 3259,
+            "to": 3275,
+            "unsupported": true,
+            "blocked": false,
+            "collider": ""
+        },
+        {
+            "from": 3261,
+            "to": 3245,
+            "unsupported": false,
+            "blocked": true,
+            "collider": " 2379 / sidewalk"
+        },
+        {
+            "from": 3274,
+            "to": 3258,
+            "unsupported": false,
+            "blocked": true,
+            "collider": "City tree trunk / "
+        },
+        {
+            "from": 3291,
+            "to": 3307,
+            "unsupported": true,
+            "blocked": false,
+            "collider": ""
+        },
+        {
+            "from": 3307,
+            "to": 3313,
+            "unsupported": true,
+            "blocked": false,
+            "collider": ""
+        },
+        {
+            "from": 3322,
+            "to": 3337,
+            "unsupported": false,
+            "blocked": true,
+            "collider": "City tree trunk / "
+        },
+        {
+            "from": 3533,
+            "to": 3534,
+            "unsupported": true,
+            "blocked": false,
+            "collider": ""
+        },
+        {
+            "from": 3534,
+            "to": 3533,
+            "unsupported": true,
+            "blocked": false,
+            "collider": ""
+        },
+        {
+            "from": 3539,
+            "to": 3534,
+            "unsupported": true,
+            "blocked": false,
+            "collider": ""
+        },
+        {
+            "from": 3596,
+            "to": 3597,
+            "unsupported": false,
+            "blocked": true,
+            "collider": "City tree trunk / "
+        },
+        {
+            "from": 3700,
+            "to": 3713,
+            "unsupported": true,
+            "blocked": false,
+            "collider": ""
+        },
+        {
+            "from": 3713,
+            "to": 3726,
+            "unsupported": true,
+            "blocked": false,
+            "collider": ""
+        },
+        {
+            "from": 3726,
+            "to": 3732,
+            "unsupported": true,
+            "blocked": false,
+            "collider": ""
+        },
+        {
+            "from": 3732,
+            "to": 3726,
+            "unsupported": true,
+            "blocked": false,
+            "collider": ""
+        },
+        {
+            "from": 3954,
+            "to": 3955,
+            "unsupported": false,
+            "blocked": true,
+            "collider": "Bench support / Station metal"
+        },
+        {
+            "from": 4018,
+            "to": 4059,
+            "unsupported": true,
+            "blocked": false,
+            "collider": ""
+        },
+        {
+            "from": 4031,
+            "to": 4061,
+            "unsupported": true,
+            "blocked": false,
+            "collider": ""
+        },
+        {
+            "from": 4048,
+            "to": 4049,
+            "unsupported": false,
+            "blocked": true,
+            "collider": "City tree trunk / "
+        },
+        {
+            "from": 4133,
+            "to": 4144,
+            "unsupported": true,
+            "blocked": false,
+            "collider": ""
+        },
+        {
+            "from": 4144,
+            "to": 4151,
+            "unsupported": true,
+            "blocked": false,
+            "collider": ""
+        },
+        {
+            "from": 4151,
+            "to": 4144,
+            "unsupported": true,
+            "blocked": false,
+            "collider": ""
+        },
+        {
+            "from": 4199,
+            "to": 4196,
+            "unsupported": true,
+            "blocked": false,
+            "collider": ""
+        },
+        {
+            "from": 4255,
+            "to": 4246,
+            "unsupported": false,
+            "blocked": true,
+            "collider": "City tree trunk / "
+        },
+        {
+            "from": 4264,
+            "to": 4255,
+            "unsupported": false,
+            "blocked": true,
+            "collider": "City tree trunk / "
+        },
+        {
+            "from": 4343,
+            "to": 4350,
+            "unsupported": true,
+            "blocked": false,
+            "collider": ""
+        },
+        {
+            "from": 4350,
+            "to": 4357,
+            "unsupported": true,
+            "blocked": false,
+            "collider": ""
+        },
+        {
+            "from": 4357,
+            "to": 4350,
+            "unsupported": true,
+            "blocked": false,
+            "collider": ""
+        },
+        {
+            "from": 4357,
+            "to": 4361,
+            "unsupported": true,
+            "blocked": false,
+            "collider": ""
+        },
+        {
+            "from": 4361,
+            "to": 4357,
+            "unsupported": true,
+            "blocked": false,
+            "collider": ""
+        },
+        {
+            "from": 4386,
+            "to": 4380,
+            "unsupported": true,
+            "blocked": false,
+            "collider": ""
+        },
+        {
+            "from": 4390,
+            "to": 4395,
+            "unsupported": false,
+            "blocked": true,
+            "collider": "City tree trunk / "
+        },
+        {
+            "from": 4439,
+            "to": 4440,
+            "unsupported": true,
+            "blocked": false,
+            "collider": ""
+        },
+        {
+            "from": 4440,
+            "to": 4439,
+            "unsupported": true,
+            "blocked": false,
+            "collider": ""
+        },
+        {
+            "from": 4442,
+            "to": 4440,
+            "unsupported": true,
+            "blocked": false,
+            "collider": ""
+        },
+        {
+            "from": 4462,
+            "to": 4444,
+            "unsupported": true,
+            "blocked": false,
+            "collider": ""
+        },
+        {
+            "from": 4500,
+            "to": 4505,
+            "unsupported": true,
+            "blocked": false,
+            "collider": ""
+        },
+        {
+            "from": 4502,
+            "to": 4506,
+            "unsupported": true,
+            "blocked": false,
+            "collider": ""
+        },
+        {
+            "from": 4512,
+            "to": 4515,
+            "unsupported": true,
+            "blocked": false,
+            "collider": ""
+        },
+        {
+            "from": 4515,
+            "to": 4518,
+            "unsupported": true,
+            "blocked": false,
+            "collider": ""
+        }
+    ],
+    "reachableTrips": 9
+}

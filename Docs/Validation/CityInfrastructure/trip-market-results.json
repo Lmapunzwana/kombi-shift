@@ -1,0 +1,20 @@
+{
+    "passed": [
+        "Main menu opens the actual Trip Market",
+        "Market validates and previews Mbare",
+        "Market validates and previews Avondale",
+        "Market validates and previews Borrowdale",
+        "Market validates and previews Highfield",
+        "Market validates and previews Glen View",
+        "Market validates and previews Budiriro",
+        "Market validates and previews Kuwadzana",
+        "Market validates and previews Hatfield",
+        "Market validates and previews Chitungwiza",
+        "Start Trip accepts the selected reachable itinerary",
+        "Trip Market start loads actual city gameplay",
+        "Selected Borrowdale terminal is instantiated",
+        "Market-selected Rush Hour initialises eight-person demand",
+        "Player starts at the selected reachable origin"
+    ],
+    "failed": []
+}

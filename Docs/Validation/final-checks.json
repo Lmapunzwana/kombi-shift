@@ -1,0 +1,11 @@
+{
+  "powertrain": {
+    "passed": 11,
+    "failed": 0
+  },
+  "maximumMeasuredSpeedKph": 94.19049072265625,
+  "maxRpmPassing55To65": 3155.8125,
+  "priorValidation": "pre-powertrain-checks.json (before powertrain tune)",
+  "editorAuthenticationErrorsInFreshTest": 0,
+  "scope": "Automated native Unity test, not a human full-shift playtest"
+}

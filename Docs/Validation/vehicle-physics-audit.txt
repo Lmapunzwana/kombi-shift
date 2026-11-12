@@ -1,0 +1,22 @@
+Vehicle Hiace_RCC_Player: position=(-499.51, 24.51, 574.31), rotation=(0.00, 357.92, 0.00), scale=(1.00, 1.00, 1.00), constraints=None, mass=2050, centre=(0.00, 0.58, 0.06)
+Wheel WheelCollider_L pos=(-500.07, 24.78, 573.26) scale=(1.00, 1.00, 1.00) radius=0.265 centre=(0.00, 0.00, 0.00) suspension=0.24 enabled=True
+Wheel WheelCollider_R pos=(-498.87, 24.78, 573.31) scale=(1.00, 1.00, 1.00) radius=0.265 centre=(0.00, 0.00, 0.00) suspension=0.24 enabled=True
+Wheel WheelCollider_L pos=(-500.15, 24.78, 575.31) scale=(1.00, 1.00, 1.00) radius=0.265 centre=(0.00, 0.00, 0.00) suspension=0.24 enabled=True
+Wheel WheelCollider_R pos=(-498.95, 24.78, 575.36) scale=(1.00, 1.00, 1.00) radius=0.265 centre=(0.00, 0.00, 0.00) suspension=0.24 enabled=True
+Ground hit Centre Line bz2: point=(-499.51, 24.45, 574.31) normal=(0.00, 1.00, 0.01)
+Ground hit Asphalt Street bz2: point=(-499.51, 24.41, 574.31) normal=(0.00, 1.00, 0.02)
+Ground hit  1767: point=(-499.51, 24.33, 574.31) normal=(0.01, 1.00, 0.01)
+Road collider geometryt040100010000000110110100110010010000000st65_1675Broadway: enabled=True, mesh=geometryt040100010000000110110100110010010000000st65_1675Broadway, bounds=Center: (-117.40, 93.34, 419.80), Extents: (45.65, 74.00, 46.23)
+Road collider geometryt040100010000000110110100110010010000010st162_1717Broadway: enabled=True, mesh=geometryt040100010000000110110100110010010000010st162_1717Broadway, bounds=Center: (-270.28, 136.79, 408.44), Extents: (27.32, 115.00, 26.73)
+Road collider geometryt040100010000000110110100110010010000010st97_1740Broadway: enabled=True, mesh=geometryt040100010000000110110100110010010000010st97_1740Broadway, bounds=Center: (-368.98, 100.58, 455.89), Extents: (47.93, 78.35, 45.26)
+Road collider geometryt040100010000000110110100010110100110110st87_1600Broadway: enabled=True, mesh=geometryt040100010000000110110100010110100110110st87_1600Broadway, bounds=Center: (199.34, 57.59, 528.47), Extents: (30.61, 42.00, 30.15)
+Road collider geometryt040100010000000110110100110010010000000st76_BroadwayTheatre: enabled=True, mesh=geometryt040100010000000110110100110010010000000st76_BroadwayTheatre, bounds=Center: (-148.48, 27.82, 417.70), Extents: (32.03, 7.65, 34.46)
+Road collider geometryt040100010000000110110100110010010000000st77_BroadwayTheatre: enabled=True, mesh=geometryt040100010000000110110100110010010000000st77_BroadwayTheatre, bounds=Center: (-148.48, 27.82, 417.70), Extents: (32.03, 7.65, 34.46)
+Road collider geometryt040100010000000110110100110010010000010st98_1740Broadway: enabled=True, mesh=geometryt040100010000000110110100110010010000010st98_1740Broadway, bounds=Center: (-368.98, 100.58, 455.88), Extents: (47.93, 78.35, 45.26)
+Road collider geometryt040100010000000110110100010110100110110st88_1600Broadway: enabled=True, mesh=geometryt040100010000000110110100010110100110110st88_1600Broadway, bounds=Center: (189.97, 103.89, 529.11), Extents: (14.69, 4.30, 15.63)
+Road collider geometryt040100010000000110110100110010010000000st34_1700Broadway: enabled=True, mesh=geometryt040100010000000110110100110010010000000st34_1700Broadway, bounds=Center: (-205.54, 100.29, 488.99), Extents: (42.16, 81.00, 39.28)
+Road collider geometryt040100010000000110110100110010010000010st161_1717Broadway: enabled=True, mesh=geometryt040100010000000110110100110010010000010st161_1717Broadway, bounds=Center: (-270.28, 136.79, 408.44), Extents: (27.32, 115.00, 26.73)
+Road collider geometryt040100010000000110110100110010010000000st33_1700Broadway: enabled=True, mesh=geometryt040100010000000110110100110010010000000st33_1700Broadway, bounds=Center: (-205.54, 100.29, 488.99), Extents: (42.16, 81.00, 39.28)
+Road collider geometryt040100010000000110110100110010010000000st64_1675Broadway: enabled=True, mesh=geometryt040100010000000110110100110010010000000st64_1675Broadway, bounds=Center: (-117.40, 93.34, 419.79), Extents: (45.66, 74.00, 46.23)
+Road collider geometryt040100010000000110110100010110100110110st90_1600Broadway: enabled=True, mesh=geometryt040100010000000110110100010110100110110st90_1600Broadway, bounds=Center: (199.34, 61.89, 528.47), Extents: (30.61, 46.30, 30.15)
+Road collider geometryt040100010000000110110100010110100110110st89_1600Broadway: enabled=True, mesh=geometryt040100010000000110110100010110100110110st89_1600Broadway, bounds=Center: (190.06, 103.89, 529.18), Extents: (15.01, 4.30, 15.90)

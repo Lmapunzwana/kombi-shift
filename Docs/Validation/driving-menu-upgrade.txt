@@ -1,0 +1,1 @@
+Live Hiace menu rebuilt. Painted road colliders disabled: 3. Vehicle upright arcade stabilization and ground-aware camera applied.

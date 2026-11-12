@@ -1,0 +1,11 @@
+Passenger seating and left-lane scene repair
+Roadside Passenger Stop: 12 supported bench positions, left service offset 1.55m, waiting 3
+Arterial Junction: 12 supported bench positions, left service offset 1.55m, waiting 6
+Mbare Drop-off: 12 supported bench positions, left service offset 1.55m, waiting 0
+CBD Approach: 12 supported bench positions, left service offset 1.55m, waiting 6
+Roadside Passenger Stop: 12 supported bench positions, left service offset 1.55m, waiting 3
+Roadside Passenger Stop: 12 supported bench positions, left service offset 1.55m, waiting 6
+West Market: 12 supported bench positions, left service offset 1.55m, waiting 6
+Hiace_RCC_Player: 12 cabin seats
+Rival Kombi — Mbare Express: 12 cabin seats
+Rival Kombi — City Shuttle: 12 cabin seats

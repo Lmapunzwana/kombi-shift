@@ -1,0 +1,10 @@
+{
+    "platform": "StandaloneLinux64",
+    "result": "Succeeded",
+    "unity": "6000.6.2f1",
+    "builtUtc": "2026-11-08T12:48:18.6851400Z",
+    "bytes": 394330727,
+    "errors": 0,
+    "warnings": 26,
+    "durationSeconds": 28.901913999999998
+}

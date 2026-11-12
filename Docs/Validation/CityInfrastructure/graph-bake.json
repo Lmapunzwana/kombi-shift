@@ -1,0 +1,15 @@
+{
+  "roadTriangles": 25683,
+  "cityMeshRenderers": 12611,
+  "rasterStepMetres": 2.0,
+  "skeletonIterations": 7,
+  "nodes": 4533,
+  "directedLinks": 9258,
+  "retainedComponents": 2,
+  "componentSkeletonSizes": [
+    13336,
+    38
+  ],
+  "discardedTinyFragments": 1,
+  "largestComponentNodeCount": 4519
+}

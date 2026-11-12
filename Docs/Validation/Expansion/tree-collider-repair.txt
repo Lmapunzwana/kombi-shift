@@ -1,0 +1,48 @@
+Executed 2026-11-09T20:45:45.0434920Z
+Disabled oversized alpha-plane colliders near route; added narrow solid trunk capsules: 16
+tree1Plane_001 607 trunk=(-841.56, 19.35, 508.26) radius=0.45
+tree1Plane_002 589 trunk=(-819.28, 19.78, 520.10) radius=0.45
+tree1Plane 607 trunk=(-841.56, 19.35, 508.26) radius=0.3965271
+tree1Plane_001 589 trunk=(-819.28, 19.78, 520.10) radius=0.3044251
+tree1Plane_002 414 trunk=(-847.17, 19.08, 520.53) radius=0.4394409
+tree1Plane 583 trunk=(-807.48, 20.10, 517.73) radius=0.45
+tree1Plane_001 550 trunk=(-813.27, 20.64, 497.43) radius=0.45
+tree1Plane 200 trunk=(-503.57, 26.59, 525.42) radius=0.208548
+tree1Plane_002 162 trunk=(-510.39, 21.76, 725.46) radius=0.2
+tree1Plane_004 162 trunk=(-509.40, 22.89, 725.66) radius=0.2
+tree1Plane_004 200 trunk=(-504.98, 26.80, 527.63) radius=0.45
+tree1Plane_001 162 trunk=(-510.39, 21.76, 725.46) radius=0.2
+tree1Plane_001 414 trunk=(-847.17, 19.08, 520.53) radius=0.3828186
+tree1Plane 550 trunk=(-813.27, 20.64, 497.43) radius=0.3314575
+tree1Plane_001 583 trunk=(-807.48, 20.10, 517.73) radius=0.4240234
+tree1Plane_002 550 trunk=(-813.27, 20.64, 497.43) radius=0.2
+Executed 2026-11-09T20:51:44.2334130Z
+Disabled oversized alpha-plane colliders near route; added narrow solid trunk capsules: 0
+Executed 2026-11-10T10:29:10.3111500Z
+Disabled oversized alpha-plane colliders near route; added narrow solid trunk capsules: 21
+tree1Plane 506 trunk=(-267.96, 22.69, 958.95) radius=0.2
+tree1Plane_004 506 trunk=(-267.37, 24.80, 958.52) radius=0.2
+tree1Plane_005 583 trunk=(-810.42, 25.58, 515.18) radius=0.45
+tree1Plane_003 494 trunk=(-267.11, 24.06, 983.57) radius=0.2
+tree1Plane_003 162 trunk=(-510.64, 23.01, 724.67) radius=0.2
+tree1Plane_003 200 trunk=(-501.43, 27.06, 525.55) radius=0.4307861
+tree1Plane_005 589 trunk=(-822.97, 24.72, 520.53) radius=0.4301941
+tree1Plane_003 506 trunk=(-268.50, 24.91, 958.71) radius=0.2
+tree1Plane_003 589 trunk=(-819.53, 25.19, 517.26) radius=0.45
+tree1Plane_005 162 trunk=(-511.41, 22.92, 725.81) radius=0.2
+tree1Plane_001 494 trunk=(-267.62, 22.74, 983.57) radius=0.2
+tree1Plane_003 583 trunk=(-805.46, 26.05, 515.53) radius=0.45
+tree1Plane_005 506 trunk=(-268.25, 24.70, 959.67) radius=0.2
+tree1Plane_004 589 trunk=(-816.10, 24.76, 521.51) radius=0.45
+Executed 2026-11-10T10:36:57.9920250Z
+Disabled oversized alpha-plane colliders near route: 0
+Removed overlapping duplicate route tree trunk capsules: 10
+Executed 2026-11-10T11:46:32.6576510Z
+Disabled oversized alpha-plane colliders near route: 0
+Removed overlapping duplicate route tree trunk capsules: 0
+Executed 2026-11-10T13:02:15.5482810Z
+Disabled oversized alpha-plane colliders near route: 0
+Removed overlapping duplicate route tree trunk capsules: 0
+Executed 2026-11-10T14:17:28.7020850Z
+Disabled oversized alpha-plane colliders near route: 0
+Removed overlapping duplicate route tree trunk capsules: 0

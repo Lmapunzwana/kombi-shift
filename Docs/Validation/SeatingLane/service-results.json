@@ -1,0 +1,31 @@
+{
+    "passed": [
+        "Seven expanded route stations configured",
+        "Expanded route begins with three six-person queues",
+        "Two rival kombis present",
+        "All waiting passengers seated with valid humanoid rigs",
+        "Player can reserve a nearby waiting stop",
+        "Rival cannot reserve passengers already claimed by player",
+        "Passenger stands and walks toward the doorway",
+        "All six passengers walk toward the kombi together",
+        "Six passengers physically board before fares are credited",
+        "Boarded passenger occupies a player cabin seat",
+        "Concurrent boarding assigns six different cabin seats",
+        "Route advances after boarding completes",
+        "Rival travels along the route to a waiting stop",
+        "Rival boards and removes six waiting passengers",
+        "Rival passengers are not credited to player",
+        "A pending passenger destination keeps an exhausted pickup as a valid drop-off",
+        "Next station starts boarding when player stops",
+        "Driving away cancels boarding and returns passengers to bench",
+        "HUD corners stay separate at (1600.00, 900.00)",
+        "HUD corners stay separate at (1280.00, 720.00)",
+        "HUD corners stay separate at (900.00, 600.00)",
+        "Minimap has transparent corners and a circular visible area",
+        "Game lighting has no cast shadows",
+        "Player can collect the remaining passengers after rival theft",
+        "Final terminal completes the shift and starts alighting",
+        "Delivered passengers never reappear in earlier waiting queues"
+    ],
+    "failed": []
+}

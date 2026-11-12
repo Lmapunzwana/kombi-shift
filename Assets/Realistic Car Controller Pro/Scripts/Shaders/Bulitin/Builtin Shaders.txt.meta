@@ -1,0 +1,15 @@
+fileFormatVersion: 2
+guid: 014600a58ca78c54c80895d10f07dd0b
+TextScriptImporter:
+  externalObjects: {}
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 178967
+  packageName: Realistic Car Controller Pro
+  packageVersion: 2.0
+  assetPath: Assets/Realistic Car Controller Pro/Scripts/Shaders/Bulitin/Builtin
+    Shaders.txt
+  uploadId: 840030

@@ -1,0 +1,17 @@
+{
+  "grounding": {
+    "passed": 18,
+    "failed": 0
+  },
+  "passengerService": {
+    "passed": 26,
+    "failed": 0
+  },
+  "menuCamera": {
+    "passed": 22,
+    "failed": 0
+  },
+  "totalPassed": 66,
+  "totalFailed": 0,
+  "scope": "Native Linux Unity editor; automated checks, not a human complete-shift playtest"
+}

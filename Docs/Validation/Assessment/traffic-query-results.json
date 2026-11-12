@@ -1,0 +1,11 @@
+{
+    "vehicles": 10,
+    "samplesPerMode": 120,
+    "iterationsPerSample": 20,
+    "baselineTotalBytes": 491520,
+    "bufferedTotalBytes": 0,
+    "reductionPercent": 100.0,
+    "identicalHitCounts": true,
+    "scope": "Editor CPU physics-query fixture; Mono used-heap delta after forced collection per sample; not whole-game FPS or human playtesting",
+    "utc": "2026-11-08T12:25:48.3947610Z"
+}

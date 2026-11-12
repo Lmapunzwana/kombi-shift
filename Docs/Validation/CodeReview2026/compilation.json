@@ -1,0 +1,36 @@
+{
+  "utc": "2026-11-12T11:12:21.855144+00:00",
+  "unity": "6000.6.2f1",
+  "method": "Roslyn C# compilation using existing Unity-generated Assembly-CSharp response-file references; Unity analyzers omitted; temporary assembly outputs only. Player variant removes UNITY_EDITOR defines.",
+  "results": [
+    {
+      "configuration": "editor",
+      "exitCode": 0,
+      "errors": [],
+      "warningCount": 98,
+      "warningKinds": [
+        "CS0618"
+      ]
+    },
+    {
+      "configuration": "player",
+      "exitCode": 0,
+      "errors": [],
+      "warningCount": 36,
+      "warningKinds": [
+        "CS0618"
+      ]
+    },
+    {
+      "configuration": "editor-tools against new runtime reference assembly",
+      "exitCode": 0,
+      "errors": [],
+      "warningCount": 119
+    }
+  ],
+  "unitComponentTests": "Not run: required Unit Test MCP unavailable",
+  "sceneIntegration": "Not rerun: existing Editor is open without Pipeline connection; no second Editor launched",
+  "builds": "Not regenerated",
+  "performance": "No fresh runtime benchmark",
+  "temporaryLogs": "C:\\Users\\T490\\AppData\\Local\\Temp\\kombi-compile-final-gx11_7ox"
+}

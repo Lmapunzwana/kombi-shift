@@ -1,0 +1,123 @@
+<?xml version="1.0" encoding="utf-8"?>
+<test-run id="2" testcasecount="15" result="Passed" total="15" passed="15" failed="0" inconclusive="0" skipped="0" asserts="0" engine-version="3.5.0.0" clr-version="4.0.30319.42000" start-time="2026-11-09 19:53:00Z" end-time="2026-11-09 19:53:00Z" duration="0.0956622">
+  <test-suite type="TestSuite" id="1000" name="Kombi Shift 2" fullname="Kombi Shift 2" runstate="Runnable" testcasecount="15" result="Passed" start-time="2026-11-09 19:53:00Z" end-time="2026-11-09 19:53:00Z" duration="0.095662" total="15" passed="15" failed="0" inconclusive="0" skipped="0" asserts="0">
+    <properties>
+      <property name="platform" value="EditMode" />
+    </properties>
+    <test-suite type="Assembly" id="1021" name="KombiShift.Expansion.Tests.dll" fullname="/home/jayden-mapasure/Documents/ChatGPT/kombi shift game/BranchProjects/KombiShift2/Library/ScriptAssemblies/KombiShift.Expansion.Tests.dll" runstate="Runnable" testcasecount="15" result="Passed" start-time="2026-11-09 19:53:00Z" end-time="2026-11-09 19:53:00Z" duration="0.084784" total="15" passed="15" failed="0" inconclusive="0" skipped="0" asserts="0">
+      <properties>
+        <property name="_PID" value="215847" />
+        <property name="_APPDOMAIN" value="Unity Child Domain" />
+        <property name="platform" value="EditMode" />
+        <property name="EditorOnly" value="True" />
+      </properties>
+      <test-suite type="TestFixture" id="1001" name="ExpansionRulesTests" fullname="ExpansionRulesTests" classname="ExpansionRulesTests" runstate="Runnable" testcasecount="15" result="Passed" start-time="2026-11-09 19:53:00Z" end-time="2026-11-09 19:53:00Z" duration="0.082767" total="15" passed="15" failed="0" inconclusive="0" skipped="0" asserts="0">
+        <properties />
+        <test-suite type="ParameterizedMethod" id="1010" name="HappinessIsBounded" fullname="ExpansionRulesTests.HappinessIsBounded" classname="ExpansionRulesTests" runstate="Runnable" testcasecount="3" result="Passed" start-time="2026-11-09 19:53:00Z" end-time="2026-11-09 19:53:00Z" duration="0.029106" total="3" passed="3" failed="0" inconclusive="0" skipped="0" asserts="0">
+          <properties />
+          <test-case id="1007" name="HappinessIsBounded(-1000.0f,0.0f)" fullname="ExpansionRulesTests.HappinessIsBounded(-1000.0f,0.0f)" methodname="HappinessIsBounded" classname="ExpansionRulesTests" runstate="Runnable" seed="314418459" result="Passed" start-time="2026-11-09 19:53:00Z" end-time="2026-11-09 19:53:00Z" duration="0.019250" asserts="0">
+            <properties>
+              <property name="retryIteration" value="0" />
+              <property name="repeatIteration" value="0" />
+            </properties>
+          </test-case>
+          <test-case id="1008" name="HappinessIsBounded(1000.0f,100.0f)" fullname="ExpansionRulesTests.HappinessIsBounded(1000.0f,100.0f)" methodname="HappinessIsBounded" classname="ExpansionRulesTests" runstate="Runnable" seed="729473984" result="Passed" start-time="2026-11-09 19:53:00Z" end-time="2026-11-09 19:53:00Z" duration="0.000363" asserts="0">
+            <properties>
+              <property name="retryIteration" value="0" />
+              <property name="repeatIteration" value="0" />
+            </properties>
+          </test-case>
+          <test-case id="1009" name="HappinessIsBounded(-25.0f,75.0f)" fullname="ExpansionRulesTests.HappinessIsBounded(-25.0f,75.0f)" methodname="HappinessIsBounded" classname="ExpansionRulesTests" runstate="Runnable" seed="470261557" result="Passed" start-time="2026-11-09 19:53:00Z" end-time="2026-11-09 19:53:00Z" duration="0.000169" asserts="0">
+            <properties>
+              <property name="retryIteration" value="0" />
+              <property name="repeatIteration" value="0" />
+            </properties>
+          </test-case>
+        </test-suite>
+        <test-suite type="ParameterizedMethod" id="1015" name="ImpactsUseThresholdAndCap" fullname="ExpansionRulesTests.ImpactsUseThresholdAndCap" classname="ExpansionRulesTests" runstate="Runnable" testcasecount="4" result="Passed" start-time="2026-11-09 19:53:00Z" end-time="2026-11-09 19:53:00Z" duration="0.002909" total="4" passed="4" failed="0" inconclusive="0" skipped="0" asserts="0">
+          <properties />
+          <test-case id="1011" name="ImpactsUseThresholdAndCap(2.0f,3.0f,0.0f)" fullname="ExpansionRulesTests.ImpactsUseThresholdAndCap(2.0f,3.0f,0.0f)" methodname="ImpactsUseThresholdAndCap" classname="ExpansionRulesTests" runstate="Runnable" seed="753946884" result="Passed" start-time="2026-11-09 19:53:00Z" end-time="2026-11-09 19:53:00Z" duration="0.000998" asserts="0">
+            <properties>
+              <property name="retryIteration" value="0" />
+              <property name="repeatIteration" value="0" />
+            </properties>
+          </test-case>
+          <test-case id="1012" name="ImpactsUseThresholdAndCap(10.0f,0.1f,0.0f)" fullname="ExpansionRulesTests.ImpactsUseThresholdAndCap(10.0f,0.1f,0.0f)" methodname="ImpactsUseThresholdAndCap" classname="ExpansionRulesTests" runstate="Runnable" seed="2106910344" result="Passed" start-time="2026-11-09 19:53:00Z" end-time="2026-11-09 19:53:00Z" duration="0.000292" asserts="0">
+            <properties>
+              <property name="retryIteration" value="0" />
+              <property name="repeatIteration" value="0" />
+            </properties>
+          </test-case>
+          <test-case id="1013" name="ImpactsUseThresholdAndCap(5.0f,3.0f,5.0f)" fullname="ExpansionRulesTests.ImpactsUseThresholdAndCap(5.0f,3.0f,5.0f)" methodname="ImpactsUseThresholdAndCap" classname="ExpansionRulesTests" runstate="Runnable" seed="1524517423" result="Passed" start-time="2026-11-09 19:53:00Z" end-time="2026-11-09 19:53:00Z" duration="0.000135" asserts="0">
+            <properties>
+              <property name="retryIteration" value="0" />
+              <property name="repeatIteration" value="0" />
+            </properties>
+          </test-case>
+          <test-case id="1014" name="ImpactsUseThresholdAndCap(100.0f,30.0f,35.0f)" fullname="ExpansionRulesTests.ImpactsUseThresholdAndCap(100.0f,30.0f,35.0f)" methodname="ImpactsUseThresholdAndCap" classname="ExpansionRulesTests" runstate="Runnable" seed="171668818" result="Passed" start-time="2026-11-09 19:53:00Z" end-time="2026-11-09 19:53:00Z" duration="0.000106" asserts="0">
+            <properties>
+              <property name="retryIteration" value="0" />
+              <property name="repeatIteration" value="0" />
+            </properties>
+          </test-case>
+        </test-suite>
+        <test-suite type="ParameterizedMethod" id="1018" name="LeftLaneFollowsTravelDirection" fullname="ExpansionRulesTests.LeftLaneFollowsTravelDirection" classname="ExpansionRulesTests" runstate="Runnable" testcasecount="2" result="Passed" start-time="2026-11-09 19:53:00Z" end-time="2026-11-09 19:53:00Z" duration="0.001834" total="2" passed="2" failed="0" inconclusive="0" skipped="0" asserts="0">
+          <properties />
+          <test-case id="1016" name="LeftLaneFollowsTravelDirection(1.0f,-1.0f)" fullname="ExpansionRulesTests.LeftLaneFollowsTravelDirection(1.0f,-1.0f)" methodname="LeftLaneFollowsTravelDirection" classname="ExpansionRulesTests" runstate="Runnable" seed="1303492180" result="Passed" start-time="2026-11-09 19:53:00Z" end-time="2026-11-09 19:53:00Z" duration="0.001093" asserts="0">
+            <properties>
+              <property name="retryIteration" value="0" />
+              <property name="repeatIteration" value="0" />
+            </properties>
+          </test-case>
+          <test-case id="1017" name="LeftLaneFollowsTravelDirection(-1.0f,1.0f)" fullname="ExpansionRulesTests.LeftLaneFollowsTravelDirection(-1.0f,1.0f)" methodname="LeftLaneFollowsTravelDirection" classname="ExpansionRulesTests" runstate="Runnable" seed="2093985721" result="Passed" start-time="2026-11-09 19:53:00Z" end-time="2026-11-09 19:53:00Z" duration="0.000145" asserts="0">
+            <properties>
+              <property name="retryIteration" value="0" />
+              <property name="repeatIteration" value="0" />
+            </properties>
+          </test-case>
+        </test-suite>
+        <test-case id="1020" name="PerformanceRetainsControlAtWorstCondition" fullname="ExpansionRulesTests.PerformanceRetainsControlAtWorstCondition" methodname="PerformanceRetainsControlAtWorstCondition" classname="ExpansionRulesTests" runstate="Runnable" seed="650253847" result="Passed" start-time="2026-11-09 19:53:00Z" end-time="2026-11-09 19:53:00Z" duration="0.009472" asserts="0">
+          <properties>
+            <property name="retryIteration" value="0" />
+            <property name="repeatIteration" value="0" />
+          </properties>
+        </test-case>
+        <test-case id="1006" name="RequestAndMissedStopAreOneShot" fullname="ExpansionRulesTests.RequestAndMissedStopAreOneShot" methodname="RequestAndMissedStopAreOneShot" classname="ExpansionRulesTests" runstate="Runnable" seed="1607893707" result="Passed" start-time="2026-11-09 19:53:00Z" end-time="2026-11-09 19:53:00Z" duration="0.003624" asserts="0">
+          <properties>
+            <property name="retryIteration" value="0" />
+            <property name="repeatIteration" value="0" />
+          </properties>
+        </test-case>
+        <test-suite type="ParameterizedMethod" id="1005" name="StopRequestUsesApproachRadius" fullname="ExpansionRulesTests.StopRequestUsesApproachRadius" classname="ExpansionRulesTests" runstate="Runnable" testcasecount="3" result="Passed" start-time="2026-11-09 19:53:00Z" end-time="2026-11-09 19:53:00Z" duration="0.011405" total="3" passed="3" failed="0" inconclusive="0" skipped="0" asserts="0">
+          <properties />
+          <test-case id="1002" name="StopRequestUsesApproachRadius(100.0f,False)" fullname="ExpansionRulesTests.StopRequestUsesApproachRadius(100.0f,False)" methodname="StopRequestUsesApproachRadius" classname="ExpansionRulesTests" runstate="Runnable" seed="215899800" result="Passed" start-time="2026-11-09 19:53:00Z" end-time="2026-11-09 19:53:00Z" duration="0.006711" asserts="0">
+            <properties>
+              <property name="retryIteration" value="0" />
+              <property name="repeatIteration" value="0" />
+            </properties>
+          </test-case>
+          <test-case id="1003" name="StopRequestUsesApproachRadius(50.0f,True)" fullname="ExpansionRulesTests.StopRequestUsesApproachRadius(50.0f,True)" methodname="StopRequestUsesApproachRadius" classname="ExpansionRulesTests" runstate="Runnable" seed="1226979524" result="Passed" start-time="2026-11-09 19:53:00Z" end-time="2026-11-09 19:53:00Z" duration="0.000494" asserts="0">
+            <properties>
+              <property name="retryIteration" value="0" />
+              <property name="repeatIteration" value="0" />
+            </properties>
+          </test-case>
+          <test-case id="1004" name="StopRequestUsesApproachRadius(90.0f,True)" fullname="ExpansionRulesTests.StopRequestUsesApproachRadius(90.0f,True)" methodname="StopRequestUsesApproachRadius" classname="ExpansionRulesTests" runstate="Runnable" seed="269626705" result="Passed" start-time="2026-11-09 19:53:00Z" end-time="2026-11-09 19:53:00Z" duration="0.000451" asserts="0">
+            <properties>
+              <property name="retryIteration" value="0" />
+              <property name="repeatIteration" value="0" />
+            </properties>
+          </test-case>
+        </test-suite>
+        <test-case id="1019" name="UtilityRespondsToDemandSeatsAndReservation" fullname="ExpansionRulesTests.UtilityRespondsToDemandSeatsAndReservation" methodname="UtilityRespondsToDemandSeatsAndReservation" classname="ExpansionRulesTests" runstate="Runnable" seed="1509482791" result="Passed" start-time="2026-11-09 19:53:00Z" end-time="2026-11-09 19:53:00Z" duration="0.009637" asserts="0">
+          <properties>
+            <property name="retryIteration" value="0" />
+            <property name="repeatIteration" value="0" />
+          </properties>
+          <output><![CDATA[Saving results to: /home/jayden-mapasure/.config/unity3d/Kombi Shift Team/Kombi Shift 2/TestResults.xml
+]]></output>
+        </test-case>
+      </test-suite>
+    </test-suite>
+  </test-suite>
+</test-run>

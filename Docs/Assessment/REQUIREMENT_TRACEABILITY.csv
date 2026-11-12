@@ -1,0 +1,10 @@
+requirement,subject,implementation,evidence,limit
+M1,Journey,Menu; Director; PassengerTrip,Expansion/integration.json; Regression JSON,Staged service/outcomes; authentic full shift pending
+M2,Two challenge states,StageSettings resources; traffic density; profiles; fare,Regression Morning/Rush JSON,Initial tuning; authentic balance pending
+M3,Architecture/events/coroutines,Director; Station; Trip; Quality; Law; Condition,"Expansion rule, UTF and integration evidence",Events connect rules to feedback; vendor engine retained
+M4,Scenes/prefabs/animation,Expanded original scene; existing humanoid rigs,Physical boarding/alighting integration,"Procedural pose blending, not an authored Animator graph"
+M5,Physics/damage/humps,RCC adapter; rival wheels; condition; shared hump mesh,Expansion/road-physics.json; integration,Headless staged physics; human comfort and impact validation pending
+M6,AI/level/progression,Utility profiles; lane offsets; safe passing; 1.24 km itinerary,Expansion/map-audit.txt; integration,Selected trips use the audited branching graph; junction/passing/end-turn scenarios still need coverage
+M7,UI/audio/accessibility,HUD metrics; request tone; activity; existing menus,Expansion/Visual; integration events,Real audibility/accessibility and novice review pending
+M8,Measured optimisation,Buffered existing queries; mesh reuse; half-second trip sampler,Historical Assessment traffic-query fixture,City Editor measurements exist; fresh standalone CPU/GPU measurements after reliability changes remain pending
+M9,Deployment,ExpansionBuild outputs separately from previous releases,Expansion/build-platform JSON; pipeline.json,Export success differs from native execution; see engineering report

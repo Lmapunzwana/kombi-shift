@@ -1,0 +1,5 @@
+{
+  "name": "KombiShift.Expansion.Tests",
+  "includePlatforms": ["Editor"],
+  "optionalUnityReferences": ["TestAssemblies"]
+}

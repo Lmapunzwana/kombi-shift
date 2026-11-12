@@ -1,0 +1,11 @@
+Passenger stations: 4
+Seated waiting passengers: 12
+Competing kombis: 2
+Passenger prefab variants: 6
+Circular map and compact corner HUD enabled.
+
+Unity Play mode service validation: 23 passed; 0 failed.
+Includes real boarding, exclusive claims, rival pickups, cancellation, route progression, terminal delivery and circular HUD geometry.
+See Docs/Validation/service-results.json. Traffic is disabled and the test player is parked to isolate service behaviour.
+
+Group boarding/presentation update: 27 service/HUD/cover/shadow checks passed. Native Unity game-view and menu captures are in Docs/Validation. All six passengers start walking together, use distinct cabin seats, and remain subject to exclusive station ownership. The old artwork is outside Assets; the cover is the current gameplay Hiace.

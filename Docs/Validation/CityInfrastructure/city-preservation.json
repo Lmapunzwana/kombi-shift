@@ -1,0 +1,13 @@
+{
+  "baselineCommit": "7a6a733",
+  "originalCityPrefabInstances": 1,
+  "missingCityPrefabInstances": [],
+  "modifiedImportedCityAssets": [],
+  "changedCityOverridePaths": [
+    "m_Enabled",
+    "m_Materials.Array.data[0]",
+    "m_Mesh"
+  ],
+  "unexpectedChangedCityOverridePaths": [],
+  "scope": "Preserves the original imported city prefab instances, source assets and transforms. Road mesh/material and foliage-collider overrides are intentional. Runtime inventory separately verifies all 12611 city mesh renderers."
+}
