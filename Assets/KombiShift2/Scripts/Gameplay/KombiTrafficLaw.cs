@@ -65,7 +65,7 @@ namespace KombiShift2.Gameplay
                 {
                     enteredJunction=true;
                     if(junction.MustStop(transform.forward))Record("city-red:"+junction.GetEntityId(),"Red traffic signal",5);
-                    if(junction.stopControlled&&!stoppedForJunction)Record("city-stop:"+junction.GetEntityId(),"Failed to stop at the junction",3);
+                    if(junction.RequiresStop(transform.forward)&&!stoppedForJunction)Record("city-stop:"+junction.GetEntityId(),"Failed to stop at the junction",3);
                 }
             }
             else if(speed>8f && Vector3.Distance(node.position,transform.position)<10f)

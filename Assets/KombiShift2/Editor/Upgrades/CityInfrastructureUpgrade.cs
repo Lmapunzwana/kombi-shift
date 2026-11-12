@@ -18,6 +18,19 @@ public static class KombiCityInfrastructureUpgrade
     public static void VerifyRoadPhysics(){Apply();CityRoadPhysicsVerification.Run();}
     public static void VerifyGameplay(){Apply();KombiCityVerification.Run();}
     public static void VerifyBothStages(){Apply();KombiCityVerification.Both();}
+    [MenuItem("Kombi Shift/Rebuild Classified Junction Controls")]
+    public static void RebuildJunctionControls()
+    {
+        if(Application.isBatchMode)EditorSceneManager.OpenScene(KombiProjectWorkbench.Shift);
+        var scene=SceneManager.GetActiveScene();
+        if(EditorApplication.isPlayingOrWillChangePlaymode||scene.path!=KombiProjectWorkbench.Shift||scene.isDirty)
+            throw new InvalidOperationException("Save the driving scene and stop Play mode before rebuilding junction controls.");
+        var root=GameObject.Find(Root);var network=root!=null?root.GetComponent<CityRoadNetwork>():null;
+        if(network==null)throw new InvalidOperationException("The saved city infrastructure is missing its road network.");
+        network.Load(true);BuildIntersections(root.transform,network);BuildMarkings(root.transform,network);
+        EditorSceneManager.MarkSceneDirty(scene);EditorSceneManager.SaveScene(scene);AssetDatabase.SaveAssets();
+        KombiCitySignalVerification.Run();
+    }
     [MenuItem("Kombi Shift/Apply Existing City Infrastructure")]
     public static void Apply()
     {
@@ -174,45 +187,53 @@ public static class KombiCityInfrastructureUpgrade
             var capsule=trunk.AddComponent<CapsuleCollider>();capsule.radius=.16f;capsule.height=2.5f;existing.Add(position);
         }
     }
+    [Serializable] sealed class JunctionDocument { public JunctionRecord[] junctions; }
+    [Serializable] sealed class JunctionRecord { public string id,type,control;public Vector3 centre;public float radius;public ArmRecord[] arms; }
+    [Serializable] sealed class ArmRecord { public string id,control;public float bearing,width;public bool major,incoming,outgoing;public Vector3 approachLanePoint; }
     static void BuildIntersections(Transform root,CityRoadNetwork network)
     {
+        var source=AssetDatabase.LoadAssetAtPath<TextAsset>("Assets/Resources/CityJunctions.json");
+        if(source==null)throw new InvalidOperationException("Classify city junctions before applying the city infrastructure.");
+        var document=JsonUtility.FromJson<JunctionDocument>(source.text);
+        if(document?.junctions==null||document.junctions.Length==0)throw new InvalidDataException("CityJunctions.json contains no junctions.");
         var old=root.Find("City intersections");if(old!=null)Object.DestroyImmediate(old.gameObject);
         var group=new GameObject("City intersections").transform;group.SetParent(root,false);
-        var positions=new List<Vector3>();
-        var circleNodes=network.Nodes.Where(n=>n.roundabout).ToArray();
-        if(circleNodes.Length>0)
-        {
-            var centre=new Vector3(-656,circleNodes.Average(n=>n.position.y),262);
-            var circle=new GameObject("Existing city roundabout — clockwise");circle.transform.SetParent(group,false);circle.transform.position=centre;
-            var roundabout=circle.AddComponent<CityIntersection>();roundabout.roundabout=true;roundabout.radius=40;
-            positions.Add(centre);
-        }
         var lampMaterial=AssetDatabase.LoadAssetAtPath<Material>(Generated+"/TrafficLamp.mat");
         if(lampMaterial==null){lampMaterial=new Material(Shader.Find("Standard"));lampMaterial.EnableKeyword("_EMISSION");AssetDatabase.CreateAsset(lampMaterial,Generated+"/TrafficLamp.mat");}
-        foreach(var node in network.Nodes)
+        foreach(var record in document.junctions)
         {
-            if(node.component!=0||!node.junction||node.roundabout||positions.Any(p=>Vector3.Distance(p,node.position)<22))continue;
-            positions.Add(node.position);var go=new GameObject("City junction "+positions.Count);go.transform.SetParent(group,false);go.transform.position=node.position;
-            var intersection=go.AddComponent<CityIntersection>();intersection.signalised=positions.Count%3==0;intersection.stopControlled=!intersection.signalised&&positions.Count%2==0;intersection.radius=8;
-            MakeJunctionSign(go.transform,intersection.signalised?"SIGNAL AHEAD":intersection.stopControlled?"STOP":"GIVE WAY",Mathf.Max(6,node.width*.5f+1));
-            if(intersection.signalised)
+            var go=new GameObject(record.id+" — "+record.type+" — "+record.control);go.transform.SetParent(group,false);go.transform.position=record.centre;
+            var intersection=go.AddComponent<CityIntersection>();intersection.junctionId=record.id;intersection.junctionType=record.type;intersection.control=record.control;
+            intersection.signalised=record.control=="Signalised";intersection.roundabout=record.control=="RoundaboutYield";intersection.radius=record.radius;
+            var arms=record.arms??Array.Empty<ArmRecord>();intersection.stopControlled=arms.Any(a=>a.control=="Stop");
+            var runtimeArms=new List<CityIntersectionArm>();
+            int nextMinorPhase=arms.Any(a=>a.major)?1:0;
+            foreach(var arm in arms)
             {
-                var eastWest=new List<Renderer>();var northSouth=new List<Renderer>();
-                foreach(var forward in new[]{Vector3.right,Vector3.left,Vector3.forward,Vector3.back})
+                int phase=arm.major?0:nextMinorPhase;
+                var runtime=new CityIntersectionArm{id=arm.id,control=arm.control,bearing=arm.bearing,width=arm.width,major=arm.major,incoming=arm.incoming,outgoing=arm.outgoing,phase=phase};
+                Vector3 outward=new(Mathf.Sin(arm.bearing*Mathf.Deg2Rad),0,Mathf.Cos(arm.bearing*Mathf.Deg2Rad));
+                Vector3 inward=-outward,left=-Vector3.Cross(Vector3.up,inward);
+                Vector3 stop=record.centre+outward*(record.radius+1f);stop.y=arm.approachLanePoint.y;
+                if(arm.control=="Signal"&&arm.incoming)
                 {
-                    float width=ApproachWidth(network,node.position,forward);
-                    Vector3 left=-Vector3.Cross(Vector3.up,forward);
-                    Vector3 position=node.position-forward*(intersection.radius+1f)+left*(width*.5f+.9f);
-                    var post=GameObject.CreatePrimitive(PrimitiveType.Cylinder);post.name="Traffic signal post";post.transform.SetParent(go.transform,false);
-                    post.transform.localPosition=new Vector3(position.x-node.position.x,1.5f,position.z-node.position.z);post.transform.localScale=new Vector3(.12f,1.5f,.12f);
-                    var lamp=GameObject.CreatePrimitive(PrimitiveType.Sphere);lamp.name="Signal lamp";lamp.transform.SetParent(go.transform,false);
-                    lamp.transform.localPosition=post.transform.localPosition+Vector3.up*1.5f;lamp.transform.localScale=Vector3.one*.4f;
-                    Object.DestroyImmediate(lamp.GetComponent<Collider>());lamp.GetComponent<Renderer>().sharedMaterial=lampMaterial;
-                    if(Mathf.Abs(forward.x)>Mathf.Abs(forward.z))eastWest.Add(lamp.GetComponent<Renderer>());else northSouth.Add(lamp.GetComponent<Renderer>());
+                    Vector3 lampPosition=stop+left*(arm.width*.5f+.8f);
+                    runtime.lampHead=MakeSignalHead(go.transform,"Signal lamp head "+arm.id,lampPosition,record.centre,lampMaterial);
+                    if(arm.width>=16f)runtime.repeater=MakeSignalHead(go.transform,"Far-side repeater "+arm.id,record.centre-outward*(record.radius+.8f)-left*(arm.width*.25f),record.centre,lampMaterial);
+                    MakeJunctionSign(go.transform,"SIGNAL AHEAD",stop+outward*8f+left*(arm.width*.5f+.8f),record.centre);
                 }
-                intersection.eastWestLamps=eastWest.ToArray();intersection.northSouthLamps=northSouth.ToArray();
+                else if((arm.control=="Stop"||arm.control=="GiveWay")&&arm.incoming)
+                    MakeJunctionSign(go.transform,arm.control=="Stop"?"STOP":"GIVE WAY",stop+left*(arm.width*.5f+.8f),record.centre);
+                runtimeArms.Add(runtime);
             }
+            intersection.arms=runtimeArms.ToArray();
         }
+    }
+    static Renderer MakeSignalHead(Transform parent,string name,Vector3 position,Vector3 centre,Material material)
+    {
+        var post=GameObject.CreatePrimitive(PrimitiveType.Cylinder);post.name="Traffic signal post";post.transform.SetParent(parent);post.transform.position=position+Vector3.up*1.5f;post.transform.localScale=new Vector3(.12f,1.5f,.12f);
+        var lamp=GameObject.CreatePrimitive(PrimitiveType.Sphere);lamp.name=name;lamp.transform.SetParent(parent);lamp.transform.position=position+Vector3.up*3f;lamp.transform.localScale=Vector3.one*.4f;lamp.transform.rotation=Quaternion.LookRotation((position-centre).normalized);
+        Object.DestroyImmediate(lamp.GetComponent<Collider>());var renderer=lamp.GetComponent<Renderer>();renderer.sharedMaterial=material;return renderer;
     }
     static float ApproachWidth(CityRoadNetwork network,Vector3 centre,Vector3 forward)
     {
@@ -226,10 +247,10 @@ public static class KombiCityInfrastructureUpgrade
         }
         return width;
     }
-    static void MakeJunctionSign(Transform parent,string label,float roadside)
+    static void MakeJunctionSign(Transform parent,string label,Vector3 position,Vector3 centre)
     {
-        var post=GameObject.CreatePrimitive(PrimitiveType.Cylinder);post.name=label+" sign post";post.transform.SetParent(parent,false);post.transform.localPosition=new Vector3(roadside,1,-9);post.transform.localScale=new Vector3(.07f,1,.07f);
-        var sign=new GameObject(label+" sign",typeof(TextMesh));sign.transform.SetParent(parent,false);sign.transform.localPosition=new Vector3(roadside,2.1f,-9);
+        var post=GameObject.CreatePrimitive(PrimitiveType.Cylinder);post.name=label+" sign post";post.transform.SetParent(parent);post.transform.position=position+Vector3.up;post.transform.localScale=new Vector3(.07f,1,.07f);
+        var sign=new GameObject(label+" sign",typeof(TextMesh));sign.transform.SetParent(parent);sign.transform.position=position+Vector3.up*2.1f;sign.transform.rotation=Quaternion.LookRotation((position-centre).normalized);
         var text=sign.GetComponent<TextMesh>();text.text=label;text.fontSize=40;text.characterSize=.04f;text.anchor=TextAnchor.MiddleCenter;text.color=label=="STOP"?new Color(1,.35f,.25f):Color.white;
     }
     static void BuildMarkings(Transform root,CityRoadNetwork network)
@@ -303,26 +324,26 @@ public static class KombiCityInfrastructureUpgrade
         foreach(var junction in Object.FindObjectsByType<CityIntersection>())
         {
             if(junction.roundabout)continue;
-            foreach(var forward in new[]{Vector3.forward,Vector3.back,Vector3.left,Vector3.right})
+            foreach(var arm in junction.arms)
             {
-                float roadWidth=ApproachWidth(network,junction.transform.position,forward);
-                Vector3 left=-Vector3.Cross(Vector3.up,forward);
-                float laneOffset=roadWidth>=13f?4.65f:Mathf.Min(roadWidth*.22f,1.55f);
+                if(arm==null||!arm.incoming)continue;
+                Vector3 outward=arm.Direction,forward=-outward,left=-Vector3.Cross(Vector3.up,forward);float roadWidth=arm.width;
+                float laneOffset=roadWidth>=13f?4.65f:Mathf.Max(1.55f,Mathf.Min(roadWidth*.22f,4.65f));
                 float stopDistance=junction.radius+1f;
-                if(junction.signalised||junction.stopControlled)
+                if(arm.control=="Signal"||arm.control=="Stop")
                 {
                     int laneCount=roadWidth>=13f?2:1;
                     for(int lane=0;lane<laneCount;lane++)
                     {
-                        Vector3 stop=junction.transform.position-forward*stopDistance+left*(laneOffset-lane*3.1f);
+                        Vector3 stop=junction.transform.position+outward*stopDistance+left*(laneOffset-lane*3.1f);
                         Strip(stop-left*1.5f,stop+left*1.5f,.28f,whiteVertices,whiteTriangles);
                     }
                 }
-                if(junction.signalised)
+                if(arm.control=="Signal")
                 {
                     for(int stripe=0;stripe<5;stripe++)
                     {
-                        Vector3 crossing=junction.transform.position-forward*(stopDistance+1.5f+stripe*.58f);
+                        Vector3 crossing=junction.transform.position+outward*(stopDistance+1.5f+stripe*.58f);
                         Strip(crossing-left*(roadWidth*.5f-.25f),crossing+left*(roadWidth*.5f-.25f),.28f,whiteVertices,whiteTriangles);
                     }
                 }

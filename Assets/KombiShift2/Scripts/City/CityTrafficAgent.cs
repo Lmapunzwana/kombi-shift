@@ -81,13 +81,14 @@ namespace KombiShift2.City
                 if(junction!=lastJunction){lastJunction=junction;stopCompleted=false;stoppedSince=0;}
                 if(junction!=null&&Vector3.Distance(body.position,junction.transform.position)<junction.radius+8f)
                 {
-                    if(junction.stopControlled&&!stopCompleted)
+                    bool stopRequired=junction.RequiresStop(heading);
+                    if(stopRequired&&!stopCompleted)
                     {
                         if(speed<.3f){if(stoppedSince==0)stoppedSince=Time.time;stopCompleted=Time.time-stoppedSince>.6f;}
                         if(!stopCompleted)desiredSpeed=0;
                     }
                     Vector3 exit=index+3<path.Count?graph.LanePoint(path,index+3):target;
-                    if(junction.stopControlled&&!stopCompleted || !junction.MayEnter(body,heading,exit))desiredSpeed=0;
+                    if(stopRequired&&!stopCompleted || !junction.MayEnter(body,heading,exit))desiredSpeed=0;
                     else desiredSpeed=Mathf.Min(desiredSpeed,junction.roundabout?4:5);
                 }
                 watch.Stop();DecisionMilliseconds=(float)watch.Elapsed.TotalMilliseconds;

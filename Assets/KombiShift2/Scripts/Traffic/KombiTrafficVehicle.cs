@@ -10,7 +10,6 @@ namespace KombiShift2.Traffic
         [SerializeField] private float laneOffset = 1.55f;
         [SerializeField] private bool reverseRoute;
         private int routeDirection = 1;
-        private TrafficSignalController[] signals;
         private float groundClearance = .05f;
         private readonly RaycastHit[] obstacleHits = new RaycastHit[64];
         private readonly RaycastHit[] groundHits = new RaycastHit[128];
@@ -18,7 +17,6 @@ namespace KombiShift2.Traffic
         private void Start()
         {
             routeDirection = reverseRoute ? -1 : 1;
-            signals = FindObjectsByType<TrafficSignalController>(FindObjectsInactive.Exclude, FindObjectsSortMode.None);
             Renderer[] renderers = GetComponentsInChildren<Renderer>();
             if (renderers.Length > 0)
             {
@@ -54,17 +52,10 @@ namespace KombiShift2.Traffic
             }
             Vector3 direction = delta.normalized;
             bool blocked = ObstacleAhead(direction);
-            if (!blocked && signals != null)
+            if (!blocked)
             {
-                foreach (TrafficSignalController signal in signals)
-                {
-                    Vector3 toSignal = signal.transform.position - transform.position;
-                    if (signal.MustStop && toSignal.sqrMagnitude < 196f && Vector3.Dot(transform.forward, toSignal.normalized) > .45f)
-                    {
-                        blocked = true;
-                        break;
-                    }
-                }
+                var junction=KombiShift2.City.CityIntersection.Near(target);
+                if(junction!=null&&Vector3.Distance(transform.position,junction.transform.position)<junction.radius+8f&&junction.MustStop(direction))blocked=true;
             }
             float movement = (blocked ? 0f : speed) * Time.deltaTime;
             Vector3 nextPosition = transform.position + direction * movement;

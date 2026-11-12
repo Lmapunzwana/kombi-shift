@@ -1,0 +1,10 @@
+{
+    "junctions": 143,
+    "signalisedJunctions": 92,
+    "signalisedIncomingArms": 330,
+    "primaryLampHeads": 330,
+    "classificationMismatches": 0,
+    "lampPlacementFailures": 0,
+    "lightCycleFailures": 0,
+    "details": []
+}

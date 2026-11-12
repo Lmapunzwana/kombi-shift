@@ -21,7 +21,6 @@ namespace KombiShift2.Traffic
         private KombiPassengerCabin cabin;
         private Rigidbody body;
         private WheelCollider[] wheels;
-        private TrafficSignalController[] signals;
         private int routeIndex, destinationIndex, direction = 1;
         private float startedAt, nextEvaluation, nextDeparture, blockedTime;
         private bool shiftEnded;
@@ -85,7 +84,6 @@ namespace KombiShift2.Traffic
         private void Start()
         {
             routeIndex = NearestRouteIndex(transform.position); startedAt = Time.time;
-            signals = FindObjectsByType<TrafficSignalController>(FindObjectsSortMode.None);
             if(CityTripSession.Active)cityNavigation=gameObject.AddComponent<CityRivalNavigation>();
         }
         private void FixedUpdate()
@@ -226,7 +224,7 @@ namespace KombiShift2.Traffic
             if(junction!=null)
             {
                 bool occasionalRollingStop=profile.personality==RivalPersonality.Aggressive&&Mathf.RoundToInt(Mathf.Abs(junction.transform.position.x+junction.transform.position.z))%7==0;
-                bool stopRequired=junction.stopControlled&&!occasionalRollingStop;
+                bool stopRequired=junction.RequiresStop(transform.forward)&&!occasionalRollingStop;
                 if(stopRequired&&!cityStopCompleted)
                 {
                     if(actualSpeed<.3f){if(cityStoppedAt==0)cityStoppedAt=Time.time;cityStopCompleted=Time.time-cityStoppedAt>.7f;}
@@ -236,8 +234,6 @@ namespace KombiShift2.Traffic
             }
             if (blockedTime > 25f && Time.time >= nextEvaluation)
             { target = null; ChooseTarget(); Say("Blocked route: reassessing demand; waiting for clearance"); }
-            foreach (var signal in signals)
-                if (signal != null && signal.MustStop && Vector3.Distance(signal.transform.position, transform.position) < 15f && Vector3.Dot(transform.forward, (signal.transform.position - transform.position).normalized) > .4f) desiredSpeed = 0f;
             foreach (var zone in KombiRoadRules.Active)
             {
                 float distance = Vector3.Distance(zone.transform.position, transform.position);
