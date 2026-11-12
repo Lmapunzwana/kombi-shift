@@ -1,0 +1,20 @@
+{
+  "clusterWidthFactor": 0.6,
+  "roundaboutGroupingDistance": 120.0,
+  "roundaboutMinimumFlags": 3,
+  "roundaboutRadialTolerance": 7.0,
+  "roundaboutMaximumResidualFactor": 0.15,
+  "armMergeDegrees": 20.0,
+  "mergeAcuteAngle": 45.0,
+  "interchangeHeightDifference": 4.0,
+  "signalMinimumWidth": 16.0,
+  "signalMinimumSpeed": 50.0,
+  "priorityMinorMaximumWidth": 10.0,
+  "stopMinorSpeedThreshold": 40.0,
+  "minimumRadius": 8.0,
+  "radiusWidthFactor": 0.65,
+  "radiusPerArm": 0.75,
+  "laneOffsetWidthFactor": 0.22,
+  "minimumLaneOffset": 1.55,
+  "maximumLaneOffset": 4.65
+}
