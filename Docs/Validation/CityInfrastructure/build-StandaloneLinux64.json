@@ -1,11 +1,11 @@
 {
-    "utc": "2026-11-11T11:47:43.8937890Z",
+    "utc": "2026-11-12T18:00:05.8058100Z",
     "unity": "6000.6.2f1",
     "platform": "StandaloneLinux64",
     "result": "Succeeded",
-    "output": "/home/euclide/Downloads/GAME DEV/Builds/CityInfrastructure2026/Linux/KombiShift2.x86_64",
+    "output": "/home/lmapunzwana/workspace/Builds/CityInfrastructure2026/Linux/KombiShift2.x86_64",
     "errors": 0,
-    "warnings": 39,
-    "bytes": 406075482,
-    "seconds": 228.83506
+    "warnings": 2,
+    "bytes": 414093283,
+    "seconds": 535.9810719999999
 }
