@@ -30,7 +30,18 @@ namespace KombiShift2.Traffic
         private CityIntersection cityStop;
         private bool cityStopCompleted;
         private bool headingHome;
-        private float nextHomeCheck, progressAt, forceUntil, junctionWaitStart;
+        private float nextHomeCheck, progressAt, forceUntil, junctionWaitStart, lastMovedAt, flippedSince;
+        private bool waitingAtRed;
+        private Vector3 movedAnchor;
+        private void RecoverOntoRoad()
+        {
+            Vector3 heading = target != null ? target.ServicePoint.position - transform.position : transform.forward;
+            if (Vector3.Dot(heading, transform.forward) > 0f && !CityRoadRecovery.IsFlipped(transform)) heading = transform.forward;
+            if (CityRoadRecovery.Place(body, heading, 18f)) Say("Recovered back onto the road");
+            flippedSince = 0f; lastMovedAt = Time.time; movedAnchor = transform.position; progressAt = Time.time; passing = false;
+            if (cityNavigation != null) cityNavigation.Replan();
+            routeIndex = NearestRouteIndex(transform.position);
+        }
         private Vector3 progressAnchor;
         private KombiShiftGameDirector director;
         public bool FinishedTrip { get; private set; }
@@ -111,6 +122,11 @@ namespace KombiShift2.Traffic
             if (waitingForStart) startedAt = Time.time;
             if (waitingForStart || shiftEnded || route == null || route.Length < 2 || stations == null || Time.time - startedAt < departureDelay || State == RivalState.Boarding)
             { Brake(); return; }
+            // Recovery: flipped for 2 s, or not moving for 15 s (60 s while waiting at a red light).
+            if (CityRoadRecovery.IsFlipped(transform)) { if (flippedSince == 0f) flippedSince = Time.time; } else flippedSince = 0f;
+            // Creeping does not count: at least 6 m every 15 s.
+            if ((transform.position - movedAnchor).sqrMagnitude > 36f) { movedAnchor = transform.position; lastMovedAt = Time.time; }
+            if ((flippedSince > 0f && Time.time - flippedSince > 2f) || Time.time - lastMovedAt > (waitingAtRed ? 60f : 15f)) { RecoverOntoRoad(); return; }
             var terminal = Array.Find(stations, x => x != null && x.Terminal);
             bool checkHome = !headingHome && terminal != null && Time.time >= nextHomeCheck;
             if (checkHome) nextHomeCheck = Time.time + 1f;
@@ -343,7 +359,9 @@ namespace KombiShift2.Traffic
             // Stuck recovery: a rival that has not moved for a while (and is not simply waiting out a red
             // light) squeezes through slowly, the way a kombi driver would, instead of freezing forever.
             bool redLight = junction != null && junction.signalised && !junction.SignalAllows(transform.forward);
-            float stuckLimit = redLight ? (CityIntersection.GreenSeconds + CityIntersection.AmberSeconds + CityIntersection.AllRedSeconds) * junction.PhaseCount + 5f : 3f;
+            waitingAtRed = redLight;
+            // Aggressive kombis lose patience at a red light after 10 s and edge through; others wait out the cycle.
+            float stuckLimit = redLight ? (profile.personality == RivalPersonality.Aggressive ? 10f : (CityIntersection.GreenSeconds + CityIntersection.AmberSeconds + CityIntersection.AllRedSeconds) * junction.PhaseCount + 5f) : 3f;
             if ((transform.position - progressAnchor).sqrMagnitude > 4f) { progressAnchor = transform.position; progressAt = Time.time; }
             if (Time.time - progressAt > stuckLimit && Time.time >= forceUntil)
             { forceUntil = Time.time + 4f; progressAt = Time.time; Say("Squeezing through the hold-up"); }
@@ -398,7 +416,7 @@ namespace KombiShift2.Traffic
                 wheels[i].brakeTorque = desiredSpeed < .1f || error < -.3f ? profile.braking * body.mass * wheels[i].radius / 4f : 0f;
             }
         }
-        private void Brake() { progressAt = Time.time; if (wheels == null) return; foreach (var wheel in wheels) { wheel.motorTorque = 0f; wheel.brakeTorque = 4000f; } }
+        private void Brake() { progressAt = Time.time; lastMovedAt = Time.time; if (wheels == null) return; foreach (var wheel in wheels) { wheel.motorTorque = 0f; wheel.brakeTorque = 4000f; } }
         private void OnDisable() { if (target != null) target.Release(transform); Brake(); }
         private int NearestRouteIndex(Vector3 point)
         {

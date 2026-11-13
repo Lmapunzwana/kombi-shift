@@ -33,6 +33,9 @@ namespace KombiShift2.Gameplay
         private Vector3 walkingScale;
         public Transform WaitingSeat => waitingSeat;
         public void SetWaitingSeat(Transform seat) { waitingSeat=seat; stationParent=seat; }
+        // Extra rush-hour passengers wait standing on the pavement instead of sitting on a bench.
+        public bool WaitsStanding { get; private set; }
+        public void SetStandingSpot(Transform spot) { SetWaitingSeat(spot); WaitsStanding = true; }
         public PassengerState State { get; private set; } = PassengerState.Seated;
         public PassengerPersona Persona => persona;
         public bool Boarded => State == PassengerState.Onboard;
@@ -73,7 +76,7 @@ namespace KombiShift2.Gameplay
 
         private void LateUpdate()
         {
-            float desired = State == PassengerState.Seated || State == PassengerState.Onboard || enteringCabin || (State == PassengerState.Delivered && sitOnArrival) ? 1f : 0f;
+            float desired = (State == PassengerState.Seated && !WaitsStanding) || State == PassengerState.Onboard || enteringCabin || (State == PassengerState.Delivered && sitOnArrival) ? 1f : 0f;
             seatedBlend = Mathf.MoveTowards(seatedBlend, desired, Time.deltaTime * 3.5f);
             if (State == PassengerState.Walking || State == PassengerState.Returning || State == PassengerState.Alighting) phase += Time.deltaTime * 7f;
             ApplyPose();

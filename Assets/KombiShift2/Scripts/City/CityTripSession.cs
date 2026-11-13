@@ -38,14 +38,29 @@ namespace KombiShift2.City
                 service.SetPositionAndRotation(Ground(graph.LanePoint(path,index)),Quaternion.LookRotation(forward));
                 var people=station.People;
                 bool terminal=i==selected.stopNodes.Length-1;
-                if(!terminal&&KombiChallenge.Selected==KombiStage.RushHour)
+                // Busy stops: enough waiting people for both rival kombis plus the player
+                // (Rush Hour 28, Morning 16). Benches fill first; the rest stand on the pavement.
+                int wanted=KombiChallenge.Selected==KombiStage.RushHour?28:16;
+                if(!terminal&&people.Length>0&&people.Length<wanted)
                 {
                     var demand=new List<StationPassenger>(people);
-                    // Rush hour: every bench place is taken.
-                    for(int n=people.Length;n<Mathf.Min(12,station.ArrivalSeats.Length);n++)
+                    int benches=Mathf.Min(12,station.ArrivalSeats.Length);
+                    var stationRoot=go.transform;
+                    for(int n=people.Length;n<wanted;n++)
                     {
-                        var seat=station.ArrivalSeats[n];var actor=Instantiate(people[n%people.Length].gameObject,seat,false).GetComponent<StationPassenger>();
-                        actor.transform.localPosition=Vector3.zero;actor.transform.localRotation=Quaternion.identity;actor.SetWaitingSeat(seat);actor.PoseSeatedPreview();demand.Add(actor);
+                        Transform spot;bool standing=n>=benches;
+                        if(!standing)spot=station.ArrivalSeats[n];
+                        else
+                        {
+                            int k=n-benches,row=k/8,col=k%8;
+                            spot=new GameObject("Standing passenger spot "+k).transform;spot.SetParent(stationRoot,false);
+                            spot.position=Ground(stationRoot.position-stationRoot.forward*(1.3f+row*.9f)+stationRoot.right*((col-3.5f)*.75f));
+                            spot.rotation=stationRoot.rotation;
+                        }
+                        var actor=Instantiate(people[n%people.Length].gameObject,spot,false).GetComponent<StationPassenger>();
+                        actor.transform.localPosition=Vector3.zero;actor.transform.localRotation=Quaternion.identity;
+                        if(standing)actor.SetStandingSpot(spot);else{actor.SetWaitingSeat(spot);actor.PoseSeatedPreview();}
+                        demand.Add(actor);
                     }
                     people=demand.ToArray();
                 }

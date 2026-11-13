@@ -44,8 +44,7 @@ public class MusicManager : MonoBehaviour
     RCCP_CarController player;
     float userVolume = -1f;
     bool atBusStop, ducked;
-    AudioSource hornSource;
-    AudioClip hornClip, radioOverride;
+    AudioClip radioOverride;
     readonly List<AudioClip> radio = new();
     int radioIndex = -1;
     const float DuckedVolume = .4f;
@@ -78,8 +77,6 @@ public class MusicManager : MonoBehaviour
 
         showDebugOnScreen = false;             // debug status box is not for players
         userVolume = audioSource.volume;
-        hornSource = gameObject.AddComponent<AudioSource>(); hornSource.spatialBlend = 0f; hornSource.playOnAwake = false;
-        hornClip = MakeHooter();
         if (inOnboarding) PlayOnboarding();
     }
 
@@ -92,6 +89,8 @@ public class MusicManager : MonoBehaviour
         if (userVolume < 0f) userVolume = audioSource.volume;
         audioSource.volume = Mathf.MoveTowards(audioSource.volume, userVolume * (ducked ? DuckedVolume : 1f), dt * 1.5f);
         if (KeyDown(KeyCode.N)) NextRadioStation();
+        // Radio stations play one after another.
+        if (drivingMusicActive && !inOnboarding && !userPaused && radioOverride != null && !audioSource.isPlaying) NextRadioStation();
 
         // Test key: press M to force the driving music (delete when finished testing)
         if (MKeyDown())
@@ -142,8 +141,7 @@ public class MusicManager : MonoBehaviour
         if (activeCount > 0) HandleSpeed(fastest, dt);
     }
 
-    // Music always plays while driving. Stopped at a bus stop: pause and sound the hooter.
-    // Stopped anywhere else (junctions, traffic): keep playing at a lower volume.
+    // Music always plays while driving; when the kombi is stopped it is turned down, never paused.
     void HandleSpeed(float kph, float dt)
     {
         bool moving = kph > movingSpeedKph;
@@ -162,16 +160,8 @@ public class MusicManager : MonoBehaviour
         }
         idleTimer += dt;
         if (idleTimer < pauseDelay) return;
-        if (PlayerAtBusStop())
-        {
-            if (!atBusStop)
-            {
-                atBusStop = true; ducked = false; audioSource.Pause();
-                if (hornSource != null && hornClip != null) hornSource.PlayOneShot(hornClip, .9f);
-                Log("At a bus stop: music paused, hooter sounded");
-            }
-        }
-        else ducked = true;
+        // Stopped anywhere, bus stops included: the music keeps playing, just quieter.
+        ducked = true;
     }
 
     bool PlayerAtBusStop()
@@ -186,7 +176,23 @@ public class MusicManager : MonoBehaviour
         return false;
     }
 
-    // ---------- Radio: one button (or N) changes the station ----------
+    // ---------- Radio: one button (or N) changes the station; stations play one after another ----------
+
+    enum Style { KombiFm, AfroJazz, Amapiano, Sungura, Mbira, Dancehall }
+    struct StationSpec { public string name; public float bpm, root; public int[] chords; public Style style; }
+    // Original generated loops (no recorded music is copied). Styles follow the kinds of music heard in kombis:
+    // Afro-jazz in the Mtukudzi tradition, amapiano, sungura, mbira/chimurenga and Zimdancehall.
+    static readonly StationSpec[] Specs =
+    {
+        new() { name = "Kombi FM - Afro-jazz",        bpm = 100f, root = 196f, chords = new[] { 0, 5, 7, 5 },  style = Style.AfroJazz },
+        new() { name = "Kombi FM - Amapiano",         bpm = 112f, root = 220f, chords = new[] { 0, 9, 5, 7 },  style = Style.Amapiano },
+        new() { name = "Kombi FM - Sungura",          bpm = 138f, root = 247f, chords = new[] { 0, 5, 0, 7 },  style = Style.Sungura },
+        new() { name = "Kombi FM - Mbira groove",     bpm = 96f,  root = 175f, chords = new[] { 0, 7, 9, 5 },  style = Style.Mbira },
+        new() { name = "Kombi FM - Zimdancehall",     bpm = 95f,  root = 208f, chords = new[] { 0, 8, 3, 10 }, style = Style.Dancehall },
+        new() { name = "Kombi FM - Township drive",   bpm = 104f, root = 220f, chords = new[] { 0, 7, 9, 5 },  style = Style.KombiFm },
+        new() { name = "Kombi FM - Evening rank",     bpm = 120f, root = 196f, chords = new[] { 0, 5, 7, 5 },  style = Style.KombiFm },
+    };
+    readonly Dictionary<int, AudioClip> stationCache = new();
 
     public void NextRadioStation()
     {
@@ -195,52 +201,85 @@ public class MusicManager : MonoBehaviour
         {
             foreach (var clip in drivingTracks) if (clip != null && !radio.Contains(clip)) radio.Add(clip);
             foreach (var clip in onboardingTracks) if (clip != null && !radio.Contains(clip)) radio.Add(clip);
-            radio.Add(MakeStation("Kombi FM 1 (generated)", 104f, new[] { 0, 7, 9, 5 }, 220f));
-            radio.Add(MakeStation("Kombi FM 2 (generated)", 120f, new[] { 0, 5, 7, 5 }, 196f));
+            for (int i = 0; i < Specs.Length; i++) radio.Add(null);   // generated on first play
         }
         radioIndex = (radioIndex + 1) % radio.Count;
+        int generated = radioIndex - (radio.Count - Specs.Length);
+        if (radio[radioIndex] == null && generated >= 0)
+        {
+            if (!stationCache.TryGetValue(generated, out var made)) { made = MakeStation(Specs[generated]); stationCache[generated] = made; }
+            radio[radioIndex] = made;
+        }
         radioOverride = radio[radioIndex];
-        userPaused = false;
-        audioSource.clip = radioOverride; audioSource.loop = true; audioSource.Play();
-        if (atBusStop) audioSource.Pause();
+        userPaused = false; drivingMusicActive = true;
+        audioSource.clip = radioOverride; audioSource.loop = false; audioSource.Play();
         Log("Radio: " + radioOverride.name);
     }
 
-    static AudioClip MakeHooter()
-    {
-        const int rate = 22050; int length = (int)(rate * .75f);
-        var data = new float[length];
-        for (int i = 0; i < length; i++)
-        {
-            float time = i / (float)rate;
-            float envelope = Mathf.Clamp01(time * 30f) * Mathf.Clamp01((.75f - time) * 12f);
-            // Two-tone vehicle horn (roughly 350 Hz and 440 Hz), slightly squared for a brassy sound.
-            float s = Mathf.Sin(2f * Mathf.PI * 350f * time) + .8f * Mathf.Sin(2f * Mathf.PI * 440f * time);
-            data[i] = Mathf.Clamp(s * 1.6f, -1f, 1f) * .35f * envelope;
-        }
-        var clip = AudioClip.Create("Kombi hooter", length, 1, rate, false); clip.SetData(data, 0); return clip;
-    }
+    public string RadioStationName => radioOverride != null ? radioOverride.name : "";
 
-    // Simple original loop (bass + arpeggio + hi-hat) so the radio always has more than one station.
-    static AudioClip MakeStation(string name, float bpm, int[] progression, float root)
+    static float Pluck(float freq, float t, float decay) => (2f * Mathf.Abs(2f * (t * freq - Mathf.Floor(t * freq + .5f))) - 1f) * Mathf.Exp(-t * decay);
+    static float Noise(float t) => Mathf.PerlinNoise(t * 3100f, t * 17f) * 2f - 1f;
+
+    static AudioClip MakeStation(StationSpec s)
     {
-        const int rate = 22050; float beat = 60f / bpm; int bars = progression.Length * 2;
+        const int rate = 22050; float beat = 60f / s.bpm; int bars = 16;
         int length = (int)(rate * beat * 4f * bars);
         var data = new float[length];
-        int[] major = { 0, 4, 7, 12 };
+        int[] major = { 0, 4, 7, 12 }, minor = { 0, 3, 7, 10 };
         for (int i = 0; i < length; i++)
         {
-            float time = i / (float)rate; int beatIndex = (int)(time / beat); int bar = (beatIndex / 4) / 2;
-            float chordRoot = root * Mathf.Pow(2f, progression[bar % progression.Length] / 12f);
-            float inBeat = time - beatIndex * beat;
-            float bass = Mathf.Sin(2f * Mathf.PI * chordRoot * .5f * time) * Mathf.Exp(-inBeat * 3f) * .35f;
-            float eighth = beat * .5f; int step = (int)(time / eighth); float inStep = time - step * eighth;
-            float note = chordRoot * 2f * Mathf.Pow(2f, major[step % 4] / 12f);
-            float arp = Mathf.Sin(2f * Mathf.PI * note * time) * Mathf.Exp(-inStep * 9f) * .22f;
-            float hat = (step % 2 == 1 ? 1f : 0f) * Mathf.Exp(-inStep * 60f) * (Mathf.PerlinNoise(time * 3000f, 0f) - .5f) * .25f;
-            data[i] = Mathf.Clamp(bass + arp + hat, -1f, 1f) * .8f;
+            float t = i / (float)rate;
+            int b = (int)(t / beat); float inBeat = t - b * beat; int bar = b / 4;
+            int chord = s.chords[(bar / 2) % s.chords.Length];
+            float root = s.root * Mathf.Pow(2f, chord / 12f);
+            int[] scale = s.style == Style.Dancehall ? minor : major;
+            float sixteenth = beat * .25f; int step16 = (int)(t / sixteenth); float in16 = t - step16 * sixteenth;
+            float eighth = beat * .5f; int step8 = (int)(t / eighth); float in8 = t - step8 * eighth;
+            float v = 0f;
+            switch (s.style)
+            {
+                case Style.AfroJazz: // walking bass, plucked acoustic-guitar arpeggio, soft shaker
+                    v += Mathf.Sin(2f * Mathf.PI * root * .5f * Mathf.Pow(2f, scale[b % 4] / 12f) * t) * Mathf.Exp(-inBeat * 2.5f) * .32f;
+                    v += Pluck(root * 2f * Mathf.Pow(2f, scale[step8 % 4] / 12f), in8, 7f) * .2f;
+                    v += Noise(t) * Mathf.Exp(-in8 * 40f) * .07f;
+                    break;
+                case Style.Amapiano: // log drum on the off-beats, piano chord stabs, 16th shakers
+                    { float lt = (step8 % 2 == 1) ? in8 : in8 + eighth; float lf = root * .5f * (1f + Mathf.Exp(-lt * 18f) * .6f);
+                      v += Mathf.Sin(2f * Mathf.PI * lf * lt) * Mathf.Exp(-lt * 4f) * .45f; }
+                    if (b % 2 == 0) for (int n = 0; n < 3; n++) v += Mathf.Sin(2f * Mathf.PI * root * 2f * Mathf.Pow(2f, scale[n] / 12f) * t) * Mathf.Exp(-inBeat * 5f) * .08f;
+                    v += Noise(t) * Mathf.Exp(-in16 * 55f) * .09f;
+                    v += Mathf.Sin(2f * Mathf.PI * 55f * inBeat) * Mathf.Exp(-inBeat * 14f) * .35f; // kick
+                    break;
+                case Style.Sungura: // fast bright lead-guitar 16ths, driving bass, snare on 2 and 4
+                    v += Pluck(root * 2f * Mathf.Pow(2f, scale[step16 % 4] / 12f), in16, 14f) * .22f;
+                    v += Mathf.Sin(2f * Mathf.PI * root * .5f * t) * Mathf.Exp(-in8 * 5f) * .3f;
+                    if (b % 2 == 1) v += Noise(t) * Mathf.Exp(-inBeat * 18f) * .18f;
+                    break;
+                case Style.Mbira: // two interlocking mbira lines and hosho shaker in triplets
+                    { float trip = beat / 3f; int st = (int)(t / trip); float inT = t - st * trip;
+                      v += Pluck(root * 2f * Mathf.Pow(2f, scale[st % 4] / 12f), inT, 9f) * .18f;
+                      v += Pluck(root * 3f * Mathf.Pow(2f, scale[(st + 2) % 4] / 12f), (inT + trip * .5f) % trip, 9f) * .12f;
+                      v += Noise(t) * Mathf.Exp(-inT * 45f) * .1f; }
+                    v += Mathf.Sin(2f * Mathf.PI * root * .5f * t) * Mathf.Exp(-inBeat * 2f) * .22f;
+                    break;
+                case Style.Dancehall: // kick on 1 and 3, snare on the off-beat, deep synth bass, staccato chords
+                    if (b % 2 == 0) v += Mathf.Sin(2f * Mathf.PI * 50f * inBeat) * Mathf.Exp(-inBeat * 10f) * .45f;
+                    if (step8 % 4 == 3) v += Noise(t) * Mathf.Exp(-in8 * 25f) * .2f;
+                    v += Mathf.Sin(2f * Mathf.PI * root * .25f * t) * .2f * (Mathf.Exp(-in8 * 3f));
+                    if (step8 % 2 == 1) for (int n = 0; n < 3; n++) v += Mathf.Sin(2f * Mathf.PI * root * 2f * Mathf.Pow(2f, scale[n] / 12f) * t) * Mathf.Exp(-in8 * 16f) * .07f;
+                    break;
+                default: // Kombi FM: bass, arpeggio and hi-hat
+                    v += Mathf.Sin(2f * Mathf.PI * root * .5f * t) * Mathf.Exp(-inBeat * 3f) * .35f;
+                    v += Mathf.Sin(2f * Mathf.PI * root * 2f * Mathf.Pow(2f, scale[step8 % 4] / 12f) * t) * Mathf.Exp(-in8 * 9f) * .22f;
+                    if (step8 % 2 == 1) v += Noise(t) * Mathf.Exp(-in8 * 60f) * .12f;
+                    break;
+            }
+            // Fade in/out so stations change smoothly.
+            float edge = Mathf.Clamp01(t * 2f) * Mathf.Clamp01((length / (float)rate - t) * 2f);
+            data[i] = Mathf.Clamp(v, -1f, 1f) * .8f * edge;
         }
-        var clip = AudioClip.Create(name, length, 1, rate, false); clip.SetData(data, 0); return clip;
+        var clip = AudioClip.Create(s.name, length, 1, rate, false); clip.SetData(data, 0); return clip;
     }
 
     // ---------- Track selection (public, so UI Button On Click events can use them) ----------
@@ -457,12 +496,11 @@ public class MusicManager : MonoBehaviour
         AudioClip chosen = radioOverride;
         if (chosen == null)
         {
-            // Without driving tracks, keep the onboarding music going so there is always music.
-            var list = FirstAssignedTrack(drivingTracks, 0) >= 0 ? drivingTracks : onboardingTracks;
-            int index = FirstAssignedTrack(list, list == drivingTracks ? drivingIndex : onboardingIndex);
-            if (index < 0) { Debug.LogWarning("MusicManager: no music clips assigned."); return; }
-            if (list == drivingTracks) drivingIndex = index;
-            chosen = list[index];
+            // Without driving tracks the radio takes over and plays its stations one after another.
+            int index = FirstAssignedTrack(drivingTracks, drivingIndex);
+            if (index < 0) { NextRadioStation(); return; }
+            drivingIndex = index;
+            chosen = drivingTracks[index];
         }
 
         if (audioSource.clip == chosen) audioSource.UnPause();

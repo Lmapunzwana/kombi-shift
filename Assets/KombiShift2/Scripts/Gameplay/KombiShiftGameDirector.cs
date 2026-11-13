@@ -34,7 +34,7 @@ namespace KombiShift2.Gameplay
         private GUIStyle title, body, resultText, mapLabel;
         private Transform[] routePath;
         private readonly List<Vector3> driven = new();
-        private float nextTrailSample;
+        private float nextTrailSample, playerFlipped, playerStuck;
         private Texture2D mapPixel;
         public void SetRoutePath(Transform[] points) { routePath = points; }
         [SerializeField] private List<PassengerTrip> trips = new();
@@ -159,6 +159,12 @@ namespace KombiShift2.Gameplay
                 notice = "GO! The rivals are racing you to the passengers.";
             }
             timeRemaining = Mathf.Max(0f, timeRemaining - Time.deltaTime);
+            // Recovery: upside down for 2 s, or pressing W for 5 s without moving -> back onto the road.
+            playerFlipped = CityRoadRecovery.IsFlipped(vehicle.transform) ? playerFlipped + Time.deltaTime : 0f;
+            bool pushing = Input.GetKey(KeyCode.W) || Input.GetKey(KeyCode.UpArrow);
+            playerStuck = pushing && !servicing && vehicle.absoluteSpeed < 1f ? playerStuck + Time.deltaTime : 0f;
+            if ((playerFlipped > 2f || playerStuck > 5f) && CityRoadRecovery.Place(vehicle.GetComponent<Rigidbody>(), vehicle.transform.forward))
+            { playerFlipped = playerStuck = 0f; notice = "Kombi recovered back onto the road."; }
             // Record the path actually driven for the end-of-shift route map.
             if (Time.time >= nextTrailSample)
             {

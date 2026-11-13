@@ -7,6 +7,7 @@ namespace KombiShift2.City
         CityRoadNetwork graph;List<int> path=new();int index;Vector3 target;float nextPlan;
         public CityRoadNode Node=>graph!=null&&path.Count>0?graph.Nodes[path[Mathf.Clamp(index,0,path.Count-1)]]:null;
         public bool HasPath=>graph==null||path.Count>=2;
+        public void Replan(){target=new Vector3(1e6f,0f,1e6f);nextPlan=0f;}
         public Vector3 Point(Transform service)
         {return Point(service.position,service.forward);}
         Vector3 Point(Vector3 destination,Vector3 heading)
