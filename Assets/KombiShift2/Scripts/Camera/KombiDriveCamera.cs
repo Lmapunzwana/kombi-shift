@@ -72,7 +72,9 @@ namespace KombiShift2.CameraSystem
             Quaternion rotation;
             if(cabView)
             {
-                wanted=vehicle.position+heading*cabOffset;
+                // Keep older serialized scenes on the right-hand driver side too.
+                Vector3 driverOffset=cabOffset;driverOffset.x=Mathf.Abs(driverOffset.x);
+                wanted=vehicle.position+heading*driverOffset;
                 wanted.y=Mathf.Max(wanted.y,groundY+.8f);
                 rotation=Quaternion.Euler(cabPitch,lastHeading+cabYaw,0);
             }
