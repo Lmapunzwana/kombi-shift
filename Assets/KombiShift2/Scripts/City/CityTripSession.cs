@@ -54,7 +54,7 @@ namespace KombiShift2.City
                 stops.Add(station.transform);
             }
             if(stops.Count<2)throw new InvalidOperationException("Selected trip needs at least two valid stops.");
-            director.Configure(player,stops.ToArray(),4f);FindFirstObjectByType<KombiNavigationHud>().Configure(player,points,director);
+            director.Configure(player,stops.ToArray(),4f);director.SetRoutePath(points);FindFirstObjectByType<KombiNavigationHud>().Configure(player,points,director);
             player.transform.SetPositionAndRotation(stops[0].GetComponent<PassengerStation>().ServicePoint.position+Vector3.up*.14f,stops[0].GetComponent<PassengerStation>().ServicePoint.rotation);
             var rigidbody=player.GetComponent<Rigidbody>();rigidbody.position=player.transform.position;rigidbody.rotation=player.transform.rotation;
             var rivals=FindObjectsByType<RivalKombiAI>();

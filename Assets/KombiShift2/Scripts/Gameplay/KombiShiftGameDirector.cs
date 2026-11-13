@@ -31,7 +31,12 @@ namespace KombiShift2.Gameplay
         private RivalKombiAI[] rivals;
         private KombiPassengerCabin cabin;
         private readonly List<StationPassenger> onboard = new();
-        private GUIStyle title, body;
+        private GUIStyle title, body, resultText, mapLabel;
+        private Transform[] routePath;
+        private readonly List<Vector3> driven = new();
+        private float nextTrailSample;
+        private Texture2D mapPixel;
+        public void SetRoutePath(Transform[] points) { routePath = points; }
         [SerializeField] private List<PassengerTrip> trips = new();
         [SerializeField] private float requestRadius = 90f, missedStopPenalty = 20f;
         [SerializeField] private int missedStopXP = 10;
@@ -150,6 +155,13 @@ namespace KombiShift2.Gameplay
                 notice = "GO! The rivals are racing you to the passengers.";
             }
             timeRemaining = Mathf.Max(0f, timeRemaining - Time.deltaTime);
+            // Record the path actually driven for the end-of-shift route map.
+            if (Time.time >= nextTrailSample)
+            {
+                nextTrailSample = Time.time + .5f;
+                Vector3 here = vehicle.transform.position;
+                if (driven.Count == 0 || (driven[^1] - here).sqrMagnitude > 9f) driven.Add(here);
+            }
             if (timeRemaining <= 0f) { Finish(false); return; }
             if (Input.GetKeyDown(KeyCode.T)) notice = Condition.Repair() ? "Vehicle repaired." : $"Repair at a stop, below 2 km/h: ${Condition.RepairPrice}";
             if (Time.time >= nextTripSample) { SampleTrips(); nextTripSample = Time.time + .5f; }
@@ -275,6 +287,7 @@ namespace KombiShift2.Gameplay
             title ??= new GUIStyle(GUI.skin.label) { fontSize = 26, fontStyle = FontStyle.Bold, alignment = TextAnchor.MiddleCenter };
             body ??= new GUIStyle(GUI.skin.label) { fontSize = 17, alignment = TextAnchor.MiddleCenter, wordWrap = true };
             title.normal.textColor = body.normal.textColor = Color.white;
+            if (finished) { DrawResultScreen(); return; }
             float width = Mathf.Min(440f, Screen.width - 24f);
             Rect panel = new(Screen.width * .5f - width * .5f, Screen.height * .5f - 180f, width, 360f);
             GUI.Box(panel, GUIContent.none);
@@ -297,6 +310,105 @@ namespace KombiShift2.Gameplay
             { if (paused) SetPaused(false); else RestartShift(); }
             if (GUI.Button(new Rect(panel.center.x + 8, panel.y + 278, width / 2 - 24, 32), "MAIN MENU")) ReturnToMenu();
             if (success && Stage == KombiStage.Morning && GUI.Button(new Rect(panel.x + 16, panel.y + 318, width - 32, 30), "NEXT: RUSH HOUR")) NextStage();
+        }
+
+        // End of shift: results on the left, a map of the pickup route and the path driven on the right.
+        private void DrawResultScreen()
+        {
+            resultText ??= new GUIStyle(GUI.skin.label) { fontSize = 16, alignment = TextAnchor.UpperLeft, wordWrap = true, richText = true };
+            mapLabel ??= new GUIStyle(GUI.skin.label) { fontSize = 12, alignment = TextAnchor.MiddleLeft };
+            resultText.normal.textColor = mapLabel.normal.textColor = Color.white;
+            string destination = CityTripSession.Active ? CityTripSelection.Selected.destination : "Mbare";
+            float width = Mathf.Min(940f, Screen.width - 24f), height = Mathf.Min(540f, Screen.height - 24f);
+            Rect panel = new(Screen.width * .5f - width * .5f, Screen.height * .5f - height * .5f, width, height);
+            GUI.Box(panel, GUIContent.none); GUI.Box(panel, GUIContent.none);
+            GUI.Label(new Rect(panel.x, panel.y + 10, width, 40), success ? "YOU WON" : "YOU LOST", title);
+
+            bool sideBySide = width >= 640f;
+            float column = sideBySide ? width * .46f : width - 40f;
+            float buttonsTop = panel.yMax - 50f;
+            string outcome = success
+                ? $"{destination} reached. {delivered} passengers delivered; target {MinimumPassengers} reached."
+                : timeRemaining <= 0f
+                    ? $"Time expired before reaching {destination}. {delivered} delivered; target {MinimumPassengers}."
+                    : $"Target missed at {destination}. {delivered} delivered; {MinimumPassengers} required.";
+            string stats =
+                $"<b>{KombiChallenge.Name(Stage)}</b>\n{outcome}\n\n" +
+                $"Passengers delivered: {delivered} / {MinimumPassengers}\n" +
+                $"Rivals collected: {RivalPassengers}\n" +
+                $"Rivals finished: {RivalsFinished} / {(rivals == null ? 0 : rivals.Length)}\n" +
+                $"Gross fares: ${GrossEarnings:0.00}\n" +
+                $"Repairs: ${RepairExpenses}    Fines: ${Law.TotalFines}\n" +
+                $"Net + time bonus: ${earnings:0.00}\n" +
+                $"Best: ${KombiChallenge.Best(Stage)}";
+            Rect textRect = new(panel.x + 20, panel.y + 58, column, buttonsTop - panel.y - 66);
+            // Shrink the font until the text fits, so lines never overlap the buttons.
+            resultText.fontSize = 16;
+            while (resultText.fontSize > 11 && resultText.CalcHeight(new GUIContent(stats), textRect.width) > textRect.height) resultText.fontSize--;
+            GUI.Label(textRect, stats, resultText);
+
+            if (sideBySide)
+            {
+                float size = Mathf.Min(width - column - 60f, buttonsTop - panel.y - 90f);
+                Rect map = new(panel.xMax - size - 20f, panel.y + 58f, size, size);
+                DrawRouteMap(map);
+                GUI.Label(new Rect(map.x, map.yMax + 2, size, 18), "Grey: route   Yellow: your drive   Green: start   Red: terminal", mapLabel);
+            }
+
+            bool next = success && Stage == KombiStage.Morning;
+            float buttonWidth = (width - 40f - (next ? 20f : 10f)) / (next ? 3f : 2f);
+            if (GUI.Button(new Rect(panel.x + 20, buttonsTop, buttonWidth, 34), "REPLAY")) RestartShift();
+            if (GUI.Button(new Rect(panel.x + 30 + buttonWidth, buttonsTop, buttonWidth, 34), "MAIN MENU")) ReturnToMenu();
+            if (next && GUI.Button(new Rect(panel.x + 40 + buttonWidth * 2, buttonsTop, buttonWidth, 34), "NEXT: RUSH HOUR")) NextStage();
+        }
+
+        private void DrawRouteMap(Rect area)
+        {
+            if (mapPixel == null) { mapPixel = new Texture2D(1, 1); mapPixel.SetPixel(0, 0, Color.white); mapPixel.Apply(); }
+            var planned = new List<Vector3>();
+            if (routePath != null) foreach (var p in routePath) if (p != null) planned.Add(p.position);
+            if (planned.Count < 2 && stations != null) foreach (var s in stations) if (s != null) planned.Add(s.ServicePoint.position);
+            var all = new List<Vector3>(planned); all.AddRange(driven);
+            if (vehicle != null) all.Add(vehicle.transform.position);
+            Color previous = GUI.color;
+            GUI.color = new Color(0f, 0f, 0f, .65f); GUI.DrawTexture(area, mapPixel);
+            if (all.Count < 2) { GUI.color = previous; return; }
+            float minX = all.Min(p => p.x), maxX = all.Max(p => p.x), minZ = all.Min(p => p.z), maxZ = all.Max(p => p.z);
+            float span = Mathf.Max(maxX - minX, maxZ - minZ, 1f) * 1.1f;
+            float cx = (minX + maxX) * .5f, cz = (minZ + maxZ) * .5f;
+            Vector2 ToMap(Vector3 w) => new(area.center.x + (w.x - cx) / span * area.width, area.center.y - (w.z - cz) / span * area.height);
+            void Line(List<Vector3> points, Color colour, float thickness)
+            {
+                GUI.color = colour;
+                for (int i = 1; i < points.Count; i++)
+                {
+                    Vector2 a = ToMap(points[i - 1]), b = ToMap(points[i]);
+                    int steps = Mathf.Max(1, Mathf.CeilToInt(Vector2.Distance(a, b) / (thickness * .6f)));
+                    for (int s = 0; s <= steps; s++)
+                    {
+                        Vector2 p = Vector2.Lerp(a, b, s / (float)steps);
+                        GUI.DrawTexture(new Rect(p.x - thickness * .5f, p.y - thickness * .5f, thickness, thickness), mapPixel);
+                    }
+                }
+            }
+            void Dot(Vector3 world, Color colour, float size, string label)
+            {
+                Vector2 p = ToMap(world); GUI.color = colour;
+                GUI.DrawTexture(new Rect(p.x - size * .5f, p.y - size * .5f, size, size), mapPixel);
+                if (!string.IsNullOrEmpty(label)) { GUI.color = Color.white; GUI.Label(new Rect(p.x + size * .6f, p.y - 9f, 120f, 18f), label, mapLabel); }
+            }
+            Line(planned, new Color(.75f, .75f, .75f, 1f), 4f);
+            Line(driven, new Color(1f, .85f, .1f, 1f), 3f);
+            if (stations != null)
+                for (int i = 0; i < stations.Length; i++)
+                {
+                    var s = stations[i]; if (s == null) continue;
+                    bool first = i == 0, last = s.Terminal;
+                    Dot(s.ServicePoint.position, first ? Color.green : last ? Color.red : Color.white, first || last ? 11f : 8f, first ? "Start" : last ? destination() : (i).ToString());
+                }
+            if (vehicle != null) Dot(vehicle.transform.position, new Color(1f, .85f, .1f, 1f), 9f, "You");
+            GUI.color = previous;
+            string destination() => CityTripSession.Active ? CityTripSelection.Selected.destination : "Mbare";
         }
     }
 }
