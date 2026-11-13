@@ -60,7 +60,7 @@ namespace KombiShift.JaydenStarter
         {
             if(game==null||!game.IsPlaying||Time.time<nextCollision||hit.contactCount==0||hit.relativeVelocity.magnitude<3)return;
             if(hit.GetContact(0).normal.y>.6f)return;
-            nextCollision=Time.time+1.5f;game.Damage(Mathf.Min(12,hit.relativeVelocity.magnitude*.65f));
+            nextCollision=Time.time+1.5f;game.Damage(Mathf.Min(12,hit.relativeVelocity.magnitude*.65f));game.RegisterTrafficFine(hit);
         }
         protected virtual void OnDestroy(){if(contactMaterial!=null)Destroy(contactMaterial);}
     }
