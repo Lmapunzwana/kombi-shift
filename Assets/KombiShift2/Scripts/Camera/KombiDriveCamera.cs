@@ -9,7 +9,7 @@ namespace KombiShift2.CameraSystem
     {
         [SerializeField] private Transform vehicle;
         [SerializeField] private Vector3 chaseOffset = new(0f,3.2f,-7.2f);
-        [SerializeField] private Vector3 cabOffset = new(.262f,1.18f,1.193f);
+        [SerializeField] private Vector3 driverEyeOffset = new(.262f,1.33f,.793f);
         [SerializeField] private float positionDamping = 9f;
         private readonly RaycastHit[] hits = new RaycastHit[96];
         private bool cabView;
@@ -73,7 +73,7 @@ namespace KombiShift2.CameraSystem
             if(cabView)
             {
                 // Keep older serialized scenes on the right-hand driver side too.
-                Vector3 driverOffset=cabOffset;driverOffset.x=Mathf.Abs(driverOffset.x);
+                Vector3 driverOffset=driverEyeOffset;driverOffset.x=Mathf.Abs(driverOffset.x);
                 wanted=vehicle.position+heading*driverOffset;
                 wanted.y=Mathf.Max(wanted.y,groundY+.8f);
                 rotation=Quaternion.Euler(cabPitch,lastHeading+cabYaw,0);
