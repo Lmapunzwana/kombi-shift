@@ -192,7 +192,17 @@ namespace KombiShift2.City
         bool Leader(Vector3 origin,Vector3 direction,float distance,out RaycastHit nearest)
         {
             nearest=default;float closest=float.MaxValue;int count=Physics.SphereCastNonAlloc(origin,.7f,direction,hits,distance,~0,QueryTriggerInteraction.Ignore);
-            for(int i=0;i<count;i++){var hit=hits[i];if(hit.transform.IsChildOf(transform))continue;var rb=hit.rigidbody;if(rb==null||!IsRoadUser(rb))continue;if(hit.distance<closest){closest=hit.distance;nearest=hit;}}
+            for(int i=0;i<count;i++)
+            {
+                var hit=hits[i];
+                if(hit.transform.IsChildOf(transform))continue;
+                var rb=hit.rigidbody;
+                if(rb==null||!IsRoadUser(rb))continue;
+                // Only treat traffic travelling along this cast direction as a leader.
+                // This prevents oncoming vehicles from making both sides brake nose-to-nose.
+                if(Vector3.Dot(rb.transform.forward,direction)<.5f)continue;
+                if(hit.distance<closest){closest=hit.distance;nearest=hit;}
+            }
             return closest<float.MaxValue;
         }
         static bool IsRoadUser(Rigidbody rb)=>rb.GetComponent<CityTrafficAgent>()!=null||rb.GetComponentInParent<KombiShift2.Traffic.RivalKombiAI>()!=null||rb.GetComponentInParent<KombiShift2.Traffic.KombiTrafficVehicle>()!=null||rb.CompareTag("Player");
