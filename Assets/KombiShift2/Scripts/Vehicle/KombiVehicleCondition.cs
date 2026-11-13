@@ -40,8 +40,14 @@ namespace KombiShift2.Vehicle
             float speed = collision.relativeVelocity.magnitude;
             float amount = ImpactDamage(speed, collision.impulse.magnitude / Mathf.Max(1f, rb.mass), harmlessImpact, damageScale);
             if (amount <= 0f) return;
-            nextImpact = Time.time + 1f; ApplyDamage(amount);
-            if(director!=null)director.Quality.Apply("collision", speed >= severeImpact ? "Passenger: That was a serious crash!" : "Passenger: Please drive carefully!", -amount * .5f, -Mathf.CeilToInt(amount * .3f), 1f);
+            nextImpact = Time.time + 1f;
+            if (speed >= severeImpact)
+            {
+                if (director != null) director.Crash();
+                return;
+            }
+            ApplyDamage(amount);
+            if(director!=null)director.Quality.Apply("collision", "Passenger: Please drive carefully!", -amount * .5f, -Mathf.CeilToInt(amount * .3f), 1f);
         }
         public int RepairPrice => Mathf.CeilToInt((100f - Health) * repairCostPerPoint);
         public bool Repair()
