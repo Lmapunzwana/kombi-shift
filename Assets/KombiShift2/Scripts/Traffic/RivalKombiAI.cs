@@ -54,13 +54,18 @@ namespace KombiShift2.Traffic
         public int Onboard => riders.Count;
         private bool servicePass;
         private int Drops(PassengerStation station) { int n = 0; foreach (var r in riders) if (r.Key != null && r.Value == station) n++; return n; }
+        private float StationRouteDistance(PassengerStation station)
+        {
+            if(station==null)return float.PositiveInfinity;
+            return cityNavigation!=null?cityNavigation.DistanceTo(station.ServicePoint):RouteDistance(NearestRouteIndex(station.ServicePoint.position));
+        }
         private PassengerStation NextStopAhead()
         {
             PassengerStation best = null; float bestDistance = float.PositiveInfinity;
             foreach (var s in stations)
             {
                 if (s == null) continue;
-                float d = RouteDistance(NearestRouteIndex(s.ServicePoint.position));
+                float d = StationRouteDistance(s);
                 if (d > 25f && d < bestDistance) { bestDistance = d; best = s; }
             }
             return best != null ? best : Array.Find(stations, x => x != null && x.Terminal);
@@ -191,7 +196,7 @@ namespace KombiShift2.Traffic
             {
                 if (station == null || station.Terminal) continue;
                 if (Drops(station) == 0 && !(station.HasWaiting && Onboard < cabin.Seats.Length)) continue;
-                if (station == target || !float.IsPositiveInfinity(RouteDistance(NearestRouteIndex(station.ServicePoint.position)))) { demandAhead = true; break; }
+                if (station == target || !float.IsPositiveInfinity(StationRouteDistance(station))) { demandAhead = true; break; }
             }
             if (!demandAhead) return true;
             if (director == null) return false;
@@ -265,21 +270,23 @@ namespace KombiShift2.Traffic
         {
             // A rider whose stop is now behind the kombi gets off at the next stop ahead instead.
             var behind = new List<StationPassenger>();
-            foreach (var r in riders) if (r.Key != null && r.Value != null && !r.Value.Terminal && r.Value != target && float.IsPositiveInfinity(RouteDistance(NearestRouteIndex(r.Value.ServicePoint.position)))) behind.Add(r.Key);
+            foreach (var r in riders) if (r.Key != null && r.Value != null && !r.Value.Terminal && r.Value != target && float.IsPositiveInfinity(StationRouteDistance(r.Value))) behind.Add(r.Key);
             foreach (var person in behind) riders[person] = NextStopAhead();
             nextEvaluation = Time.time + profile.reassessSeconds;
             PassengerStation best = null; float bestValue = float.NegativeInfinity, currentValue = float.NegativeInfinity; int bestIndex = routeIndex;
             foreach (var station in stations)
             {
-                if (station == null || station.Terminal || direction < 0) continue;
+                if (station == null || station.Terminal || (cityNavigation == null && direction < 0)) continue;
                 int drops = Drops(station);
                 bool canBoard = station.HasWaiting && !station.Reserved && Onboard < cabin.Seats.Length;
                 if (!canBoard && drops == 0) continue;
                 int index = NearestRouteIndex(station.ServicePoint.position);
+                float routeDistance = StationRouteDistance(station);
+                if(float.IsPositiveInfinity(routeDistance))continue;
                 int count = Physics.OverlapSphereNonAlloc(station.ServicePoint.position, 10f, congestion, ~0, QueryTriggerInteraction.Ignore);
                 int vehicles = 0;
                 for (int i = 0; i < count; i++) if (congestion[i].attachedRigidbody != null && congestion[i].attachedRigidbody != body) vehicles++;
-                float utility = profile.Utility(canBoard ? station.WaitingCount : 0, cabin.Seats.Length - Onboard, RouteDistance(index), speed, vehicles, false) + drops * profile.passengerValue;
+                float utility = profile.Utility(canBoard ? station.WaitingCount : 0, cabin.Seats.Length - Onboard, routeDistance, speed, vehicles, false) + drops * profile.passengerValue;
                 if (station == target) currentValue = utility;
                 if (utility > bestValue) { best = station; bestValue = utility; bestIndex = index; }
             }
