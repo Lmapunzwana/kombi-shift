@@ -105,7 +105,7 @@ namespace KombiShift.JaydenStarter
         void Begin()
         {
             if(boardingRoutine!=null){StopCoroutine(boardingRoutine);boardingRoutine=null;} Time.timeScale=1; screen=Screen.Playing; Condition=Fuel=100;
-            elapsed=gross=fuelCost=repairCost=0;stopIndex=delivered=missed=0;aboard=boarding=unloading=false;hwindiReadyAt=0;patience=60;hazardAt=nextRivalDecision=0;
+            elapsed=gross=fuelCost=repairCost=0;ResetTrafficFines();stopIndex=delivered=missed=0;aboard=boarding=unloading=false;hwindiReadyAt=0;patience=60;hazardAt=nextRivalDecision=0;
             driver.Body.position=new Vector3(-3,.34f,0);driver.Body.rotation=Quaternion.identity;driver.Body.linearVelocity=Vector3.zero;driver.Body.angularVelocity=Vector3.zero;
             driver.ParkNow();Wear.ResetWear();ConfigureLevel();ResetTraffic();rival.Configure(this,roadGraph,level.aggression,Rainy);tipsTotal=noCrashBonus=0;crashCount=0;stopIndex=BestStop();PositionPassenger();ResetHwindi();ApplyWeather();
             if(rainRoutine!=null)StopCoroutine(rainRoutine);if(Rainy)rainRoutine=StartCoroutine(StartRain());else rain.Stop(true,ParticleSystemStopBehavior.StopEmittingAndClear);
