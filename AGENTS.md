@@ -7,7 +7,7 @@ This repository is a Unity 3D driving game inspired by Harare commuter kombis. T
 - Unity version: **6000.6.2f1**.
 - Main playable scene: `Assets/KombiShift2/Scenes/KombiMainMenu.unity`. The driving scene is `Assets/KombiShift2/Scenes/KombiShift_FirstShift.unity`.
 - The editor menu **Kombi Shift > Play Main Menu** opens the game.
-- Controls: WASD/arrows drive, Space parking brake/boarding, S reverse, C camera, right mouse orbit, wheel zoom, L lights, V wipers, Escape pause, R restart, T repair.
+- Controls: WASD/arrows drive, Space parking brake/boarding, S reverse, C camera, right mouse orbit, wheel zoom, L lights, V wipers, Q left indicator, E right indicator, X cancel indicators, Escape pause, R restart, T repair.
 - Unity project dependencies are in `Packages/`; do not edit package manifests unless needed for the task.
 
 ## Game loop and rules

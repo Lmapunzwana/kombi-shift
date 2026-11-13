@@ -31,6 +31,9 @@ namespace KombiShift2.Vehicle
                 yield break;
             }
 
+            if(vehicle.GetComponent<KombiTurnIndicators>()==null)
+                vehicle.gameObject.AddComponent<KombiTurnIndicators>();
+
             yield return null;
             bool automated = Application.isBatchMode && System.Array.IndexOf(System.Environment.GetCommandLineArgs(), "--kombi-smoke") >= 0;
             RCCP.RegisterPlayerVehicle(vehicle, true, true);
