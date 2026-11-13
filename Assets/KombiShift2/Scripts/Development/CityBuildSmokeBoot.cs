@@ -15,6 +15,6 @@ namespace KombiShift2.Development
                 new GameObject("Native city smoke entry",typeof(CityBuildSmokeBoot));
         }
         void Start()
-        {CityTripSelection.Selected=CityTripCatalog.Load().trips.FirstOrDefault(t=>t.id=="mbare");SceneManager.LoadScene("KombiShift_FirstShift");}
+        {CityTripSelection.Selected=CityTripCatalog.Load().trips.FirstOrDefault(t=>t.id=="mbare");KombiShift2.Gameplay.KombiShiftGameDirector.LoadRequestedAt=Time.realtimeSinceStartup;SceneManager.LoadScene("KombiShift_FirstShift");}
     }
 }

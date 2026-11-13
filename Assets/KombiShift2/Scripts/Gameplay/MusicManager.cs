@@ -1,3 +1,5 @@
+using System.Collections.Generic;
+using KombiShift2.Gameplay;
 using UnityEngine;
 #if ENABLE_INPUT_SYSTEM
 using UnityEngine.InputSystem;
@@ -38,6 +40,15 @@ public class MusicManager : MonoBehaviour
     float statusTimer = 0f;
     string statusText = "starting...";
     RCCP_CarController[] cars = new RCCP_CarController[0];
+    PassengerStation[] busStops = new PassengerStation[0];
+    RCCP_CarController player;
+    float userVolume = -1f;
+    bool atBusStop, ducked;
+    AudioSource hornSource;
+    AudioClip hornClip, radioOverride;
+    readonly List<AudioClip> radio = new();
+    int radioIndex = -1;
+    const float DuckedVolume = .4f;
 
     void Awake()
     {
@@ -65,6 +76,10 @@ public class MusicManager : MonoBehaviour
             return;
         }
 
+        showDebugOnScreen = false;             // debug status box is not for players
+        userVolume = audioSource.volume;
+        hornSource = gameObject.AddComponent<AudioSource>(); hornSource.spatialBlend = 0f; hornSource.playOnAwake = false;
+        hornClip = MakeHooter();
         if (inOnboarding) PlayOnboarding();
     }
 
@@ -73,6 +88,10 @@ public class MusicManager : MonoBehaviour
         if (audioSource == null) return;
 
         float dt = Time.unscaledDeltaTime;
+        // Smoothly follow the player's volume, lowered while waiting in traffic or at junctions.
+        if (userVolume < 0f) userVolume = audioSource.volume;
+        audioSource.volume = Mathf.MoveTowards(audioSource.volume, userVolume * (ducked ? DuckedVolume : 1f), dt * 1.5f);
+        if (KeyDown(KeyCode.N)) NextRadioStation();
 
         // Test key: press M to force the driving music (delete when finished testing)
         if (MKeyDown())
@@ -90,6 +109,7 @@ public class MusicManager : MonoBehaviour
         {
             searchTimer = 1f;
             cars = FindObjectsByType<RCCP_CarController>(FindObjectsInactive.Include);
+            busStops = FindObjectsByType<PassengerStation>(FindObjectsSortMode.None);
         }
 
         // Use the fastest ACTIVE car (so a parked showcase model doesn't matter)
@@ -99,6 +119,7 @@ public class MusicManager : MonoBehaviour
         {
             if (c == null || !c.gameObject.activeInHierarchy) continue;
             activeCount++;
+            if (player == null || !player.gameObject.activeInHierarchy || c.absoluteSpeed > fastest) player = c;
             if (c.absoluteSpeed > fastest) fastest = c.absoluteSpeed;
         }
 
@@ -121,37 +142,105 @@ public class MusicManager : MonoBehaviour
         if (activeCount > 0) HandleSpeed(fastest, dt);
     }
 
+    // Music always plays while driving. Stopped at a bus stop: pause and sound the hooter.
+    // Stopped anywhere else (junctions, traffic): keep playing at a lower volume.
     void HandleSpeed(float kph, float dt)
     {
         bool moving = kph > movingSpeedKph;
-
         if (inOnboarding)
         {
             if (!moving) return;
             Log("Kombi is moving, ending onboarding");
             EndOnboarding();
         }
-
+        if (!drivingMusicActive) { drivingMusicActive = true; PlayDriving(); }
         if (moving)
         {
-            idleTimer = 0f;
-            if (!drivingMusicActive)
-            {
-                drivingMusicActive = true;
-                PlayDriving();
-            }
+            idleTimer = 0f; ducked = false;
+            if (atBusStop) { atBusStop = false; if (!userPaused) audioSource.UnPause(); }
+            return;
         }
-        else if (drivingMusicActive)
+        idleTimer += dt;
+        if (idleTimer < pauseDelay) return;
+        if (PlayerAtBusStop())
         {
-            idleTimer += dt;
-            // holdUntil keeps a track the player just picked playing for a few seconds
-            if (idleTimer >= pauseDelay && Time.unscaledTime >= holdUntil)
+            if (!atBusStop)
             {
-                drivingMusicActive = false;
-                audioSource.Pause();
-                Log("Kombi stopped, music paused");
+                atBusStop = true; ducked = false; audioSource.Pause();
+                if (hornSource != null && hornClip != null) hornSource.PlayOneShot(hornClip, .9f);
+                Log("At a bus stop: music paused, hooter sounded");
             }
         }
+        else ducked = true;
+    }
+
+    bool PlayerAtBusStop()
+    {
+        if (player == null) return false;
+        foreach (var stop in busStops)
+        {
+            if (stop == null || !stop.isActiveAndEnabled || stop.ServicePoint == null) continue;
+            Vector3 d = stop.ServicePoint.position - player.transform.position; d.y = 0f;
+            if (d.sqrMagnitude < 14f * 14f) return true;
+        }
+        return false;
+    }
+
+    // ---------- Radio: one button (or N) changes the station ----------
+
+    public void NextRadioStation()
+    {
+        if (audioSource == null) return;
+        if (radio.Count == 0)
+        {
+            foreach (var clip in drivingTracks) if (clip != null && !radio.Contains(clip)) radio.Add(clip);
+            foreach (var clip in onboardingTracks) if (clip != null && !radio.Contains(clip)) radio.Add(clip);
+            radio.Add(MakeStation("Kombi FM 1 (generated)", 104f, new[] { 0, 7, 9, 5 }, 220f));
+            radio.Add(MakeStation("Kombi FM 2 (generated)", 120f, new[] { 0, 5, 7, 5 }, 196f));
+        }
+        radioIndex = (radioIndex + 1) % radio.Count;
+        radioOverride = radio[radioIndex];
+        userPaused = false;
+        audioSource.clip = radioOverride; audioSource.loop = true; audioSource.Play();
+        if (atBusStop) audioSource.Pause();
+        Log("Radio: " + radioOverride.name);
+    }
+
+    static AudioClip MakeHooter()
+    {
+        const int rate = 22050; int length = (int)(rate * .75f);
+        var data = new float[length];
+        for (int i = 0; i < length; i++)
+        {
+            float time = i / (float)rate;
+            float envelope = Mathf.Clamp01(time * 30f) * Mathf.Clamp01((.75f - time) * 12f);
+            // Two-tone vehicle horn (roughly 350 Hz and 440 Hz), slightly squared for a brassy sound.
+            float s = Mathf.Sin(2f * Mathf.PI * 350f * time) + .8f * Mathf.Sin(2f * Mathf.PI * 440f * time);
+            data[i] = Mathf.Clamp(s * 1.6f, -1f, 1f) * .35f * envelope;
+        }
+        var clip = AudioClip.Create("Kombi hooter", length, 1, rate, false); clip.SetData(data, 0); return clip;
+    }
+
+    // Simple original loop (bass + arpeggio + hi-hat) so the radio always has more than one station.
+    static AudioClip MakeStation(string name, float bpm, int[] progression, float root)
+    {
+        const int rate = 22050; float beat = 60f / bpm; int bars = progression.Length * 2;
+        int length = (int)(rate * beat * 4f * bars);
+        var data = new float[length];
+        int[] major = { 0, 4, 7, 12 };
+        for (int i = 0; i < length; i++)
+        {
+            float time = i / (float)rate; int beatIndex = (int)(time / beat); int bar = (beatIndex / 4) / 2;
+            float chordRoot = root * Mathf.Pow(2f, progression[bar % progression.Length] / 12f);
+            float inBeat = time - beatIndex * beat;
+            float bass = Mathf.Sin(2f * Mathf.PI * chordRoot * .5f * time) * Mathf.Exp(-inBeat * 3f) * .35f;
+            float eighth = beat * .5f; int step = (int)(time / eighth); float inStep = time - step * eighth;
+            float note = chordRoot * 2f * Mathf.Pow(2f, major[step % 4] / 12f);
+            float arp = Mathf.Sin(2f * Mathf.PI * note * time) * Mathf.Exp(-inStep * 9f) * .22f;
+            float hat = (step % 2 == 1 ? 1f : 0f) * Mathf.Exp(-inStep * 60f) * (Mathf.PerlinNoise(time * 3000f, 0f) - .5f) * .25f;
+            data[i] = Mathf.Clamp(bass + arp + hat, -1f, 1f) * .8f;
+        }
+        var clip = AudioClip.Create(name, length, 1, rate, false); clip.SetData(data, 0); return clip;
     }
 
     // ---------- Track selection (public, so UI Button On Click events can use them) ----------
@@ -220,7 +309,7 @@ public class MusicManager : MonoBehaviour
 
     public void SetVolume(float value)
     {
-        if (audioSource != null) audioSource.volume = Mathf.Clamp01(value);
+        if (audioSource != null) userVolume = Mathf.Clamp01(value);
     }
 
     // Open or close the music panel (can also be called from your own Settings button)
@@ -254,6 +343,7 @@ public class MusicManager : MonoBehaviour
 
         if (GUI.Button(new Rect(bx, by, bw, bh), panelOpen ? "Close" : "Music"))
             panelOpen = !panelOpen;
+        if (GUI.Button(new Rect(bx - 96f, by, 92f, bh), "Radio (N)")) NextRadioStation();
 
         if (!panelOpen) return;
 
@@ -283,8 +373,8 @@ public class MusicManager : MonoBehaviour
         GUILayout.BeginHorizontal();
         if (GUILayout.Button(userPaused ? "Play" : "Pause", GUILayout.Width(60f))) ToggleMusic();
         GUILayout.Label("Vol", GUILayout.Width(28f));
-        float v = GUILayout.HorizontalSlider(audioSource.volume, 0f, 1f);
-        if (!Mathf.Approximately(v, audioSource.volume)) audioSource.volume = v;
+        float v = GUILayout.HorizontalSlider(userVolume, 0f, 1f);
+        if (!Mathf.Approximately(v, userVolume)) userVolume = v;
         GUILayout.EndHorizontal();
 
         GUILayout.EndArea();
@@ -322,6 +412,18 @@ public class MusicManager : MonoBehaviour
         return -1;
     }
 
+    static bool KeyDown(KeyCode key)
+    {
+#if ENABLE_INPUT_SYSTEM
+        Keyboard k = Keyboard.current;
+        if (k != null && key == KeyCode.N && k.nKey.wasPressedThisFrame) return true;
+#endif
+#if ENABLE_LEGACY_INPUT_MANAGER
+        if (Input.GetKeyDown(key)) return true;
+#endif
+        return false;
+    }
+
     // Also callable from a button if onboarding ends some other way
     public void EndOnboarding()
     {
@@ -352,15 +454,16 @@ public class MusicManager : MonoBehaviour
     void PlayDriving()
     {
         if (userPaused) return;
-        int index = FirstAssignedTrack(drivingTracks, drivingIndex);
-        if (index < 0)
+        AudioClip chosen = radioOverride;
+        if (chosen == null)
         {
-            Debug.LogWarning("MusicManager: Driving Tracks list has no assigned clips.");
-            return;
+            // Without driving tracks, keep the onboarding music going so there is always music.
+            var list = FirstAssignedTrack(drivingTracks, 0) >= 0 ? drivingTracks : onboardingTracks;
+            int index = FirstAssignedTrack(list, list == drivingTracks ? drivingIndex : onboardingIndex);
+            if (index < 0) { Debug.LogWarning("MusicManager: no music clips assigned."); return; }
+            if (list == drivingTracks) drivingIndex = index;
+            chosen = list[index];
         }
-        drivingIndex = index;
-
-        AudioClip chosen = drivingTracks[drivingIndex];
 
         if (audioSource.clip == chosen) audioSource.UnPause();
         else

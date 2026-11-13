@@ -26,6 +26,8 @@ namespace KombiShift2.UI
         public float Highlight(int index)=>highlights[index];
         public static Rect CardRect(int index,float width)=>new(58+index*320,H-226,304,112);
 
+        public static bool OpenMarketOnLoad;
+        void Start(){if(!OpenMarketOnLoad)return;OpenMarketOnLoad=false;Activate(0);}
         void Awake()
         {
             Time.timeScale=1;Cursor.visible=true;Cursor.lockState=CursorLockMode.None;
@@ -67,8 +69,8 @@ namespace KombiShift2.UI
         }
         IEnumerator StartShift()
         {
-            starting=true;
-            while(transition<1f){transition+=Time.unscaledDeltaTime*2.5f;yield return null;}
+            starting=true;transition=1f;
+            KombiShift2.Gameplay.KombiShiftGameDirector.LoadRequestedAt=Time.realtimeSinceStartup;
             var load=SceneManager.LoadSceneAsync("KombiShift_FirstShift");
             while(!load.isDone)yield return null;
         }

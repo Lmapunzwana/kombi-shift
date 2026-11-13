@@ -37,6 +37,20 @@ namespace KombiShift2.Traffic
         private readonly RaycastHit[] obstacles = new RaycastHit[64];
         private readonly Collider[] congestion = new Collider[32];
         public int PassengersTaken { get; private set; }
+        // Riders currently on board and the stop each one wants to get off at.
+        private readonly Dictionary<StationPassenger, PassengerStation> riders = new();
+        public int Onboard => riders.Count;
+        private bool servicePass;
+        private int Drops(PassengerStation station) { int n = 0; foreach (var r in riders) if (r.Key != null && r.Value == station) n++; return n; }
+        private PassengerStation PickDestination(PassengerStation from)
+        {
+            int start = Array.IndexOf(stations, from);
+            var terminal = Array.Find(stations, x => x != null && x.Terminal);
+            if (start < 0 || UnityEngine.Random.value < .35f) return terminal;
+            var ahead = new List<PassengerStation>();
+            for (int i = start + 1; i < stations.Length; i++) if (stations[i] != null) ahead.Add(stations[i]);
+            return ahead.Count > 0 ? ahead[UnityEngine.Random.Range(0, ahead.Count)] : terminal;
+        }
         public RivalState State { get; private set; }
         public PassengerStation Target => target;
         public float Speed => speed;
@@ -104,7 +118,7 @@ namespace KombiShift2.Traffic
             {
                 headingHome = true;
                 if (target != null && target != terminal) target.Release(transform);
-                Say("Heading for " + terminal.name + " with " + PassengersTaken + " passengers");
+                Say("Heading for " + terminal.name + " with " + Onboard + " passengers");
             }
             bool full = headingHome;
             if (full)
@@ -122,7 +136,7 @@ namespace KombiShift2.Traffic
                     return;
                 }
             }
-            else if (Time.time >= nextDeparture && (target == null || !target.HasWaiting || target.Reserved || Time.time >= nextEvaluation)) ChooseTarget();
+            else if (Time.time >= nextDeparture && (target == null || !(target.HasWaiting || Drops(target) > 0) || (target.Reserved && Drops(target) == 0) || Time.time >= nextEvaluation)) ChooseTarget();
             if (target == null) { State = RivalState.Cruise; CruiseRoute(); return; }
             float distance = FlatDistance(target.ServicePoint.position, transform.position);
             if (distance < 2.2f && target.MatchesApproach(transform))
@@ -143,11 +157,11 @@ namespace KombiShift2.Traffic
         // Go to the terminal when full, when no passengers are left ahead, or when the clock says it is time to finish.
         private bool ShouldHeadToTerminal(PassengerStation terminal)
         {
-            if (PassengersTaken >= cabin.Seats.Length) return true;
+            if (Onboard >= cabin.Seats.Length) return true;
             bool demandAhead = false;
             foreach (var station in stations)
             {
-                if (station == null || station.Terminal || !station.HasWaiting) continue;
+                if (station == null || station.Terminal || (!station.HasWaiting && Drops(station) == 0)) continue;
                 if (station == target || !float.IsPositiveInfinity(RouteDistance(NearestRouteIndex(station.ServicePoint.position)))) { demandAhead = true; break; }
             }
             if (!demandAhead) return true;
@@ -163,7 +177,7 @@ namespace KombiShift2.Traffic
             if (FinishedTrip) return;
             FinishedTrip = true; shiftEnded = true; Brake();
             if (target != null) target.Release(transform);
-            Say("Reached " + (target != null ? target.name : "the terminal") + " - dropping off " + PassengersTaken + " passengers");
+            Say("Reached " + (target != null ? target.name : "the terminal") + " - dropping off " + Onboard + " passengers");
             StartCoroutine(LeaveTerminal(target));
         }
         private IEnumerator LeaveTerminal(PassengerStation terminal)
@@ -224,27 +238,57 @@ namespace KombiShift2.Traffic
             PassengerStation best = null; float bestValue = float.NegativeInfinity, currentValue = float.NegativeInfinity; int bestIndex = routeIndex;
             foreach (var station in stations)
             {
-                if (station == null || !station.HasWaiting || station.Reserved || direction < 0) continue;
+                if (station == null || station.Terminal || direction < 0) continue;
+                int drops = Drops(station);
+                bool canBoard = station.HasWaiting && !station.Reserved && Onboard < cabin.Seats.Length;
+                if (!canBoard && drops == 0) continue;
                 int index = NearestRouteIndex(station.ServicePoint.position);
                 int count = Physics.OverlapSphereNonAlloc(station.ServicePoint.position, 10f, congestion, ~0, QueryTriggerInteraction.Ignore);
                 int vehicles = 0;
                 for (int i = 0; i < count; i++) if (congestion[i].attachedRigidbody != null && congestion[i].attachedRigidbody != body) vehicles++;
-                float utility = profile.Utility(station.WaitingCount, cabin.Seats.Length - PassengersTaken, RouteDistance(index), speed, vehicles, station.Reserved);
+                float utility = profile.Utility(canBoard ? station.WaitingCount : 0, cabin.Seats.Length - Onboard, RouteDistance(index), speed, vehicles, false) + drops * profile.passengerValue;
                 if (station == target) currentValue = utility;
                 if (utility > bestValue) { best = station; bestValue = utility; bestIndex = index; }
             }
-            if (target != null && target.HasWaiting && !target.Reserved && best != target && bestValue < currentValue + profile.switchAdvantage) return;
-            if (best != target && best != null) Say("Targeting " + best.name + " (demand " + best.WaitingCount + ")");
+            if (target != null && (target.HasWaiting || Drops(target) > 0) && best != target && bestValue < currentValue + profile.switchAdvantage) return;
+            if (best != target && best != null) Say("Targeting " + best.name + " (waiting " + best.WaitingCount + ", dropping " + Drops(best) + ")");
             target = best; destinationIndex = bestIndex;
         }
         private IEnumerator Collect()
         {
             var stop = target;
-            yield return stop.Board(transform, cabin.Doorway, cabin.Seats, PassengersTaken,
-                person => { PassengersTaken++; Say("Picked up passenger — total " + PassengersTaken); },
-                () => !shiftEnded && isActiveAndEnabled && stop != null && stop.MatchesApproach(transform) && body.linearVelocity.magnitude < .6f && FlatDistance(transform.position, stop.ServicePoint.position) < 4f);
-            stop.Release(transform); target = null; State = RivalState.Depart; nextDeparture = Time.time + 3f;
+            // Riders whose stop this is get off first, walking out through the door.
+            var leaving = new List<StationPassenger>();
+            foreach (var r in riders) if (r.Key != null && r.Value == stop) leaving.Add(r.Key);
+            for (int i = 0; i < leaving.Count; i++)
+            {
+                riders.Remove(leaving[i]);
+                var arrival = stop.ClaimArrival(leaving[i], out bool seated);
+                leaving[i].LeaveAt(arrival != null ? arrival : stop.transform, seated, cabin.Doorway, i * .55f);
+            }
+            if (leaving.Count > 0)
+            {
+                Say("Dropping off " + leaving.Count + " at " + stop.name);
+                float until = Time.time + 3f + leaving.Count * .6f;
+                while (Time.time < until && leaving.Exists(x => x != null && x.State != PassengerState.Delivered)) { Brake(); yield return null; }
+            }
+            if (stop.HasWaiting && Onboard < cabin.Seats.Length)
+                yield return stop.Board(transform, cabin.Doorway, cabin.Seats, Onboard,
+                    person => { PassengersTaken++; riders[person] = PickDestination(stop); Say("Picked up passenger for " + (riders[person] != null ? riders[person].name : "the terminal") + " - " + Onboard + " on board"); },
+                    () => !shiftEnded && isActiveAndEnabled && stop != null && stop.MatchesApproach(transform) && body.linearVelocity.magnitude < .6f && FlatDistance(transform.position, stop.ServicePoint.position) < 4f);
+            stop.Release(transform); target = null; State = RivalState.Depart; nextDeparture = Time.time + 2f;
             Say("Departing " + stop.name); routeIndex = NearestRouteIndex(transform.position);
+        }
+        // A vehicle standing at a bus stop (a loading rival, the player or a stopped car) may be overtaken.
+        private bool ServiceStopAhead(RaycastHit hit)
+        {
+            var other = hit.rigidbody;
+            if (other == null || other.linearVelocity.magnitude > 1f) return false;
+            var rival = other.GetComponentInParent<RivalKombiAI>();
+            if (rival != null && (rival.State == RivalState.Boarding || rival.FinishedTrip)) return true;
+            foreach (var station in stations)
+                if (station != null && FlatDistance(station.ServicePoint.position, other.position) < 15f) return true;
+            return false;
         }
         private bool Clear(Vector3 origin, Vector3 forward, float distance, out RaycastHit nearest)
         {
@@ -282,15 +326,16 @@ namespace KombiShift2.Traffic
             if(road!=null)
             {
                 desiredSpeed=Mathf.Min(desiredSpeed,road.speedLimit/3.6f*profile.LimitTolerance);
-                if(!passing && profile.allowOvertaking && road.allowPassing && road.width>=13f && junction==null && !clear && obstacle.rigidbody!=null && obstacle.distance>5f && blockedTime>2f && Mathf.Abs(steering)<8f && Time.time>nextPass)
+                bool stoppedAtStop=!clear&&ServiceStopAhead(obstacle);
+                if(!passing && profile.allowOvertaking && (road.allowPassing && road.width>=13f || stoppedAtStop) && junction==null && !clear && obstacle.rigidbody!=null && obstacle.distance>4f && blockedTime>(stoppedAtStop?.8f:2f) && Mathf.Abs(steering)<8f && Time.time>nextPass)
                 {
                     Vector3 lane=origin+transform.right*3.1f;
-                    if(Clear(lane,transform.forward,45f,out _) && Clear(lane,-transform.forward,20f,out _)){passing=true;passUntil=Time.time+7;Say("Passing slow traffic in a clear same-direction lane");}
+                    if(Clear(lane,transform.forward,stoppedAtStop?35f:45f,out _) && Clear(lane,-transform.forward,stoppedAtStop?12f:20f,out _)){passing=true;servicePass=stoppedAtStop;passUntil=Time.time+(stoppedAtStop?5f:7f);Say(stoppedAtStop?"Overtaking a kombi loading at the stop":"Passing slow traffic in a clear same-direction lane");}
                 }
-                if(passing && (Time.time>passUntil||!road.allowPassing||junction!=null))
+                if(passing && (Time.time>passUntil||(!road.allowPassing&&!servicePass)||junction!=null))
                 {
                     Vector3 lane=origin-transform.right*3.1f;
-                    if(Clear(lane,transform.forward,12f,out _)&&Clear(lane,-transform.forward,12f,out _)){passing=false;nextPass=Time.time+6;}
+                    if(Clear(lane,transform.forward,12f,out _)&&Clear(lane,-transform.forward,12f,out _)){passing=false;servicePass=false;nextPass=Time.time+3;}
                 }
             }
             // Stuck recovery: a rival that has not moved for a while (and is not simply waiting out a red

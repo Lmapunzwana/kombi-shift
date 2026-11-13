@@ -73,7 +73,9 @@ namespace KombiShift2.Gameplay
         }
         public void ReturnToMenu() { Time.timeScale = 1f; SceneManager.LoadScene("KombiMainMenu"); }
         public void RestartShift() { Time.timeScale = 1f; SceneManager.LoadScene(SceneManager.GetActiveScene().name); }
-        public void NextStage() { KombiChallenge.Selected = KombiStage.RushHour; RestartShift(); }
+        // Next: back to the route map so the player chooses the next trip (Morning success moves on to Rush Hour).
+        public void NextStage() { if (success && Stage == KombiStage.Morning) KombiChallenge.Selected = KombiStage.RushHour; KombiShift2.UI.KombiMainMenu.OpenMarketOnLoad = true; ReturnToMenu(); }
+        public static float LoadRequestedAt = -1f;
         public RCCP_CarController Vehicle => vehicle;
         public int CurrentStop => stopIndex;
         public int StopCount => stops?.Length ?? 0;
@@ -113,6 +115,8 @@ namespace KombiShift2.Gameplay
         {
             Time.timeScale = 1f;
             Stage = KombiChallenge.Selected;
+            int treesRemoved = CityPresentationCleanup.Apply(CityRoadNetwork.Active);
+            if (LoadRequestedAt >= 0f) { Debug.Log($"KOMBI_LOAD shift ready in {Time.realtimeSinceStartup - LoadRequestedAt:0.00} s (road trees hidden: {treesRemoved})"); LoadRequestedAt = -1f; }
             shiftSeconds = CityTripSession.Active ? CityTripSession.SelectedDuration : KombiChallenge.Seconds(Stage);
             timeRemaining = shiftSeconds;
             var stageSettings = KombiStageSettings.Load(Stage);
@@ -355,11 +359,11 @@ namespace KombiShift2.Gameplay
                 GUI.Label(new Rect(map.x, map.yMax + 2, size, 18), "Grey: route   Yellow: your drive   Green: start   Red: terminal", mapLabel);
             }
 
-            bool next = success && Stage == KombiStage.Morning;
+            bool next = true;
             float buttonWidth = (width - 40f - (next ? 20f : 10f)) / (next ? 3f : 2f);
             if (GUI.Button(new Rect(panel.x + 20, buttonsTop, buttonWidth, 34), "REPLAY")) RestartShift();
             if (GUI.Button(new Rect(panel.x + 30 + buttonWidth, buttonsTop, buttonWidth, 34), "MAIN MENU")) ReturnToMenu();
-            if (next && GUI.Button(new Rect(panel.x + 40 + buttonWidth * 2, buttonsTop, buttonWidth, 34), "NEXT: RUSH HOUR")) NextStage();
+            if (next && GUI.Button(new Rect(panel.x + 40 + buttonWidth * 2, buttonsTop, buttonWidth, 34), success && Stage == KombiStage.Morning ? "NEXT: RUSH HOUR - CHOOSE ROUTE" : "NEXT: CHOOSE ROUTE")) NextStage();
         }
 
         private void DrawRouteMap(Rect area)
