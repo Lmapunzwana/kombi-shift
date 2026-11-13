@@ -53,6 +53,7 @@ namespace KombiShift.JaydenStarter
         Vector3 Target=>stops[Mathf.Clamp(stopIndex,0,stops.Length-1)];
         void Start()
         {
+            if(GetComponent<TrafficFineHUD>()==null)gameObject.AddComponent<TrafficFineHUD>();
             diagnosticSession=Array.Exists(Environment.GetCommandLineArgs(),a=>a.StartsWith("--kombi-"));
             musicVolume = PlayerPrefs.GetFloat("KombiJayden.Music.v2", .12f); effectsVolume = PlayerPrefs.GetFloat("KombiJayden.Effects.v2", .75f);
             Application.runInBackground=true;BuildWorld();InitializeSystems();screen=Screen.Menu;gameManager.SetState(GameManager.ShiftState.Menu);Time.timeScale=0;Application.targetFrameRate=60;
