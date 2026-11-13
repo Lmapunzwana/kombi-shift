@@ -309,6 +309,19 @@ public class MusicManager : MonoBehaviour
         return false;
     }
 
+    // Returns the first slot from 'start' onwards (wrapping) that has a clip, or -1 if none do.
+    // Lets the game run when a track file has been removed but its Inspector slot remains.
+    static int FirstAssignedTrack(AudioClip[] list, int start)
+    {
+        if (list == null || list.Length == 0) return -1;
+        for (int i = 0; i < list.Length; i++)
+        {
+            int index = (start + i) % list.Length;
+            if (list[index] != null) return index;
+        }
+        return -1;
+    }
+
     // Also callable from a button if onboarding ends some other way
     public void EndOnboarding()
     {
@@ -323,11 +336,13 @@ public class MusicManager : MonoBehaviour
     void PlayOnboarding()
     {
         if (userPaused) return;
-        if (onboardingTracks.Length == 0)
+        int index = FirstAssignedTrack(onboardingTracks, onboardingIndex);
+        if (index < 0)
         {
-            Debug.LogWarning("MusicManager: Onboarding Tracks list is empty.");
+            Debug.LogWarning("MusicManager: Onboarding Tracks list has no assigned clips.");
             return;
         }
+        onboardingIndex = index;
         audioSource.clip = onboardingTracks[onboardingIndex];
         audioSource.loop = true;
         audioSource.Play();
@@ -337,11 +352,13 @@ public class MusicManager : MonoBehaviour
     void PlayDriving()
     {
         if (userPaused) return;
-        if (drivingTracks.Length == 0)
+        int index = FirstAssignedTrack(drivingTracks, drivingIndex);
+        if (index < 0)
         {
-            Debug.LogWarning("MusicManager: Driving Tracks list is empty.");
+            Debug.LogWarning("MusicManager: Driving Tracks list has no assigned clips.");
             return;
         }
+        drivingIndex = index;
 
         AudioClip chosen = drivingTracks[drivingIndex];
 
