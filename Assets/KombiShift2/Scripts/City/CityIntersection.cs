@@ -7,6 +7,7 @@ namespace KombiShift2.City
     [Serializable] public sealed class CityIntersectionArm
     {
         public string id,control; public float bearing,width; public bool major,incoming,outgoing; public int phase;
+        public Vector3 approachPoint;
         public Renderer lampHead,repeater;
         public Vector3 Direction=>new(Mathf.Sin(bearing*Mathf.Deg2Rad),0f,Mathf.Cos(bearing*Mathf.Deg2Rad));
     }
@@ -17,7 +18,8 @@ namespace KombiShift2.City
         public CityIntersectionArm[] arms=Array.Empty<CityIntersectionArm>();
         [HideInInspector] public Renderer[] eastWestLamps,northSouthLamps;
         readonly List<Reservation> reservations=new(); readonly Collider[] occupants=new Collider[24]; MaterialPropertyBlock lamp;
-        const float GreenSeconds=10f,AmberSeconds=3f,AllRedSeconds=2f,PlatoonGap=8f;
+        public const float GreenSeconds=7f,AmberSeconds=2.5f,AllRedSeconds=1.5f;
+        const float PlatoonGap=8f;
         struct Reservation { public Rigidbody vehicle; public Vector3 heading,exitDirection; public bool entered; }
         void Awake(){lamp=new MaterialPropertyBlock();}
         public int PhaseCount { get { int count=0;if(arms!=null)foreach(var arm in arms)if(arm!=null&&arm.incoming)count=Mathf.Max(count,arm.phase+1);return Mathf.Max(1,count); } }

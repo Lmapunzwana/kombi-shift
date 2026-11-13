@@ -27,9 +27,35 @@ public static class KombiCityInfrastructureUpgrade
             throw new InvalidOperationException("Save the driving scene and stop Play mode before rebuilding junction controls.");
         var root=GameObject.Find(Root);var network=root!=null?root.GetComponent<CityRoadNetwork>():null;
         if(network==null)throw new InvalidOperationException("The saved city infrastructure is missing its road network.");
-        network.Load(true);BuildIntersections(root.transform,network);BuildMarkings(root.transform,network);
+        network.Load(true);BuildIntersections(root.transform,network);Physics.SyncTransforms();BuildMarkings(root.transform,network);
         EditorSceneManager.MarkSceneDirty(scene);EditorSceneManager.SaveScene(scene);AssetDatabase.SaveAssets();
         KombiCitySignalVerification.Run();
+    }
+    [MenuItem("Kombi Shift/Repair Road Signs And Markings")]
+    public static void RepairRoadSignsAndMarkings()
+    {
+        if(EditorApplication.isPlayingOrWillChangePlaymode)throw new InvalidOperationException("Stop Play mode before repairing road signs and markings.");
+        var scene=SceneManager.GetActiveScene();
+        if(scene.isDirty)throw new InvalidOperationException("Save the current scene before repairing road signs and markings.");
+        if(scene.path!=KombiProjectWorkbench.Shift)scene=EditorSceneManager.OpenScene(KombiProjectWorkbench.Shift);
+        if(scene.isDirty)throw new InvalidOperationException("Save the driving scene before repairing road signs and markings.");
+        Directory.CreateDirectory("Review/BeforeRoadsideCleanup");
+        const string backup="Review/BeforeRoadsideCleanup/KombiShift_FirstShift.unity";
+        if(!File.Exists(backup))File.Copy(scene.path,backup);
+        var root=GameObject.Find(Root);var network=root!=null?root.GetComponent<CityRoadNetwork>():null;
+        if(network==null)throw new InvalidOperationException("The saved city infrastructure is missing its road network.");
+        CityRoadsidePlacement.RefreshVisualGroundCache();
+        network.Load(true);BuildIntersections(root.transform,network);Physics.SyncTransforms();BuildMarkings(root.transform,network);
+        int signs=KombiShiftExpansionUpgrade.RepositionRoadSignsInOpenScene();
+        EditorSceneManager.MarkSceneDirty(scene);EditorSceneManager.SaveScene(scene);AssetDatabase.SaveAssets();
+        KombiCitySignalVerification.Run();
+        var audit=KombiCityNetworkSceneAudit.Run();
+        if(audit.roadSigns==0||audit.roadSignsOnRoad>0||audit.unsupportedRoadSigns>0||audit.misfacingRoadSigns>0||
+            audit.signalPostsOnRoad>0||audit.unsupportedSignalPosts>0||audit.misplacedTrafficSignalHeads>0||
+            audit.roadwayMarkingVertices==0||audit.unsupportedRoadsideGuideVertices>0||audit.roadsideGuideVerticesOnRoad>0)
+            throw new InvalidOperationException("Roadside sign or marking audit failed; inspect scene-road-audit.json.");
+        Debug.Log("KOMBI_ROADSIDE_CLEANUP signs="+signs+" roadSignsOnRoad="+audit.roadSignsOnRoad+
+            " signalPostsOnRoad="+audit.signalPostsOnRoad+" roadwayMarkingVertices="+audit.roadwayMarkingVertices);
     }
     [MenuItem("Kombi Shift/Apply Existing City Infrastructure")]
     public static void Apply()
@@ -100,7 +126,7 @@ public static class KombiCityInfrastructureUpgrade
         }
         Physics.SyncTransforms();
         RepairCityFoliage(root.transform);
-        BuildIntersections(root.transform,network);
+        BuildIntersections(root.transform,network);Physics.SyncTransforms();
         BuildMarkings(root.transform,network);
         var stationPrefab=AssetDatabase.LoadAssetAtPath<GameObject>(Generated+"/CityPassengerStation.prefab");
         if(stationPrefab==null)
@@ -189,7 +215,7 @@ public static class KombiCityInfrastructureUpgrade
     }
     [Serializable] sealed class JunctionDocument { public JunctionRecord[] junctions; }
     [Serializable] sealed class JunctionRecord { public string id,type,control;public Vector3 centre;public float radius;public ArmRecord[] arms; }
-    [Serializable] sealed class ArmRecord { public string id,control;public float bearing,width;public bool major,incoming,outgoing;public Vector3 approachLanePoint; }
+    [Serializable] sealed class ArmRecord { public string id,control;public float bearing,width;public bool major,incoming,outgoing;public int approachNode;public Vector3 approachLanePoint; }
     static void BuildIntersections(Transform root,CityRoadNetwork network)
     {
         var source=AssetDatabase.LoadAssetAtPath<TextAsset>("Assets/Resources/CityJunctions.json");
@@ -211,28 +237,55 @@ public static class KombiCityInfrastructureUpgrade
             foreach(var arm in arms)
             {
                 int phase=arm.major?0:nextMinorPhase;
-                var runtime=new CityIntersectionArm{id=arm.id,control=arm.control,bearing=arm.bearing,width=arm.width,major=arm.major,incoming=arm.incoming,outgoing=arm.outgoing,phase=phase};
+                int approachIndex=arm.approachNode;
+                if(approachIndex<0||approachIndex>=network.Nodes.Length||network.Nodes[approachIndex].component!=0)
+                    approachIndex=network.Nearest(arm.approachLanePoint,0);
+                if(approachIndex<0)throw new InvalidOperationException(record.id+"/"+arm.id+" has no road-network approach node.");
+                var approachNode=network.Nodes[approachIndex];
+                float approachWidth=approachNode.width>0f?approachNode.width:arm.width;
+                var runtime=new CityIntersectionArm{id=arm.id,control=arm.control,bearing=arm.bearing,width=approachWidth,major=arm.major,incoming=arm.incoming,outgoing=arm.outgoing,phase=phase,approachPoint=approachNode.position};
                 Vector3 outward=new(Mathf.Sin(arm.bearing*Mathf.Deg2Rad),0,Mathf.Cos(arm.bearing*Mathf.Deg2Rad));
-                Vector3 inward=-outward,left=-Vector3.Cross(Vector3.up,inward);
-                Vector3 stop=record.centre+outward*(record.radius+1f);stop.y=arm.approachLanePoint.y;
+                Vector3 stop=approachNode.position+outward*2f;
                 if(arm.control=="Signal"&&arm.incoming)
                 {
-                    Vector3 lampPosition=stop+left*(arm.width*.5f+.8f);
-                    runtime.lampHead=MakeSignalHead(go.transform,"Signal lamp head "+arm.id,lampPosition,record.centre,lampMaterial);
-                    if(arm.width>=16f)runtime.repeater=MakeSignalHead(go.transform,"Far-side repeater "+arm.id,record.centre-outward*(record.radius+.8f)-left*(arm.width*.25f),record.centre,lampMaterial);
-                    MakeJunctionSign(go.transform,"SIGNAL AHEAD",stop+outward*8f+left*(arm.width*.5f+.8f),record.centre);
+                    if(!CityRoadsidePlacement.TryFind(stop,outward,approachWidth,1,out var lampPosition,out bool needsFooting,24f,10f))
+                        throw new InvalidOperationException(record.id+"/"+arm.id+" has no supported roadside location for its signal.");
+                    if(needsFooting)CityRoadsidePlacement.CreateFooting(go.transform,lampPosition);
+                    runtime.lampHead=MakeSignalHead(go.transform,"Signal lamp head "+arm.id,lampPosition,outward,lampMaterial);
+                    if(approachWidth>=16f)
+                    {
+                        if(CityRoadsidePlacement.TryFind(stop,outward,approachWidth,-1,out var repeaterPosition,out bool repeaterNeedsFooting))
+                        {
+                            if(repeaterNeedsFooting)CityRoadsidePlacement.CreateFooting(go.transform,repeaterPosition);
+                            runtime.repeater=MakeSignalHead(go.transform,"Far-side repeater "+arm.id,repeaterPosition,outward,lampMaterial);
+                        }
+                        else Debug.LogWarning("Omitted far-side repeater at "+record.id+"/"+arm.id+" because the opposite roadside is unsupported.");
+                    }
+                    if(CityRoadsidePlacement.TryFind(stop+outward*8f,outward,approachWidth,1,out var signalSignPosition,out bool signalSignNeedsFooting))
+                    {
+                        if(signalSignNeedsFooting)CityRoadsidePlacement.CreateFooting(go.transform,signalSignPosition);
+                        MakeJunctionSign(go.transform,"SIGNAL AHEAD",signalSignPosition,outward);
+                    }
+                    else Debug.LogWarning("Omitted SIGNAL AHEAD sign at "+record.id+"/"+arm.id+" because no supported roadside ground is available.");
                 }
                 else if((arm.control=="Stop"||arm.control=="GiveWay")&&arm.incoming)
-                    MakeJunctionSign(go.transform,arm.control=="Stop"?"STOP":"GIVE WAY",stop+left*(arm.width*.5f+.8f),record.centre);
+                {
+                    if(CityRoadsidePlacement.TryFind(stop,outward,approachWidth,1,out var signPosition,out bool signNeedsFooting))
+                    {
+                        if(signNeedsFooting)CityRoadsidePlacement.CreateFooting(go.transform,signPosition);
+                        MakeJunctionSign(go.transform,arm.control=="Stop"?"STOP":"GIVE WAY",signPosition,outward);
+                    }
+                    else Debug.LogWarning("Omitted "+arm.control+" sign at "+record.id+"/"+arm.id+" because no supported roadside ground is available.");
+                }
                 runtimeArms.Add(runtime);
             }
             intersection.arms=runtimeArms.ToArray();
         }
     }
-    static Renderer MakeSignalHead(Transform parent,string name,Vector3 position,Vector3 centre,Material material)
+    static Renderer MakeSignalHead(Transform parent,string name,Vector3 position,Vector3 facing,Material material)
     {
         var post=GameObject.CreatePrimitive(PrimitiveType.Cylinder);post.name="Traffic signal post";post.transform.SetParent(parent);post.transform.position=position+Vector3.up*1.5f;post.transform.localScale=new Vector3(.12f,1.5f,.12f);
-        var lamp=GameObject.CreatePrimitive(PrimitiveType.Sphere);lamp.name=name;lamp.transform.SetParent(parent);lamp.transform.position=position+Vector3.up*3f;lamp.transform.localScale=Vector3.one*.4f;lamp.transform.rotation=Quaternion.LookRotation((position-centre).normalized);
+        var lamp=GameObject.CreatePrimitive(PrimitiveType.Sphere);lamp.name=name;lamp.transform.SetParent(parent);lamp.transform.position=position+Vector3.up*3f;lamp.transform.localScale=Vector3.one*.4f;lamp.transform.rotation=Quaternion.LookRotation(facing.normalized);
         Object.DestroyImmediate(lamp.GetComponent<Collider>());var renderer=lamp.GetComponent<Renderer>();renderer.sharedMaterial=material;return renderer;
     }
     static float ApproachWidth(CityRoadNetwork network,Vector3 centre,Vector3 forward)
@@ -247,10 +300,10 @@ public static class KombiCityInfrastructureUpgrade
         }
         return width;
     }
-    static void MakeJunctionSign(Transform parent,string label,Vector3 position,Vector3 centre)
+    static void MakeJunctionSign(Transform parent,string label,Vector3 position,Vector3 facing)
     {
         var post=GameObject.CreatePrimitive(PrimitiveType.Cylinder);post.name=label+" sign post";post.transform.SetParent(parent);post.transform.position=position+Vector3.up;post.transform.localScale=new Vector3(.07f,1,.07f);
-        var sign=new GameObject(label+" sign",typeof(TextMesh));sign.transform.SetParent(parent);sign.transform.position=position+Vector3.up*2.1f;sign.transform.rotation=Quaternion.LookRotation((position-centre).normalized);
+        var sign=new GameObject(label+" sign",typeof(TextMesh));sign.transform.SetParent(parent);sign.transform.position=position+Vector3.up*2.1f;sign.transform.rotation=Quaternion.LookRotation(facing.normalized);
         var text=sign.GetComponent<TextMesh>();text.text=label;text.fontSize=40;text.characterSize=.04f;text.anchor=TextAnchor.MiddleCenter;text.color=label=="STOP"?new Color(1,.35f,.25f):Color.white;
     }
     static void BuildMarkings(Transform root,CityRoadNetwork network)
@@ -261,6 +314,7 @@ public static class KombiCityInfrastructureUpgrade
         var group=new GameObject("City road markings").transform;group.SetParent(root,false);
         var whiteVertices=new List<Vector3>();var whiteTriangles=new List<int>();
         var yellowVertices=new List<Vector3>();var yellowTriangles=new List<int>();
+        var guideVertices=new List<Vector3>();var guideTriangles=new List<int>();
         var paintHits=new RaycastHit[24];
         bool GroundPaint(Vector3 point,out Vector3 projected)
         {
@@ -293,30 +347,116 @@ public static class KombiCityInfrastructureUpgrade
         }
         void Strip(Vector3 a,Vector3 b,float width,List<Vector3> vertices,List<int> triangles)
         {
-            Vector3 right=Vector3.Cross(Vector3.up,(b-a).normalized)*width*.5f;
+            Vector3 direction=b-a;direction.y=0f;if(direction.sqrMagnitude<.01f)return;
+            Vector3 right=Vector3.Cross(Vector3.up,direction.normalized)*width*.5f;
             if(!GroundPaint(a-right,out var p0)||!GroundPaint(a+right,out var p1)||!GroundPaint(b+right,out var p2)||!GroundPaint(b-right,out var p3))return;
             int n=vertices.Count;vertices.Add(p0);vertices.Add(p1);vertices.Add(p2);vertices.Add(p3);triangles.AddRange(new[]{n,n+2,n+1,n,n+3,n+2});
         }
         void RoadsideStrip(Vector3 a,Vector3 b,float width)
         {
-            Vector3 right=Vector3.Cross(Vector3.up,(b-a).normalized)*width*.5f;
+            Vector3 direction=b-a;direction.y=0f;if(direction.sqrMagnitude<.01f)return;
+            Vector3 right=Vector3.Cross(Vector3.up,direction.normalized)*width*.5f;
             if(!GroundRoadside(a-right,out var p0)||!GroundRoadside(a+right,out var p1)||!GroundRoadside(b+right,out var p2)||!GroundRoadside(b-right,out var p3))return;
-            int n=yellowVertices.Count;yellowVertices.Add(p0);yellowVertices.Add(p1);yellowVertices.Add(p2);yellowVertices.Add(p3);yellowTriangles.AddRange(new[]{n,n+2,n+1,n,n+3,n+2});
+            int n=guideVertices.Count;guideVertices.Add(p0);guideVertices.Add(p1);guideVertices.Add(p2);guideVertices.Add(p3);guideTriangles.AddRange(new[]{n,n+2,n+1,n,n+3,n+2});
         }
+        void RoadLine(Vector3[] points,float offset,float width,List<Vector3> vertices,List<int> triangles)
+        {
+            for(int i=1;i<points.Length;i++)
+            {
+                Vector3 direction=points[i]-points[i-1];direction.y=0f;if(direction.sqrMagnitude<.01f)continue;
+                Vector3 right=Vector3.Cross(Vector3.up,direction.normalized);
+                Strip(points[i-1]+right*offset,points[i]+right*offset,width,vertices,triangles);
+            }
+        }
+        void DashedRoadLine(Vector3[] points,float offset,float width,List<Vector3> vertices,List<int> triangles)
+        {
+            const float dashLength=3.6f,period=6f;
+            float distance=0f;
+            for(int i=1;i<points.Length;i++)
+            {
+                Vector3 direction=points[i]-points[i-1];direction.y=0f;float length=direction.magnitude;if(length<.1f)continue;
+                direction/=length;Vector3 right=Vector3.Cross(Vector3.up,direction);
+                float segmentEnd=distance+length;
+                for(float dash=Mathf.Floor(distance/period)*period;dash<segmentEnd;dash+=period)
+                {
+                    float from=Mathf.Max(distance,dash+.3f),to=Mathf.Min(segmentEnd,dash+dashLength);
+                    if(to-from<.25f)continue;
+                    Vector3 a=Vector3.Lerp(points[i-1],points[i],(from-distance)/length)+right*offset;
+                    Vector3 b=Vector3.Lerp(points[i-1],points[i],(to-distance)/length)+right*offset;
+                    Strip(a,b,width,vertices,triangles);
+                }
+                distance=segmentEnd;
+            }
+        }
+        var adjacency=Enumerable.Range(0,network.Nodes.Length).Select(_=>new List<int>()).ToArray();
         var seen=new HashSet<long>();
         for(int i=0;i<network.Nodes.Length;i++)
         {
             var node=network.Nodes[i];if(node.component!=0)continue;
             foreach(int next in node.links)
             {
+                if(next<0||next>=network.Nodes.Length)continue;
                 int low=Mathf.Min(i,next),high=Mathf.Max(i,next);long key=((long)low<<32)|(uint)high;if(!seen.Add(key))continue;
-                var other=network.Nodes[next];if(node.junction||other.junction||node.roundabout||other.roundabout)continue;
+                var other=network.Nodes[next];if(other.component!=0||node.junction||other.junction||node.roundabout||other.roundabout)continue;
+                adjacency[i].Add(next);adjacency[next].Add(i);
                 Vector3 direction=other.position-node.position;direction.y=0f;if(direction.sqrMagnitude<.01f)continue;direction.Normalize();
                 Vector3 right=Vector3.Cross(Vector3.up,direction);float roadWidth=Mathf.Min(node.width,other.width);
                 float roadside=roadWidth*.5f+.8f;
-                RoadsideStrip(node.position+right*roadside,other.position+right*roadside,.14f);
-                RoadsideStrip(node.position-right*roadside,other.position-right*roadside,.14f);
+                RoadsideStrip(node.position+right*roadside,other.position+right*roadside,.08f);
+                RoadsideStrip(node.position-right*roadside,other.position-right*roadside,.08f);
             }
+        }
+        bool CanContinue(int previous,int current,int next)
+        {
+            if(adjacency[current].Count!=2)return false;
+            var before=network.Nodes[previous];var at=network.Nodes[current];var after=network.Nodes[next];
+            if(Mathf.Abs(before.width-at.width)>.2f||Mathf.Abs(after.width-at.width)>.2f||
+                before.allowPassing!=at.allowPassing||after.allowPassing!=at.allowPassing)return false;
+            Vector3 incoming=at.position-before.position,outgoing=after.position-at.position;incoming.y=0f;outgoing.y=0f;
+            return incoming.sqrMagnitude>.01f&&outgoing.sqrMagnitude>.01f&&Vector3.Angle(incoming,outgoing)<35f;
+        }
+        bool IsBreak(int index)
+        {
+            if(adjacency[index].Count!=2)return true;
+            return !CanContinue(adjacency[index][0],index,adjacency[index][1]);
+        }
+        long EdgeKey(int a,int b)=>((long)Mathf.Min(a,b)<<32)|(uint)Mathf.Max(a,b);
+        var consumed=new HashSet<long>();var chains=new List<List<int>>();
+        void Trace(int start,int first)
+        {
+            var chain=new List<int>{start};int previous=start,current=first;
+            while(consumed.Add(EdgeKey(previous,current)))
+            {
+                chain.Add(current);
+                if(adjacency[current].Count!=2)break;
+                int next=adjacency[current][0]==previous?adjacency[current][1]:adjacency[current][0];
+                if(!CanContinue(previous,current,next)||consumed.Contains(EdgeKey(current,next)))break;
+                previous=current;current=next;
+            }
+            if(chain.Count>1)chains.Add(chain);
+        }
+        for(int i=0;i<adjacency.Length;i++)if(IsBreak(i))
+            foreach(int next in adjacency[i])if(!consumed.Contains(EdgeKey(i,next)))Trace(i,next);
+        for(int i=0;i<adjacency.Length;i++)foreach(int next in adjacency[i])
+            if(!consumed.Contains(EdgeKey(i,next)))Trace(i,next);
+        foreach(var chain in chains)
+        {
+            var points=chain.Select(i=>network.Nodes[i].position).ToArray();
+            float roadWidth=network.Nodes[chain[0]].width;
+            bool passing=roadWidth>=13f&&chain.All(i=>network.Nodes[i].allowPassing);
+            RoadLine(points,roadWidth*.5f-.25f,.12f,whiteVertices,whiteTriangles);
+            RoadLine(points,-roadWidth*.5f+.25f,.12f,whiteVertices,whiteTriangles);
+            if(roadWidth>=13f)
+            {
+                RoadLine(points,.16f,.14f,yellowVertices,yellowTriangles);
+                RoadLine(points,-.16f,.14f,yellowVertices,yellowTriangles);
+                if(passing)
+                {
+                    DashedRoadLine(points,3.1f,.12f,whiteVertices,whiteTriangles);
+                    DashedRoadLine(points,-3.1f,.12f,whiteVertices,whiteTriangles);
+                }
+            }
+            else RoadLine(points,0f,.14f,yellowVertices,yellowTriangles);
         }
         foreach(var junction in Object.FindObjectsByType<CityIntersection>())
         {
@@ -324,24 +464,18 @@ public static class KombiCityInfrastructureUpgrade
             foreach(var arm in junction.arms)
             {
                 if(arm==null||!arm.incoming)continue;
-                Vector3 outward=arm.Direction,forward=-outward,left=-Vector3.Cross(Vector3.up,forward);float roadWidth=arm.width;
-                float laneOffset=roadWidth>=13f?4.65f:Mathf.Max(1.55f,Mathf.Min(roadWidth*.22f,4.65f));
-                float stopDistance=junction.radius+1f;
+                Vector3 outward=arm.Direction,left=Vector3.Cross(Vector3.up,outward);float roadWidth=arm.width;
                 if(arm.control=="Signal"||arm.control=="Stop")
                 {
-                    int laneCount=roadWidth>=13f?2:1;
-                    for(int lane=0;lane<laneCount;lane++)
-                    {
-                        Vector3 stop=junction.transform.position+outward*stopDistance+left*(laneOffset-lane*3.1f);
-                        Strip(stop-left*1.5f,stop+left*1.5f,.28f,whiteVertices,whiteTriangles);
-                    }
+                    Vector3 stop=arm.approachPoint+outward*(arm.control=="Signal"?2f:1.5f);
+                    Strip(stop+left*.2f,stop+left*(roadWidth*.5f-.25f),.35f,whiteVertices,whiteTriangles);
                 }
                 if(arm.control=="Signal")
                 {
-                    for(int stripe=0;stripe<5;stripe++)
+                    for(int stripe=0;stripe<6;stripe++)
                     {
-                        Vector3 crossing=junction.transform.position+outward*(stopDistance+1.5f+stripe*.58f);
-                        Strip(crossing-left*(roadWidth*.5f-.25f),crossing+left*(roadWidth*.5f-.25f),.28f,whiteVertices,whiteTriangles);
+                        Vector3 crossing=arm.approachPoint-outward*(1f+stripe*.65f);
+                        Strip(crossing-left*(roadWidth*.5f-.25f),crossing+left*(roadWidth*.5f-.25f),.42f,whiteVertices,whiteTriangles);
                     }
                 }
             }
@@ -352,11 +486,14 @@ public static class KombiCityInfrastructureUpgrade
         white.SetColor("_Color",new Color(.9f,.92f,.9f));white.enableInstancing=true;EditorUtility.SetDirty(white);
         yellow.SetColor("_Color",new Color(1f,.78f,.08f));yellow.enableInstancing=true;EditorUtility.SetDirty(yellow);
         var whiteMesh=SaveMarkingMesh(whiteVertices,whiteTriangles,"City white road markings",Generated+"/CityMarkings.asset");
-        var yellowMesh=SaveMarkingMesh(yellowVertices,yellowTriangles,"City roadside traffic guides",Generated+"/CityMarkingsYellow.asset");
-        var whiteObject=new GameObject("Shared white marking mesh",typeof(MeshFilter),typeof(MeshRenderer));whiteObject.transform.SetParent(group,false);
+        var yellowMesh=SaveMarkingMesh(yellowVertices,yellowTriangles,"City yellow centre markings",Generated+"/CityMarkingsYellow.asset");
+        var guideMesh=SaveMarkingMesh(guideVertices,guideTriangles,"City roadside traffic guides",Generated+"/CityRoadsideGuides.asset");
+        var whiteObject=new GameObject("Roadway white markings",typeof(MeshFilter),typeof(MeshRenderer));whiteObject.transform.SetParent(group,false);
         whiteObject.GetComponent<MeshFilter>().sharedMesh=whiteMesh;whiteObject.GetComponent<MeshRenderer>().sharedMaterial=white;
-        var yellowObject=new GameObject("Roadside traffic guide mesh",typeof(MeshFilter),typeof(MeshRenderer));yellowObject.transform.SetParent(group,false);
+        var yellowObject=new GameObject("Roadway yellow markings",typeof(MeshFilter),typeof(MeshRenderer));yellowObject.transform.SetParent(group,false);
         yellowObject.GetComponent<MeshFilter>().sharedMesh=yellowMesh;yellowObject.GetComponent<MeshRenderer>().sharedMaterial=yellow;
+        var guideObject=new GameObject("Roadside traffic guide mesh",typeof(MeshFilter),typeof(MeshRenderer));guideObject.transform.SetParent(group,false);
+        guideObject.GetComponent<MeshFilter>().sharedMesh=guideMesh;guideObject.GetComponent<MeshRenderer>().sharedMaterial=yellow;
     }
     static Mesh SaveMarkingMesh(List<Vector3> vertices,List<int> triangles,string name,string path)
     {

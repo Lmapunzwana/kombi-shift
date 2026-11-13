@@ -6,5 +6,9 @@
     "classificationMismatches": 0,
     "lampPlacementFailures": 0,
     "lightCycleFailures": 0,
+    "greenSeconds": 7.0,
+    "amberSeconds": 2.5,
+    "allRedSeconds": 1.5,
+    "longestRedSeconds": 15.0,
     "details": []
 }

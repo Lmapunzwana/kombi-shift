@@ -3,12 +3,14 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using BezierSolution;
+using KombiShift2.City;
 using KombiShift2.Gameplay;
 using KombiShift2.Traffic;
 using KombiShift2.UI;
 using UnityEditor;
 using UnityEditor.SceneManagement;
 using UnityEngine;
+using UnityEngine.SceneManagement;
 using Object = UnityEngine.Object;
 
 public static class KombiShiftExpansionUpgrade
@@ -188,21 +190,34 @@ public static class KombiShiftExpansionUpgrade
     [MenuItem("Kombi Shift/Repair Road Sign Placement")]
     public static void RepairRoadSignPlacement()
     {
-        var scene = EditorSceneManager.OpenScene(KombiProjectWorkbench.Shift);
+        if (EditorApplication.isPlayingOrWillChangePlaymode) throw new InvalidOperationException("Stop Play mode before repairing road signs.");
+        var scene = SceneManager.GetActiveScene();
+        if (scene.isDirty) throw new InvalidOperationException("Save the current scene before repairing road signs.");
+        if (scene.path != KombiProjectWorkbench.Shift) scene = EditorSceneManager.OpenScene(KombiProjectWorkbench.Shift);
+        int moved = RepositionRoadSignsInOpenScene();
+        EditorSceneManager.MarkSceneDirty(scene);
+        EditorSceneManager.SaveScene(scene);
+        Debug.Log("KOMBI_ROADSIDE_SIGNS_REPAIRED " + moved);
+    }
+    public static int RepositionRoadSignsInOpenScene()
+    {
         int moved = 0;
         var hud = Object.FindFirstObjectByType<KombiNavigationHud>();
+        if (hud == null) throw new InvalidOperationException("The saved driving scene is missing its navigation route.");
+        var network = Object.FindFirstObjectByType<CityRoadNetwork>();
+        if (network == null) throw new InvalidOperationException("The saved driving scene is missing its city road network.");
+        network.Load(true);
+        Physics.SyncTransforms();
         foreach (var zone in Object.FindObjectsByType<KombiRoadRuleZone>(FindObjectsSortMode.None)
                      .OrderBy(x => Nearest(hud.RoutePoints, x.transform.position)))
         {
             var post = zone.transform.Find(zone.rule + " sign post");
             var label = zone.transform.Find("Readable road sign");
             if (post == null || label == null) continue;
-            PlaceRoadSign(zone, post, label);
+            PlaceRoadSign(zone, post, label, network);
             moved++;
         }
-        EditorSceneManager.MarkSceneDirty(scene);
-        EditorSceneManager.SaveScene(scene);
-        Debug.Log("KOMBI_ROADSIDE_SIGNS_REPAIRED " + moved);
+        return moved;
     }
     public static void RepairRoadsideSceneIssues()
     {
@@ -584,7 +599,10 @@ public static class KombiShiftExpansionUpgrade
         text.transform.SetParent(zone.transform, true); text.transform.localScale = Vector3.one;
         var label = text.AddComponent<TextMesh>(); label.text = RoadSignText(rule, limit);
         label.fontSize = 48; label.characterSize = .09f; label.anchor = TextAnchor.MiddleCenter; label.color = Color.yellow;
-        PlaceRoadSign(behaviour, post.transform, text.transform);
+        var network = Object.FindFirstObjectByType<CityRoadNetwork>();
+        if (network == null) throw new InvalidOperationException("The city road network is required to place roadside signs.");
+        network.Load();
+        PlaceRoadSign(behaviour, post.transform, text.transform, network);
     }
     static string RoadSignText(RoadRule rule, float limit)
     {
@@ -601,7 +619,7 @@ public static class KombiShiftExpansionUpgrade
             _ => rule.ToString().ToUpperInvariant()
         };
     }
-    static void PlaceRoadSign(KombiRoadRuleZone zone, Transform post, Transform label)
+    static void PlaceRoadSign(KombiRoadRuleZone zone, Transform post, Transform label, CityRoadNetwork network)
     {
         Vector3 forward = zone.travelDirection; forward.y = 0f; forward.Normalize();
         Vector3 ground = zone.transform.position - Vector3.up * 1.5f;
@@ -615,9 +633,16 @@ public static class KombiShiftExpansionUpgrade
             RoadRule.Roadworks => 20f,
             _ => 0f
         };
-        Vector3 position = ground + RivalKombiAI.LeftOffset(forward, 6.5f) - forward * approach + Vector3.up;
-        post.SetPositionAndRotation(position, Quaternion.LookRotation(forward));
-        label.SetPositionAndRotation(position + Vector3.up * 1.3f, Quaternion.LookRotation(forward));
+        int roadIndex = network.Nearest(ground, 0);
+        if (roadIndex < 0) throw new InvalidOperationException("No city road node was found for the " + zone.rule + " sign.");
+        var road = network.Nodes[roadIndex];
+        Vector3 lanePoint = ground - forward * approach;
+        if (!CityRoadsidePlacement.TryFind(lanePoint, -forward, road.width, 1, out var roadside, out bool needsFooting))
+            throw new InvalidOperationException("No supported roadside surface was found for the " + zone.rule + " sign.");
+        if (needsFooting) CityRoadsidePlacement.CreateFooting(post.parent, roadside);
+        Quaternion facing = Quaternion.LookRotation(-forward);
+        post.SetPositionAndRotation(roadside + Vector3.up, facing);
+        label.SetPositionAndRotation(roadside + Vector3.up * 2.3f, facing);
         label.localScale = Vector3.one;
     }
     static void MakeHump(Transform parent, Vector3 point, Vector3 forward)
