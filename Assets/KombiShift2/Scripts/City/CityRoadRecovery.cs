@@ -32,8 +32,13 @@ namespace KombiShift2.City
                     if (score > best) { best = score; forward = d; }
                 }
             Vector3 left = -Vector3.Cross(Vector3.up, forward);
-            Vector3 position = node.position + forward * aheadMetres + left * LaneOffset;
-            position = Ground(position) + Vector3.up * .35f;
+            // Never drop a vehicle on top of another one: try a few spots further along the lane.
+            Vector3 position = Vector3.zero;
+            for (int attempt = 0; attempt < 5; attempt++)
+            {
+                position = Ground(node.position + forward * (aheadMetres + attempt * 8f) + left * LaneOffset) + Vector3.up * .35f;
+                if (!Occupied(position, forward, body)) break;
+            }
 
             body.linearVelocity = Vector3.zero; body.angularVelocity = Vector3.zero;
             body.position = position; body.rotation = Quaternion.LookRotation(forward, Vector3.up);
@@ -43,6 +48,18 @@ namespace KombiShift2.City
         }
 
         public static bool IsFlipped(Transform vehicle) => vehicle.up.y < .45f;
+
+        static readonly Collider[] overlap = new Collider[16];
+        static bool Occupied(Vector3 position, Vector3 forward, Rigidbody self)
+        {
+            int count = Physics.OverlapBoxNonAlloc(position + Vector3.up * .6f, new Vector3(1.1f, .6f, 2.6f), overlap, Quaternion.LookRotation(forward), ~0, QueryTriggerInteraction.Ignore);
+            for (int i = 0; i < count; i++)
+            {
+                var other = overlap[i].attachedRigidbody;
+                if (other != null && other != self && !other.transform.IsChildOf(self.transform)) return true;
+            }
+            return false;
+        }
 
         static Vector3 Ground(Vector3 p)
         {

@@ -31,13 +31,14 @@ namespace KombiShift2.Traffic
         private bool cityStopCompleted;
         private bool headingHome;
         private float nextHomeCheck, progressAt, forceUntil, junctionWaitStart, lastMovedAt, flippedSince;
-        private bool waitingAtRed;
+        private bool waitingAtRed, queued;
         private Vector3 movedAnchor;
         private void RecoverOntoRoad()
         {
             Vector3 heading = target != null ? target.ServicePoint.position - transform.position : transform.forward;
             if (Vector3.Dot(heading, transform.forward) > 0f && !CityRoadRecovery.IsFlipped(transform)) heading = transform.forward;
-            if (CityRoadRecovery.Place(body, heading, 18f)) Say("Recovered back onto the road");
+            float jump = target != null && FlatDistance(target.ServicePoint.position, transform.position) < 40f ? 6f : 18f;
+            if (CityRoadRecovery.Place(body, heading, jump)) Say("Recovered back onto the road");
             flippedSince = 0f; lastMovedAt = Time.time; movedAnchor = transform.position; progressAt = Time.time; passing = false;
             if (cityNavigation != null) cityNavigation.Replan();
             routeIndex = NearestRouteIndex(transform.position);
@@ -53,6 +54,17 @@ namespace KombiShift2.Traffic
         public int Onboard => riders.Count;
         private bool servicePass;
         private int Drops(PassengerStation station) { int n = 0; foreach (var r in riders) if (r.Key != null && r.Value == station) n++; return n; }
+        private PassengerStation NextStopAhead()
+        {
+            PassengerStation best = null; float bestDistance = float.PositiveInfinity;
+            foreach (var s in stations)
+            {
+                if (s == null) continue;
+                float d = RouteDistance(NearestRouteIndex(s.ServicePoint.position));
+                if (d > 25f && d < bestDistance) { bestDistance = d; best = s; }
+            }
+            return best != null ? best : Array.Find(stations, x => x != null && x.Terminal);
+        }
         private PassengerStation PickDestination(PassengerStation from)
         {
             int start = Array.IndexOf(stations, from);
@@ -126,7 +138,7 @@ namespace KombiShift2.Traffic
             if (CityRoadRecovery.IsFlipped(transform)) { if (flippedSince == 0f) flippedSince = Time.time; } else flippedSince = 0f;
             // Creeping does not count: at least 6 m every 15 s.
             if ((transform.position - movedAnchor).sqrMagnitude > 36f) { movedAnchor = transform.position; lastMovedAt = Time.time; }
-            if ((flippedSince > 0f && Time.time - flippedSince > 2f) || Time.time - lastMovedAt > (waitingAtRed ? 60f : 15f)) { RecoverOntoRoad(); return; }
+            if ((flippedSince > 0f && Time.time - flippedSince > 2f) || Time.time - lastMovedAt > (waitingAtRed || queued ? 60f : 15f)) { RecoverOntoRoad(); return; }
             var terminal = Array.Find(stations, x => x != null && x.Terminal);
             bool checkHome = !headingHome && terminal != null && Time.time >= nextHomeCheck;
             if (checkHome) nextHomeCheck = Time.time + 1f;
@@ -155,7 +167,7 @@ namespace KombiShift2.Traffic
             else if (Time.time >= nextDeparture && (target == null || !(target.HasWaiting || Drops(target) > 0) || (target.Reserved && Drops(target) == 0) || Time.time >= nextEvaluation)) ChooseTarget();
             if (target == null) { State = RivalState.Cruise; CruiseRoute(); return; }
             float distance = FlatDistance(target.ServicePoint.position, transform.position);
-            if (distance < 2.2f && target.MatchesApproach(transform))
+            if ((distance < 2.2f || (distance < 4f && Drops(target) > 0)) && target.MatchesApproach(transform))
             {
                 Brake();
                 if (body.linearVelocity.magnitude > .5f) return;
@@ -251,6 +263,10 @@ namespace KombiShift2.Traffic
         }
         private void ChooseTarget()
         {
+            // A rider whose stop is now behind the kombi gets off at the next stop ahead instead.
+            var behind = new List<StationPassenger>();
+            foreach (var r in riders) if (r.Key != null && r.Value != null && !r.Value.Terminal && r.Value != target && float.IsPositiveInfinity(RouteDistance(NearestRouteIndex(r.Value.ServicePoint.position)))) behind.Add(r.Key);
+            foreach (var person in behind) riders[person] = NextStopAhead();
             nextEvaluation = Time.time + profile.reassessSeconds;
             PassengerStation best = null; float bestValue = float.NegativeInfinity, currentValue = float.NegativeInfinity; int bestIndex = routeIndex;
             foreach (var station in stations)
@@ -360,6 +376,7 @@ namespace KombiShift2.Traffic
             // light) squeezes through slowly, the way a kombi driver would, instead of freezing forever.
             bool redLight = junction != null && junction.signalised && !junction.SignalAllows(transform.forward);
             waitingAtRed = redLight;
+            queued = !clear && obstacle.rigidbody != null;
             // Aggressive kombis lose patience at a red light after 10 s and edge through; others wait out the cycle.
             float stuckLimit = redLight ? (profile.personality == RivalPersonality.Aggressive ? 10f : (CityIntersection.GreenSeconds + CityIntersection.AmberSeconds + CityIntersection.AllRedSeconds) * junction.PhaseCount + 5f) : 3f;
             if ((transform.position - progressAnchor).sqrMagnitude > 4f) { progressAnchor = transform.position; progressAt = Time.time; }
