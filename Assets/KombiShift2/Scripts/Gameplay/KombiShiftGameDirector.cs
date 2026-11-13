@@ -81,7 +81,8 @@ namespace KombiShift2.Gameplay
         public bool Alighting => servicing && trips.Any(t=>t.state==TripState.Alighting);
         public PassengerStation[] Stations => stations;
         public RivalKombiAI[] Rivals => rivals;
-        public int RivalPassengers => rivals == null ? 0 : rivals.Sum(x => x != null ? x.PassengersTaken : 0);
+        public int RivalsFinished => rivals == null ? 0 : rivals.Count(x => x != null && x.FinishedTrip);
+        public int RivalPassengers =>rivals == null ? 0 : rivals.Sum(x => x != null ? x.PassengersTaken : 0);
         public string Notice => servicing ? (trips.Any(x => x.state == TripState.Alighting) ? "ALIGHTING — KEEP THE KOMBI STOPPED" : "BOARDING — KEEP THE KOMBI STOPPED") : notice;
         public Vector3 CurrentTarget {
             get {
@@ -118,9 +119,9 @@ namespace KombiShift2.Gameplay
             rivals = FindObjectsByType<RivalKombiAI>(FindObjectsSortMode.None);
             for (int i = 0; i < rivals.Length; i++)
             {
-                rivals[i].SetPersonality(Stage==KombiStage.Morning ? (i%2==0?RivalPersonality.Competitive:RivalPersonality.Conservative) : (i%2==0?RivalPersonality.Aggressive:RivalPersonality.Competitive), i % 2 == 0 ? new Color(.95f,.35f,.22f) : new Color(.35f,.6f,1f));
+                rivals[i].SetPersonality(Stage==KombiStage.Morning ? (i%2==0?RivalPersonality.Aggressive:RivalPersonality.Competitive) : RivalPersonality.Aggressive, i % 2 == 0 ? new Color(.95f,.35f,.22f) : new Color(.35f,.6f,1f));
                 rivals[i].ActivityChanged += (rival, activity) => Announce(rival.name + ": " + activity);
-                rivals[i].SetChallenge(KombiChallenge.RivalSpeed(Stage), KombiChallenge.RivalDelay(Stage) + i * 6f);
+                rivals[i].SetChallenge(KombiChallenge.RivalSpeed(Stage), KombiChallenge.RivalDelay(Stage));
             }
             Quality = vehicle.GetComponent<KombiServiceQuality>() ?? vehicle.gameObject.AddComponent<KombiServiceQuality>(); Quality.Configure(this);
             Condition = vehicle.GetComponent<KombiVehicleCondition>() ?? vehicle.gameObject.AddComponent<KombiVehicleCondition>(); Condition.Configure(this);
@@ -274,7 +275,7 @@ namespace KombiShift2.Gameplay
                 : timeRemaining <= 0f
                     ? $"TIME EXPIRED. Mbare was not reached. {delivered} passengers delivered; target {MinimumPassengers}."
                     : $"TARGET MISSED at Mbare. {delivered} passengers delivered; {MinimumPassengers} required.";
-            string stats = $"Passengers delivered: {delivered} / {MinimumPassengers}\nRivals collected: {RivalPassengers}\nGross fares: ${GrossEarnings:0.00}  Repairs: ${RepairExpenses}  Fines: ${Law.TotalFines}\nNet + time bonus: ${earnings:0.00}   Best: ${KombiChallenge.Best(Stage)}";
+            string stats = $"Passengers delivered: {delivered} / {MinimumPassengers}\nRivals collected: {RivalPassengers}   Rivals finished: {RivalsFinished} / {(rivals == null ? 0 : rivals.Length)}\nGross fares: ${GrossEarnings:0.00}  Repairs: ${RepairExpenses}  Fines: ${Law.TotalFines}\nNet + time bonus: ${earnings:0.00}   Best: ${KombiChallenge.Best(Stage)}";
             string message = paused ? $"{KombiChallenge.Name(Stage)}\nDeliver {MinimumPassengers}+ passengers to Mbare.\nEscape — resume    R — restart" : $"{KombiChallenge.Name(Stage)}\n{outcome}\n\n{stats}";
             GUI.Label(new Rect(panel.x + 20, panel.y + 78, width - 40, 155), message, body);
             if (paused)

@@ -63,7 +63,7 @@ namespace KombiShift2.City
                 int index=Mathf.Min(path.Count-1,Mathf.Max(1,4+i*3));var point=graph.LanePoint(path,index);
                 Vector3 forward=points[Mathf.Min(index+1,points.Length-1)].position-points[Mathf.Max(0,index-1)].position;forward.y=0;
                 rivals[i].transform.SetPositionAndRotation(point+Vector3.up*.14f,Quaternion.LookRotation(forward));
-                rivals[i].Configure(points,stops.Select(x=>x.GetComponent<PassengerStation>()).ToArray(),KombiChallenge.Selected==KombiStage.RushHour?4:22,KombiChallenge.Selected==KombiStage.RushHour?10.5f:7.5f);
+                rivals[i].Configure(points,stops.Select(x=>x.GetComponent<PassengerStation>()).ToArray(),KombiChallenge.RivalDelay(KombiChallenge.Selected),KombiChallenge.Selected==KombiStage.RushHour?10.5f:7.5f);
             }
             CityTripSelection.Distance=graph.Length(path);
             SelectedDuration=Mathf.Max(KombiChallenge.Seconds(KombiChallenge.Selected),graph.Length(path)/(KombiChallenge.Selected==KombiStage.RushHour?7f:6f)+stops.Count*40f+150f);

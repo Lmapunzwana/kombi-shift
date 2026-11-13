@@ -11,7 +11,8 @@ namespace KombiShift2.Gameplay
         public static int MinimumPassengers(KombiStage stage) => KombiStageSettings.Load(stage) != null ? KombiStageSettings.Load(stage).deliveryTarget : stage == KombiStage.Morning ? 1 : 6;
         public static float Seconds(KombiStage stage) => KombiStageSettings.Load(stage) != null ? KombiStageSettings.Load(stage).duration : stage == KombiStage.Morning ? 600f : 420f;
         public static float RivalSpeed(KombiStage stage) => KombiStageSettings.Load(stage) != null ? KombiStageSettings.Load(stage).rivalSpeed : stage == KombiStage.Morning ? 6f : 9f;
-        public static float RivalDelay(KombiStage stage) => KombiStageSettings.Load(stage) != null ? KombiStageSettings.Load(stage).rivalHeadStart : stage == KombiStage.Morning ? 45f : 8f;
+        // Rivals leave the rank the moment the shift starts, like real kombis competing for the same queue.
+        public static float RivalDelay(KombiStage stage) => 0f;
         public static int Best(KombiStage stage) => PlayerPrefs.GetInt("KombiShift2.Best." + stage, 0);
         public static void SaveBest(KombiStage stage, int earnings)
         {

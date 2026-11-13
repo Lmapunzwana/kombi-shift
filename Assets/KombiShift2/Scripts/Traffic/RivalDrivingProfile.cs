@@ -17,12 +17,16 @@ namespace KombiShift2.Traffic
         public static RivalDrivingProfile For(RivalPersonality kind) => new() {
             personality = kind,
             allowOvertaking = kind != RivalPersonality.Conservative,
-            speedMultiplier = kind == RivalPersonality.Aggressive ? 1.42f : kind == RivalPersonality.Competitive ? 1.28f : .9f,
-            followingSeconds = kind == RivalPersonality.Aggressive ? .8f : kind == RivalPersonality.Competitive ? 1f : 2f,
+            speedMultiplier = kind == RivalPersonality.Aggressive ? 1.55f : kind == RivalPersonality.Competitive ? 1.35f : .9f,
+            followingSeconds = kind == RivalPersonality.Aggressive ? .7f : kind == RivalPersonality.Competitive ? .9f : 2f,
+            maxSteering = kind == RivalPersonality.Conservative ? 32f : 35f,
+            braking = kind == RivalPersonality.Conservative ? 4f : 5.5f,
             reassessSeconds = kind == RivalPersonality.Aggressive ? 1f : kind == RivalPersonality.Competitive ? 1.5f : 4f,
             switchAdvantage = kind == RivalPersonality.Aggressive ? 1f : kind == RivalPersonality.Competitive ? 2f : 3f,
             acceleration = kind == RivalPersonality.Aggressive ? 4.2f : kind == RivalPersonality.Competitive ? 3.4f : 2f,
             passengerValue = kind == RivalPersonality.Aggressive ? 14f : kind == RivalPersonality.Competitive ? 11f : 8f };
+        // How far over a posted limit this driver will push (Harare kombi style).
+        public float LimitTolerance => personality == RivalPersonality.Aggressive ? 1.3f : personality == RivalPersonality.Competitive ? 1.15f : 1f;
         public float Utility(int demand, int seats, float distance, float speed, int congestion, bool reserved)
             => Mathf.Min(demand, seats) * passengerValue - distance / Mathf.Max(1f, speed) * travelCost - congestion * congestionPenalty - (reserved ? reservationPenalty : 0f);
     }

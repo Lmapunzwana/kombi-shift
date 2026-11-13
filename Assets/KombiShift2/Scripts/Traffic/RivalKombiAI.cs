@@ -29,6 +29,10 @@ namespace KombiShift2.Traffic
         private float passUntil,passOffset,nextPass,cityStoppedAt;
         private CityIntersection cityStop;
         private bool cityStopCompleted;
+        private bool headingHome;
+        private float nextHomeCheck;
+        private KombiShiftGameDirector director;
+        public bool FinishedTrip { get; private set; }
         private readonly RaycastHit[] obstacles = new RaycastHit[64];
         private readonly Collider[] congestion = new Collider[32];
         public int PassengersTaken { get; private set; }
@@ -83,19 +87,32 @@ namespace KombiShift2.Traffic
         private void Start()
         {
             routeIndex = NearestRouteIndex(transform.position); startedAt = Time.time;
+            director = FindFirstObjectByType<KombiShiftGameDirector>();
             if(CityTripSession.Active)cityNavigation=gameObject.AddComponent<CityRivalNavigation>();
         }
         private void FixedUpdate()
         {
             if (shiftEnded || route == null || route.Length < 2 || stations == null || Time.time - startedAt < departureDelay || State == RivalState.Boarding)
             { Brake(); return; }
-            bool full = PassengersTaken >= cabin.Seats.Length;
+            var terminal = Array.Find(stations, x => x != null && x.Terminal);
+            bool checkHome = !headingHome && terminal != null && Time.time >= nextHomeCheck;
+            if (checkHome) nextHomeCheck = Time.time + 1f;
+            if (checkHome && ShouldHeadToTerminal(terminal))
+            {
+                headingHome = true;
+                if (target != null && target != terminal) target.Release(transform);
+                Say("Heading for " + terminal.name + " with " + PassengersTaken + " passengers");
+            }
+            bool full = headingHome;
             if (full)
             {
-                target = Array.Find(stations, x => x != null && x.Terminal);
+                target = terminal;
                 if (target == null) { CruiseRoute(); return; }
                 destinationIndex = NearestRouteIndex(target.ServicePoint.position);
                 State = RivalState.Depart;
+                // A vehicle parked on the terminal bay should not keep a rival circling forever.
+                if (FlatDistance(target.ServicePoint.position, transform.position) < 12f && blockedTime > 3f && body.linearVelocity.magnitude < .5f)
+                { FinishTrip(); return; }
             }
             else if (Time.time >= nextDeparture && (target == null || !target.HasWaiting || target.Reserved || Time.time >= nextEvaluation)) ChooseTarget();
             if (target == null) { State = RivalState.Cruise; CruiseRoute(); return; }
@@ -104,7 +121,7 @@ namespace KombiShift2.Traffic
             {
                 Brake();
                 if (body.linearVelocity.magnitude > .5f) return;
-                if (full) { Say("Arrived at Mbare"); shiftEnded = true; return; }
+                if (full) { FinishTrip(); return; }
                 State = RivalState.Boarding; StartCoroutine(Collect()); return;
             }
             if (Mathf.Abs(routeIndex - destinationIndex) <= 1 && distance < 10f)
@@ -114,6 +131,38 @@ namespace KombiShift2.Traffic
                 if (!full) State = RivalState.ChasePassenger;
                 FollowRoute();
             }
+        }
+        // Go to the terminal when full, when no passengers are left ahead, or when the clock says it is time to finish.
+        private bool ShouldHeadToTerminal(PassengerStation terminal)
+        {
+            if (PassengersTaken >= cabin.Seats.Length) return true;
+            bool demandAhead = false;
+            foreach (var station in stations)
+            {
+                if (station == null || station.Terminal || !station.HasWaiting) continue;
+                if (station == target || !float.IsPositiveInfinity(RouteDistance(NearestRouteIndex(station.ServicePoint.position)))) { demandAhead = true; break; }
+            }
+            if (!demandAhead) return true;
+            if (director == null) return false;
+            int terminalIndex = NearestRouteIndex(terminal.ServicePoint.position);
+            float distance = RouteDistance(terminalIndex);
+            if (float.IsPositiveInfinity(distance)) distance = FlatDistance(transform.position, terminal.ServicePoint.position) * 1.5f;
+            float eta = distance / Mathf.Max(3f, speed * profile.speedMultiplier * .55f);
+            return director.TimeRemaining <= eta + 30f;
+        }
+        private void FinishTrip()
+        {
+            if (FinishedTrip) return;
+            FinishedTrip = true; shiftEnded = true; Brake();
+            if (target != null) target.Release(transform);
+            Say("Finished at " + (target != null ? target.name : "the terminal") + " with " + PassengersTaken + " passengers");
+            StartCoroutine(LeaveTerminal());
+        }
+        private IEnumerator LeaveTerminal()
+        {
+            // Passengers alight, then the kombi clears the bay so it never blocks the player's stop.
+            yield return new WaitForSeconds(4f);
+            gameObject.SetActive(false);
         }
         private void CruiseRoute() => FollowRoute();
         private void FollowRoute()
@@ -210,7 +259,7 @@ namespace KombiShift2.Traffic
             var junction=CityIntersection.Near(point);
             if(road!=null)
             {
-                desiredSpeed=Mathf.Min(desiredSpeed,road.speedLimit/3.6f*(profile.personality==RivalPersonality.Aggressive?1.1f:1));
+                desiredSpeed=Mathf.Min(desiredSpeed,road.speedLimit/3.6f*profile.LimitTolerance);
                 if(!passing && profile.allowOvertaking && road.allowPassing && road.width>=13f && junction==null && !clear && obstacle.rigidbody!=null && obstacle.distance>5f && blockedTime>2f && Mathf.Abs(steering)<8f && Time.time>nextPass)
                 {
                     Vector3 lane=origin+transform.right*3.1f;
@@ -241,13 +290,13 @@ namespace KombiShift2.Traffic
                 }
                 if(stopRequired&&!cityStopCompleted || !junction.MayEnter(body,transform.forward,point+transform.forward*12f))desiredSpeed=0;
             }
-            if (blockedTime > 25f && Time.time >= nextEvaluation)
+            if (!headingHome && blockedTime > 25f && Time.time >= nextEvaluation)
             { target = null; ChooseTarget(); Say("Blocked route: reassessing demand; waiting for clearance"); }
             foreach (var zone in KombiRoadRules.Active)
             {
                 float distance = Vector3.Distance(zone.transform.position, transform.position);
                 if (distance > 25f) continue;
-                if (zone.rule == RoadRule.SpeedLimit || zone.rule == RoadRule.Crossing || zone.rule == RoadRule.Hump) desiredSpeed = Mathf.Min(desiredSpeed, zone.limit / 3.6f * (profile.personality == RivalPersonality.Aggressive ? 1.15f : 1f));
+                if (zone.rule == RoadRule.SpeedLimit || zone.rule == RoadRule.Crossing || zone.rule == RoadRule.Hump) desiredSpeed = Mathf.Min(desiredSpeed, zone.limit / 3.6f * profile.LimitTolerance);
                 if (zone.rule == RoadRule.NoEntry)
                 {
                     Vector3 toZone = zone.transform.position - transform.position;

@@ -19,7 +19,7 @@ namespace KombiShift2.City
         public CityIntersectionArm[] arms=Array.Empty<CityIntersectionArm>();
         [HideInInspector] public Renderer[] eastWestLamps,northSouthLamps;
         readonly List<Reservation> reservations=new(); readonly Dictionary<Rigidbody,float> waiting=new(); readonly Collider[] occupants=new Collider[24]; MaterialPropertyBlock lamp;
-        const float GreenSeconds=10f,AmberSeconds=3f,AllRedSeconds=2f,PlatoonGap=8f;
+        public const float GreenSeconds=10f,AmberSeconds=3f,AllRedSeconds=2f,PlatoonGap=8f;
         struct Reservation { public Rigidbody vehicle; public Vector3 heading,exitDirection; public bool entered; public float reservedAt; }
         void Awake(){lamp=new MaterialPropertyBlock();}
         public int PhaseCount { get { int count=0;if(arms!=null)foreach(var arm in arms)if(arm!=null&&arm.incoming)count=Mathf.Max(count,arm.phase+1);return Mathf.Max(1,count); } }
