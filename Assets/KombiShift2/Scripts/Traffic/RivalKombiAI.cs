@@ -157,11 +157,12 @@ namespace KombiShift2.Traffic
         // Go to the terminal when full, when no passengers are left ahead, or when the clock says it is time to finish.
         private bool ShouldHeadToTerminal(PassengerStation terminal)
         {
-            if (Onboard >= cabin.Seats.Length) return true;
+            // Still worth stopping ahead: a stop where riders get off, or (with free seats) a waiting queue.
             bool demandAhead = false;
             foreach (var station in stations)
             {
-                if (station == null || station.Terminal || (!station.HasWaiting && Drops(station) == 0)) continue;
+                if (station == null || station.Terminal) continue;
+                if (Drops(station) == 0 && !(station.HasWaiting && Onboard < cabin.Seats.Length)) continue;
                 if (station == target || !float.IsPositiveInfinity(RouteDistance(NearestRouteIndex(station.ServicePoint.position)))) { demandAhead = true; break; }
             }
             if (!demandAhead) return true;
@@ -326,7 +327,8 @@ namespace KombiShift2.Traffic
             if(road!=null)
             {
                 desiredSpeed=Mathf.Min(desiredSpeed,road.speedLimit/3.6f*profile.LimitTolerance);
-                bool stoppedAtStop=!clear&&ServiceStopAhead(obstacle);
+                // Overtake a kombi loading at a stop, or (aggressive kombis) a queue that has stood still for 4 s.
+                bool stoppedAtStop=!clear&&(ServiceStopAhead(obstacle)||(profile.personality==RivalPersonality.Aggressive&&obstacle.rigidbody!=null&&obstacle.rigidbody.linearVelocity.magnitude<1f&&blockedTime>4f));
                 if(!passing && profile.allowOvertaking && (road.allowPassing && road.width>=13f || stoppedAtStop) && junction==null && !clear && obstacle.rigidbody!=null && obstacle.distance>4f && blockedTime>(stoppedAtStop?.8f:2f) && Mathf.Abs(steering)<8f && Time.time>nextPass)
                 {
                     Vector3 lane=origin+transform.right*3.1f;
@@ -347,7 +349,8 @@ namespace KombiShift2.Traffic
             { forceUntil = Time.time + 4f; progressAt = Time.time; Say("Squeezing through the hold-up"); }
             bool forcing = Time.time < forceUntil;
             if (forcing) desiredSpeed = Mathf.Min(desiredSpeed, 7f);
-            if (!clear && !forcing)
+            // Squeezing through never rams a vehicle close ahead.
+            if (!clear && (!forcing || (obstacle.rigidbody != null && obstacle.distance < 6f)))
             {
                 float leadSpeed=obstacle.rigidbody!=null?Mathf.Max(0f,Vector3.Dot(obstacle.rigidbody.linearVelocity,transform.forward)):0f;
                 float safeDistance=Mathf.Max(0f,obstacle.distance-4f);
