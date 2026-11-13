@@ -9,7 +9,7 @@ namespace KombiShift2.City
     {
         public int morningVehicles=28,rushVehicles=48;
         public float fullPhysicsDistance=350f,spawnDistance=450f;
-        readonly List<CityTrafficAgent> pool=new();CityRoadNetwork graph;Transform player;float next;
+        readonly List<CityTrafficAgent> pool=new();readonly Collider[] spawnHits=new Collider[24];CityRoadNetwork graph;Transform player;float next;
         public int ActiveCount {get;private set;}
         public float MeanDecisionMilliseconds {get;private set;}
         IEnumerator Start()
@@ -61,30 +61,34 @@ namespace KombiShift2.City
             foreach(var agent in pool)
             {
                 float distance=Vector3.Distance(agent.transform.position,player.position);
-                if(agent.gameObject.activeSelf&&distance>spawnDistance+200f){agent.gameObject.SetActive(false);}
+                Vector3 fromPlayer=agent.transform.position-player.position;
+                if(agent.gameObject.activeSelf&&distance>spawnDistance+200f&&Vector3.Dot(player.forward,fromPlayer)<-50f){agent.gameObject.SetActive(false);}
                 if(!agent.gameObject.activeSelf)TrySpawn(agent);
                 if(!agent.gameObject.activeSelf)continue;
-                var body=agent.GetComponent<Rigidbody>();bool detailed=Vector3.Distance(agent.transform.position,player.position)<fullPhysicsDistance;
-                if(body.isKinematic==detailed){body.isKinematic=!detailed;if(detailed)body.WakeUp();}
+                bool detailed=Vector3.Distance(agent.transform.position,player.position)<fullPhysicsDistance;agent.SetDetailedPhysics(detailed);
                 active++;cost+=agent.DecisionMilliseconds;
             }
             ActiveCount=active;MeanDecisionMilliseconds=active>0?cost/active:0;
         }
         void TrySpawn(CityTrafficAgent agent)
         {
-            for(int attempt=0;attempt<40;attempt++)
+            for(int attempt=0;attempt<200;attempt++)
             {
                 int start=Random.Range(0,graph.Nodes.Length);var node=graph.Nodes[start];if(node.component!=0||node.junction||node.links.Length<2)continue;
                 float distance=Vector3.Distance(node.position,player.position);if(distance<80||distance>spawnDistance)continue;
                 int end=Random.Range(0,graph.Nodes.Length);if(graph.Nodes[end].component!=0)continue;
-                var path=graph.FindPath(start,end);if(path.Count<3)continue;
+                Vector3 preferred=(node.links.Length>0?graph.Nodes[node.links[0]].position-node.position:player.forward);preferred.y=0;
+                var path=graph.FindDirectedPath(start,end,preferred);if(path.Count<3)continue;
                 Vector3 point=graph.LanePoint(path,0),forward=graph.LanePoint(path,1)-point;forward.y=0;
-                if(Physics.CheckBox(point+Vector3.up,.95f*Vector3.one,Quaternion.LookRotation(forward),~0,QueryTriggerInteraction.Ignore))continue;
+                if(CityIntersection.Near(point)!=null)continue;
+                int nearby=Physics.OverlapSphereNonAlloc(point,8f,spawnHits,~0,QueryTriggerInteraction.Ignore);bool occupied=false;
+                for(int hit=0;hit<nearby;hit++)if(spawnHits[hit].attachedRigidbody!=null&&(spawnHits[hit].attachedRigidbody.GetComponent<CityTrafficAgent>()!=null||spawnHits[hit].attachedRigidbody.CompareTag("Player"))){occupied=true;break;}
+                if(occupied)continue;
                 var camera=Camera.main;
                 if(camera!=null){var viewport=camera.WorldToViewportPoint(point);if(viewport.z>0&&viewport.x>-.1f&&viewport.x<1.1f&&viewport.y>-.1f&&viewport.y<1.1f)continue;}
                 agent.transform.SetPositionAndRotation(point+Vector3.up*.12f,Quaternion.LookRotation(forward));
                 agent.gameObject.SetActive(true);var body=agent.GetComponent<Rigidbody>();body.isKinematic=false;body.position=agent.transform.position;body.rotation=agent.transform.rotation;body.linearVelocity=Vector3.zero;body.angularVelocity=Vector3.zero;
-                agent.Initialise(graph,start,end);return;
+                agent.Initialise(graph,start,end,path);return;
             }
         }
     }

@@ -15,3 +15,7 @@ Codex assisted the new service-trip, quality, damage, traffic-law, rival-wheel-p
 ## 11 November existing-city infrastructure
 
 Codex assisted the existing-road inventory, derived graph and route data, copied physical road meshes, traffic controllers, Trip Market, integration fixtures and documentation. The existing NYBlock02 city and source assets were preserved. Road surfacing reuses the already included Poly Haven worn-asphalt textures and licence; no new city, OpenStreetMap data or proprietary ETS code/assets were imported. New navigation, shared marking meshes, road-condition geometry, signal/sign objects and UI code are project-owned additions. Source control and validation records identify the changes; they do not establish personal contributions or understanding by every member. Actual tester feedback was requested after the user confirmed it exists, but no three-person records are invented.
+
+## 13 November ambient traffic
+
+Codex assisted the project-owned ambient traffic agent, fleet, junction arbitration and automated soak verification. No vendor traffic/controller source was modified and no new external asset was added. The recorded Morning and Rush Hour results are automated evidence only, not fabricated human testing or authorship claims.

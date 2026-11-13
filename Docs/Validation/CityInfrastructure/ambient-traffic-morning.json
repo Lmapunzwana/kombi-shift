@@ -1,0 +1,86 @@
+{
+    "utc": "2026-11-13T10:48:46.8924500Z",
+    "stage": "Morning",
+    "requestedFleet": 28,
+    "peakActive": 28,
+    "junctionEntries": 305,
+    "redLightEntries": 0,
+    "stopSignViolations": 0,
+    "overThirtySecondJunctionWaits": 0,
+    "replans": 19,
+    "simulatedSeconds": 605.0051879882813,
+    "realSeconds": 609.3515625,
+    "meanDecisionMilliseconds": 0.13751071691513062,
+    "meanFrameMilliseconds": 7.574876308441162,
+    "throughputEntriesPerMinute": 30.5,
+    "baselineAvailable": false,
+    "baselineNote": "No pre-Phase-3 executable baseline was retained; current throughput is reported without fabricating a comparison.",
+    "worstWaits": [
+        {
+            "vehicle": "City traffic 2",
+            "junction": "junction-2981",
+            "reason": "",
+            "seconds": 26.248245239257813,
+            "node": 2976,
+            "position": {
+                "x": -700.5107421875,
+                "y": 23.3131103515625,
+                "z": 532.3201904296875
+            },
+            "kinematic": false
+        },
+        {
+            "vehicle": "City traffic 27",
+            "junction": "junction-1965",
+            "reason": "signal",
+            "seconds": 25.24468994140625,
+            "node": 1952,
+            "position": {
+                "x": 41.22418975830078,
+                "y": 16.472000122070313,
+                "z": 274.6304626464844
+            },
+            "kinematic": true
+        },
+        {
+            "vehicle": "City traffic 10",
+            "junction": "junction-1766",
+            "reason": "",
+            "seconds": 23.748641967773438,
+            "node": 1684,
+            "position": {
+                "x": -702.6265258789063,
+                "y": 23.755001068115234,
+                "z": 244.62710571289063
+            },
+            "kinematic": true
+        },
+        {
+            "vehicle": "City traffic 13",
+            "junction": "junction-1766",
+            "reason": "",
+            "seconds": 22.995689392089844,
+            "node": 1684,
+            "position": {
+                "x": -702.5289306640625,
+                "y": 23.746000289916992,
+                "z": 244.07357788085938
+            },
+            "kinematic": true
+        },
+        {
+            "vehicle": "City traffic 16",
+            "junction": "",
+            "reason": "",
+            "seconds": 18.748291015625,
+            "node": 256,
+            "position": {
+                "x": -146.472412109375,
+                "y": 16.31800079345703,
+                "z": -227.1449432373047
+            },
+            "kinematic": true
+        }
+    ],
+    "failed": []
+}

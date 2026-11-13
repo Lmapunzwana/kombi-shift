@@ -214,7 +214,7 @@ public static class KombiCityInfrastructureUpgrade
         }
     }
     [Serializable] sealed class JunctionDocument { public JunctionRecord[] junctions; }
-    [Serializable] sealed class JunctionRecord { public string id,type,control;public Vector3 centre;public float radius;public ArmRecord[] arms; }
+    [Serializable] sealed class JunctionRecord { public string id,type,control;public Vector3 centre;public float radius;public int[] nodeIds;public ArmRecord[] arms; }
     [Serializable] sealed class ArmRecord { public string id,control;public float bearing,width;public bool major,incoming,outgoing;public int approachNode;public Vector3 approachLanePoint; }
     static void BuildIntersections(Transform root,CityRoadNetwork network)
     {
@@ -229,13 +229,14 @@ public static class KombiCityInfrastructureUpgrade
         foreach(var record in document.junctions)
         {
             var go=new GameObject(record.id+" — "+record.type+" — "+record.control);go.transform.SetParent(group,false);go.transform.position=record.centre;
-            var intersection=go.AddComponent<CityIntersection>();intersection.junctionId=record.id;intersection.junctionType=record.type;intersection.control=record.control;
+            var intersection=go.AddComponent<CityIntersection>();intersection.junctionId=record.id;intersection.junctionType=record.type;intersection.control=record.control;intersection.nodeIds=record.nodeIds??Array.Empty<int>();
             intersection.signalised=record.control=="Signalised";intersection.roundabout=record.control=="RoundaboutYield";intersection.radius=record.radius;
             var arms=record.arms??Array.Empty<ArmRecord>();intersection.stopControlled=arms.Any(a=>a.control=="Stop");
             var runtimeArms=new List<CityIntersectionArm>();
             int nextMinorPhase=arms.Any(a=>a.major)?1:0;
             foreach(var arm in arms)
             {
+                string armControl=record.control=="Uncontrolled"?"None":arm.control;
                 int phase=arm.major?0:nextMinorPhase;
                 int approachIndex=arm.approachNode;
                 if(approachIndex<0||approachIndex>=network.Nodes.Length||network.Nodes[approachIndex].component!=0)
@@ -243,10 +244,10 @@ public static class KombiCityInfrastructureUpgrade
                 if(approachIndex<0)throw new InvalidOperationException(record.id+"/"+arm.id+" has no road-network approach node.");
                 var approachNode=network.Nodes[approachIndex];
                 float approachWidth=approachNode.width>0f?approachNode.width:arm.width;
-                var runtime=new CityIntersectionArm{id=arm.id,control=arm.control,bearing=arm.bearing,width=approachWidth,major=arm.major,incoming=arm.incoming,outgoing=arm.outgoing,phase=phase,approachPoint=approachNode.position};
+                var runtime=new CityIntersectionArm{id=arm.id,control=armControl,bearing=arm.bearing,width=approachWidth,major=arm.major,incoming=arm.incoming,outgoing=arm.outgoing,phase=phase,approachPoint=approachNode.position};
                 Vector3 outward=new(Mathf.Sin(arm.bearing*Mathf.Deg2Rad),0,Mathf.Cos(arm.bearing*Mathf.Deg2Rad));
                 Vector3 stop=approachNode.position+outward*2f;
-                if(arm.control=="Signal"&&arm.incoming)
+                if(armControl=="Signal"&&arm.incoming)
                 {
                     if(!CityRoadsidePlacement.TryFind(stop,outward,approachWidth,1,out var lampPosition,out bool needsFooting,24f,10f))
                         throw new InvalidOperationException(record.id+"/"+arm.id+" has no supported roadside location for its signal.");
@@ -268,14 +269,14 @@ public static class KombiCityInfrastructureUpgrade
                     }
                     else Debug.LogWarning("Omitted SIGNAL AHEAD sign at "+record.id+"/"+arm.id+" because no supported roadside ground is available.");
                 }
-                else if((arm.control=="Stop"||arm.control=="GiveWay")&&arm.incoming)
+                else if((armControl=="Stop"||armControl=="GiveWay")&&arm.incoming)
                 {
                     if(CityRoadsidePlacement.TryFind(stop,outward,approachWidth,1,out var signPosition,out bool signNeedsFooting))
                     {
                         if(signNeedsFooting)CityRoadsidePlacement.CreateFooting(go.transform,signPosition);
-                        MakeJunctionSign(go.transform,arm.control=="Stop"?"STOP":"GIVE WAY",signPosition,outward);
+                        MakeJunctionSign(go.transform,armControl=="Stop"?"STOP":"GIVE WAY",signPosition,outward);
                     }
-                    else Debug.LogWarning("Omitted "+arm.control+" sign at "+record.id+"/"+arm.id+" because no supported roadside ground is available.");
+                    else Debug.LogWarning("Omitted "+armControl+" sign at "+record.id+"/"+arm.id+" because no supported roadside ground is available.");
                 }
                 runtimeArms.Add(runtime);
             }
