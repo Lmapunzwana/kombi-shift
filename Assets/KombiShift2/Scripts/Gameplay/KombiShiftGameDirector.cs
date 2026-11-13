@@ -81,6 +81,7 @@ namespace KombiShift2.Gameplay
         public bool Alighting => servicing && trips.Any(t=>t.state==TripState.Alighting);
         public PassengerStation[] Stations => stations;
         public RivalKombiAI[] Rivals => rivals;
+        public bool RaceStarted { get; private set; }
         public int RivalsFinished => rivals == null ? 0 : rivals.Count(x => x != null && x.FinishedTrip);
         public int RivalPassengers =>rivals == null ? 0 : rivals.Sum(x => x != null ? x.PassengersTaken : 0);
         public string Notice => servicing ? (trips.Any(x => x.state == TripState.Alighting) ? "ALIGHTING — KEEP THE KOMBI STOPPED" : "BOARDING — KEEP THE KOMBI STOPPED") : notice;
@@ -132,7 +133,7 @@ namespace KombiShift2.Gameplay
             for (int n = 0; n < samples.Length; n++) samples[n] = Mathf.Sin(n * 2f * Mathf.PI * 660f / 22050f) * .12f * (1f - n / (float)samples.Length);
             requestTone.SetData(samples, 0);
             Quality.Changed += (message, xp) => { notice = message + $"  XP {xp:+0;-0;0}"; serviceAudio.PlayOneShot(requestTone, .45f); };
-            notice = $"{KombiChallenge.Name(Stage)} — deliver {MinimumPassengers}+ passengers to {(CityTripSession.Active?CityTripSelection.Selected.destination:"Mbare")}.";
+            notice = $"{KombiChallenge.Name(Stage)} — deliver {MinimumPassengers}+ passengers to {(CityTripSession.Active?CityTripSelection.Selected.destination:"Mbare")}. Press W to start: the rivals go when you go.";
         }
 
         private void Update()
@@ -140,6 +141,14 @@ namespace KombiShift2.Gameplay
             if (Input.GetKeyDown(KeyCode.Escape) && !finished) SetPaused(!paused);
             if (Input.GetKeyDown(KeyCode.R)) RestartShift();
             if (paused || finished || vehicle == null || StopCount == 0) return;
+            // Like a race start: the clock and the rivals wait for the player's first throttle press.
+            if (!RaceStarted)
+            {
+                bool throttle = Input.GetKey(KeyCode.W) || Input.GetKey(KeyCode.UpArrow);
+                if (!throttle && vehicle.absoluteSpeed < 1.5f && !Application.isBatchMode) return;
+                RaceStarted = true;
+                notice = "GO! The rivals are racing you to the passengers.";
+            }
             timeRemaining = Mathf.Max(0f, timeRemaining - Time.deltaTime);
             if (timeRemaining <= 0f) { Finish(false); return; }
             if (Input.GetKeyDown(KeyCode.T)) notice = Condition.Repair() ? "Vehicle repaired." : $"Repair at a stop, below 2 km/h: ${Condition.RepairPrice}";
