@@ -35,3 +35,7 @@ MorningShift/RushHour assets now expose city target, traffic pool, queue size an
 Traffic pool reuse resets manoeuvre/timing/stop state and junction claims. Dense city queries retain complete collision coverage. Spatial junction lookup, staggered decisions, reused spawn paths and a shared per-frame path-search budget reduce repeated work. No new FPS or runtime pass is claimed from these source changes.
 
 See [change scope and validation](Docs/Assessment/CODE_REVIEW_IMPROVEMENTS.md). Unit Test MCP and fresh Unity scene/play checks remain required; existing builds and historical PDFs/decks have not been regenerated.
+
+### Compact speedometer and defensive traffic
+
+The orange speedometer is 30% smaller with a transparent backing. Traffic now ignores road surfaces in its obstacle sensors, remains simulated throughout its spawn area, uses full-footprint clearance and emergency braking, and defaults to no overtaking with a 20 km/h cruise cap. Fresh full-scene evidence and scope are in `Docs/Validation/TrafficCompactHud/README.md`.

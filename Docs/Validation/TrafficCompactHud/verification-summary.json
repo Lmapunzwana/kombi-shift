@@ -1,0 +1,10 @@
+{
+  "peakActive": 28,
+  "movedVehicles": 28,
+  "vehicleContacts": 0,
+  "date": "2026-11-13",
+  "scope": "90-second normal full-scene traffic observation, Morning direct-scene scenario; not a human playtest or standalone build",
+  "compileErrorsAndExceptionsDuringObservation": [],
+  "hudScale": 0.7,
+  "transparentBacking": true
+}

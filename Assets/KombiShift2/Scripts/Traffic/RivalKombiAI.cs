@@ -26,6 +26,7 @@ namespace KombiShift2.Traffic
         private float startedAt, nextEvaluation, nextDeparture, blockedTime;
         private bool shiftEnded;
         private CityRivalNavigation cityNavigation;
+        public bool allowOvertaking; // Opt-in; normal traffic prioritises collision avoidance.
         private bool passing;
         private float passUntil,passOffset,nextPass,cityStoppedAt;
         private CityIntersection cityStop;
@@ -186,7 +187,7 @@ namespace KombiShift2.Traffic
             nearest = default; float best = float.MaxValue;
             for (int i = 0; i < count; i++)
             {
-                var hit = hits[i]; if (hit.transform.IsChildOf(transform) || hit.normal.y > .6f) continue;
+                var hit = hits[i]; if (hit.transform.IsChildOf(transform) || hit.normal.y > .6f || hit.collider.GetComponentInParent<CityRoadSurface>() != null) continue;
                 if (hit.distance < best) { best = hit.distance; nearest = hit; }
             }
             return best == float.MaxValue;
@@ -203,14 +204,14 @@ namespace KombiShift2.Traffic
             desiredSpeed *= Mathf.Lerp(1f, .25f, Mathf.InverseLerp(10f, 65f, Mathf.Abs(steering)));
             Vector3 origin = transform.position + Vector3.up;
             float actualSpeed = body.linearVelocity.magnitude;
-            bool clear = Clear(origin, transform.forward, Mathf.Max(7f, actualSpeed * profile.followingSeconds + 3f), out var obstacle);
+            bool clear = Clear(origin, transform.forward, Mathf.Max(12f, actualSpeed*actualSpeed/(2f*profile.braking)+actualSpeed*Mathf.Max(2.4f,profile.followingSeconds)+5f), out var obstacle);
             blockedTime = clear ? 0f : blockedTime + Time.fixedDeltaTime;
             // Passing is restricted to a second same-direction lane in the baked road metadata.
             var junction=CityIntersection.Near(point);
             if(road!=null)
             {
-                desiredSpeed=Mathf.Min(desiredSpeed,road.speedLimit/3.6f*(profile.personality==RivalPersonality.Aggressive?1.1f:1));
-                if(!passing && profile.allowOvertaking && road.allowPassing && road.width>=13f && junction==null && !clear && obstacle.rigidbody!=null && obstacle.distance>5f && blockedTime>2f && Mathf.Abs(steering)<8f && Time.time>nextPass)
+                desiredSpeed=Mathf.Min(desiredSpeed,Mathf.Min(20f,road.speedLimit)/3.6f);
+                if(!passing && allowOvertaking && profile.allowOvertaking && road.allowPassing && road.width>=13f && junction==null && !clear && obstacle.rigidbody!=null && obstacle.distance>5f && blockedTime>2f && Mathf.Abs(steering)<8f && Time.time>nextPass)
                 {
                     Vector3 lane=origin+transform.right*3.1f;
                     if(Clear(lane,transform.forward,45f,out _) && Clear(lane,-transform.forward,20f,out _)){passing=true;passUntil=Time.time+7;Say("Passing slow traffic in a clear same-direction lane");}
@@ -221,12 +222,11 @@ namespace KombiShift2.Traffic
                     if(Clear(lane,transform.forward,12f,out _)&&Clear(lane,-transform.forward,12f,out _)){passing=false;nextPass=Time.time+6;}
                 }
             }
-            if (!clear) desiredSpeed=Mathf.Min(desiredSpeed,Mathf.Max(0f,(obstacle.distance-4f)/profile.followingSeconds));
+            if (!clear) desiredSpeed=Mathf.Min(desiredSpeed,Mathf.Max(0f,(obstacle.distance-5f)/Mathf.Max(2.4f,profile.followingSeconds)));
             if(junction!=cityStop){cityStop=junction;cityStopCompleted=false;cityStoppedAt=0;}
             if(junction!=null)
             {
-                bool occasionalRollingStop=profile.personality==RivalPersonality.Aggressive&&Mathf.RoundToInt(Mathf.Abs(junction.transform.position.x+junction.transform.position.z))%7==0;
-                bool stopRequired=junction.stopControlled&&!occasionalRollingStop;
+                bool stopRequired=junction.stopControlled;
                 if(stopRequired&&!cityStopCompleted)
                 {
                     if(actualSpeed<.3f){if(cityStoppedAt==0)cityStoppedAt=Time.time;cityStopCompleted=Time.time-cityStoppedAt>.7f;}

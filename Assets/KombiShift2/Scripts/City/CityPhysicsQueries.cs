@@ -22,6 +22,18 @@ namespace KombiShift2.City
                 Array.Resize(ref buffer,Mathf.Min(MaximumBuffer,buffer.Length*2));
             }
         }
+        public static int BoxCast(Vector3 origin,Vector3 halfExtents,Vector3 direction,Quaternion rotation,float distance,
+            ref RaycastHit[] buffer,out RaycastHit[] results)
+        {
+            while(true)
+            {
+                int count=Physics.BoxCastNonAlloc(origin,halfExtents,direction,buffer,rotation,distance,~0,QueryTriggerInteraction.Ignore);
+                if(count<buffer.Length){results=buffer;return count;}
+                if(buffer.Length>=MaximumBuffer)
+                {results=Physics.BoxCastAll(origin,halfExtents,direction,rotation,distance,~0,QueryTriggerInteraction.Ignore);return results.Length;}
+                Array.Resize(ref buffer,Mathf.Min(MaximumBuffer,buffer.Length*2));
+            }
+        }
         public static int OverlapSphere(Vector3 origin,float radius,ref Collider[] buffer,out Collider[] results,out bool saturated)
         {
             saturated=false;

@@ -75,7 +75,9 @@ namespace KombiShift2.City
                 float despawn=spawnDistance+200f;
                 if(distance>despawn*despawn && !Visible(agent.transform.position))
                 {agent.gameObject.SetActive(false);continue;}
-                bool detailed=distance<fullPhysicsDistance*fullPhysicsDistance;
+                // Every vehicle in the spawn area must simulate; otherwise pooled cars freeze before reaching the player.
+                float simulationDistance=Mathf.Max(fullPhysicsDistance,spawnDistance+25f);
+                bool detailed=distance<simulationDistance*simulationDistance;
                 // A visible moving vehicle should not freeze at the simulation boundary.
                 agent.SetDetailedPhysics(detailed||Visible(agent.transform.position));
                 active++;cost+=agent.DecisionMilliseconds;
@@ -101,7 +103,11 @@ namespace KombiShift2.City
                 graph.RecordTrafficPathSearch((float)timer.Elapsed.TotalMilliseconds);
                 if(path.Count<3)continue;
                 Vector3 point=graph.LanePoint(path,0),forward=graph.LanePoint(path,1)-point;forward.y=0;
-                if(Physics.CheckBox(point+Vector3.up,.95f*Vector3.one,Quaternion.LookRotation(forward),~0,QueryTriggerInteraction.Ignore))continue;
+                var rotation=Quaternion.LookRotation(forward);
+                var chassis=agent.GetComponent<BoxCollider>();
+                Vector3 center=point+Vector3.up*.12f+rotation*chassis.center;
+                Vector3 clearance=chassis.size*.5f+new Vector3(.6f,.05f,3f);
+                if(Physics.CheckBox(center,clearance,rotation,~0,QueryTriggerInteraction.Ignore))continue;
                 if(Visible(point))continue;
                 agent.transform.SetPositionAndRotation(point+Vector3.up*.12f,Quaternion.LookRotation(forward));
                 var body=agent.Body;body.isKinematic=false;body.position=agent.transform.position;body.rotation=agent.transform.rotation;body.linearVelocity=Vector3.zero;body.angularVelocity=Vector3.zero;

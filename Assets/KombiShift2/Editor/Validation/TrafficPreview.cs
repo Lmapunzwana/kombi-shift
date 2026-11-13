@@ -1,20 +1,29 @@
+using System.IO;
 using UnityEditor;
 using UnityEditor.SceneManagement;
 using UnityEngine;
 using KombiShift2.City;
 
+[InitializeOnLoad]
 public static class KombiTrafficPreview
 {
+    static KombiTrafficPreview()
+    {
+        EditorApplication.delayCall+=()=>{
+            const string request="Temp/KombiTrafficObservation.request";
+            if(!File.Exists(request))return;
+            File.Delete(request);Run();
+        };
+    }
     [MenuItem("Kombi Shift/Validation/Inspect Moving Traffic And Compact HUD")]
     public static void Run()
     {
         if(EditorApplication.isPlaying)
         {
-            CityTripSelection.Selected=null;
-            if(UnityEngine.SceneManagement.SceneManager.GetActiveScene().name!="KombiShift_FirstShift")
-                UnityEngine.SceneManagement.SceneManager.LoadScene("KombiShift_FirstShift");
+            UnityEngine.SceneManagement.SceneManager.sceneLoaded-=SceneReady;
+            UnityEngine.SceneManagement.SceneManager.sceneLoaded+=SceneReady;
             EditorApplication.isPaused=false;
-            new GameObject("Live traffic observation",typeof(TrafficMotionCapture));return;
+            UnityEngine.SceneManagement.SceneManager.LoadScene("KombiShift_FirstShift");return;
         }
         if(UnityEngine.SceneManagement.SceneManager.GetActiveScene().isDirty)
         {Debug.LogWarning("Save the scene and leave Play mode before traffic verification.");return;}
@@ -24,6 +33,11 @@ public static class KombiTrafficPreview
         EditorApplication.playModeStateChanged+=Ready;
         EditorApplication.ExecuteMenuItem("Window/General/Game");
         EditorApplication.EnterPlaymode();
+    }
+    static void SceneReady(UnityEngine.SceneManagement.Scene scene,UnityEngine.SceneManagement.LoadSceneMode mode)
+    {
+        UnityEngine.SceneManagement.SceneManager.sceneLoaded-=SceneReady;
+        new GameObject("Live traffic observation",typeof(TrafficMotionCapture));
     }
     static void Ready(PlayModeStateChange state)
     {
