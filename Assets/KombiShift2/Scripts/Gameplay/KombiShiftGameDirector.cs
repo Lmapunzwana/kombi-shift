@@ -24,6 +24,7 @@ namespace KombiShift2.Gameplay
         private float timeRemaining;
         private bool finished;
         private bool success;
+        private bool crashed;
         private bool paused;
         private bool servicing;
         private string notice;
@@ -70,6 +71,12 @@ namespace KombiShift2.Gameplay
             if (finished || paused == value) return;
             paused = value; Time.timeScale = paused ? 0f : 1f;
             OnPauseChanged?.Invoke(paused);
+        }
+        public void Crash()
+        {
+            if (finished) return;
+            crashed = true;
+            Finish(false);
         }
         public void ReturnToMenu() { Time.timeScale = 1f; SceneManager.LoadScene("KombiMainMenu"); }
         public void RestartShift() { Time.timeScale = 1f; SceneManager.LoadScene(SceneManager.GetActiveScene().name); }
@@ -341,6 +348,8 @@ namespace KombiShift2.Gameplay
                 ? $"{destination} reached. {delivered} passengers delivered; target {MinimumPassengers} reached."
                 : timeRemaining <= 0f
                     ? $"Time expired before reaching {destination}. {delivered} delivered; target {MinimumPassengers}."
+                    : crashed
+                    ? $"Your kombi was involved in a serious crash. Shift ended. {delivered} passengers delivered."
                     : $"Target missed at {destination}. {delivered} delivered; {MinimumPassengers} required.";
             string stats =
                 $"<b>{KombiChallenge.Name(Stage)}</b>\n{outcome}\n\n" +
