@@ -30,7 +30,7 @@ namespace KombiShift2.Traffic
         private CityIntersection cityStop;
         private bool cityStopCompleted;
         private bool headingHome;
-        private float nextHomeCheck, progressAt, forceUntil;
+        private float nextHomeCheck, progressAt, forceUntil, junctionWaitStart;
         private Vector3 progressAnchor;
         private KombiShiftGameDirector director;
         public bool FinishedTrip { get; private set; }
@@ -296,12 +296,12 @@ namespace KombiShift2.Traffic
             // Stuck recovery: a rival that has not moved for a while (and is not simply waiting out a red
             // light) squeezes through slowly, the way a kombi driver would, instead of freezing forever.
             bool redLight = junction != null && junction.signalised && !junction.SignalAllows(transform.forward);
-            float stuckLimit = redLight ? (CityIntersection.GreenSeconds + CityIntersection.AmberSeconds + CityIntersection.AllRedSeconds) * junction.PhaseCount + 5f : 8f;
+            float stuckLimit = redLight ? (CityIntersection.GreenSeconds + CityIntersection.AmberSeconds + CityIntersection.AllRedSeconds) * junction.PhaseCount + 5f : 3f;
             if ((transform.position - progressAnchor).sqrMagnitude > 4f) { progressAnchor = transform.position; progressAt = Time.time; }
             if (Time.time - progressAt > stuckLimit && Time.time >= forceUntil)
-            { forceUntil = Time.time + 5f; progressAt = Time.time; Say("Squeezing through the hold-up"); }
+            { forceUntil = Time.time + 4f; progressAt = Time.time; Say("Squeezing through the hold-up"); }
             bool forcing = Time.time < forceUntil;
-            if (forcing) desiredSpeed = Mathf.Min(desiredSpeed, 4f);
+            if (forcing) desiredSpeed = Mathf.Min(desiredSpeed, 7f);
             if (!clear && !forcing)
             {
                 float leadSpeed=obstacle.rigidbody!=null?Mathf.Max(0f,Vector3.Dot(obstacle.rigidbody.linearVelocity,transform.forward)):0f;
@@ -309,7 +309,7 @@ namespace KombiShift2.Traffic
                 float safeSpeed=Mathf.Sqrt(leadSpeed*leadSpeed+2f*braking*safeDistance);
                 desiredSpeed=Mathf.Min(desiredSpeed,safeSpeed);
             }
-            if(junction!=cityStop){cityStop=junction;cityStopCompleted=false;cityStoppedAt=0;}
+            if(junction!=cityStop){cityStop=junction;cityStopCompleted=false;cityStoppedAt=0;junctionWaitStart=0f;}
             if(junction!=null && !forcing)
             {
                 bool occasionalRollingStop=profile.personality==RivalPersonality.Aggressive&&Mathf.RoundToInt(Mathf.Abs(junction.transform.position.x+junction.transform.position.z))%7==0;
@@ -319,7 +319,12 @@ namespace KombiShift2.Traffic
                     if(actualSpeed<.3f){if(cityStoppedAt==0)cityStoppedAt=Time.time;cityStopCompleted=Time.time-cityStoppedAt>.4f;}
                     desiredSpeed=0;
                 }
-                if(stopRequired&&!cityStopCompleted || !junction.MayEnter(body,transform.forward,point+transform.forward*12f))desiredSpeed=0;
+                bool mayEnter=junction.MayEnter(body,transform.forward,point+transform.forward*12f);
+                // Aggressive kombis do not wait for a fully empty junction on green: after 2 s they push in.
+                if(!mayEnter&&profile.personality==RivalPersonality.Aggressive&&junction.SignalAllows(transform.forward))
+                {if(junctionWaitStart==0f)junctionWaitStart=Time.time;mayEnter=Time.time-junctionWaitStart>2f;}
+                else if(mayEnter)junctionWaitStart=0f;
+                if(stopRequired&&!cityStopCompleted || !mayEnter)desiredSpeed=0;
             }
             if (!headingHome && blockedTime > 25f && Time.time >= nextEvaluation)
             { target = null; ChooseTarget(); Say("Blocked route: reassessing demand; waiting for clearance"); }

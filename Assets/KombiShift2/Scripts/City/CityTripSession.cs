@@ -41,7 +41,8 @@ namespace KombiShift2.City
                 if(!terminal&&KombiChallenge.Selected==KombiStage.RushHour)
                 {
                     var demand=new List<StationPassenger>(people);
-                    for(int n=people.Length;n<8;n++)
+                    // Rush hour: every bench place is taken.
+                    for(int n=people.Length;n<Mathf.Min(12,station.ArrivalSeats.Length);n++)
                     {
                         var seat=station.ArrivalSeats[n];var actor=Instantiate(people[n%people.Length].gameObject,seat,false).GetComponent<StationPassenger>();
                         actor.transform.localPosition=Vector3.zero;actor.transform.localRotation=Quaternion.identity;actor.SetWaitingSeat(seat);actor.PoseSeatedPreview();demand.Add(actor);
