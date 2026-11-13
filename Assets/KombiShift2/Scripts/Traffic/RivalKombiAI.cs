@@ -29,7 +29,6 @@ namespace KombiShift2.Traffic
         private float passUntil,passOffset,nextPass,cityStoppedAt;
         private CityIntersection cityStop;
         private bool cityStopCompleted;
-        private readonly Dictionary<KombiRoadRuleZone, float> stoppedAt = new();
         private readonly RaycastHit[] obstacles = new RaycastHit[64];
         private readonly Collider[] congestion = new Collider[32];
         public int PassengersTaken { get; private set; }
@@ -122,7 +121,9 @@ namespace KombiShift2.Traffic
             if(cityNavigation!=null && target!=null)
             {
                 routeIndex=NearestRouteIndex(transform.position);
-                Drive(cityNavigation.Point(target.ServicePoint),speed*profile.speedMultiplier);
+                Vector3 point=cityNavigation.Point(target.ServicePoint);
+                if(!cityNavigation.HasPath){Brake();return;}
+                Drive(point,speed*profile.speedMultiplier);
                 return;
             }
             if (FlatDistance(route[routeIndex].position, transform.position) < 5f)
@@ -178,8 +179,8 @@ namespace KombiShift2.Traffic
         }
         private bool Clear(Vector3 origin, Vector3 forward, float distance, out RaycastHit nearest)
         {
-            int count = Physics.SphereCastNonAlloc(origin, .8f, forward, obstacles, distance, ~0, QueryTriggerInteraction.Ignore);
-            var hits = count == obstacles.Length ? Physics.SphereCastAll(origin, .8f, forward, distance, ~0, QueryTriggerInteraction.Ignore) : obstacles;
+            int count = Physics.SphereCastNonAlloc(origin, 1f, forward, obstacles, distance, ~0, QueryTriggerInteraction.Ignore);
+            var hits = count == obstacles.Length ? Physics.SphereCastAll(origin, 1f, forward, distance, ~0, QueryTriggerInteraction.Ignore) : obstacles;
             if (hits != obstacles) count = hits.Length;
             nearest = default; float best = float.MaxValue;
             for (int i = 0; i < count; i++)
@@ -201,7 +202,9 @@ namespace KombiShift2.Traffic
             desiredSpeed *= Mathf.Lerp(1f, .25f, Mathf.InverseLerp(10f, 65f, Mathf.Abs(steering)));
             Vector3 origin = transform.position + Vector3.up;
             float actualSpeed = body.linearVelocity.magnitude;
-            bool clear = Clear(origin, transform.forward, Mathf.Max(7f, actualSpeed * profile.followingSeconds + 3f), out var obstacle);
+            float braking = Mathf.Max(.5f, profile.braking);
+            float detectionDistance = Mathf.Max(14f, Mathf.Max(actualSpeed * profile.followingSeconds + 8f, actualSpeed * actualSpeed / (2f * braking) + 8f));
+            bool clear = Clear(origin, transform.forward, detectionDistance, out var obstacle);
             blockedTime = clear ? 0f : blockedTime + Time.fixedDeltaTime;
             // Passing is restricted to a second same-direction lane in the baked road metadata.
             var junction=CityIntersection.Near(point);
@@ -219,7 +222,13 @@ namespace KombiShift2.Traffic
                     if(Clear(lane,transform.forward,12f,out _)&&Clear(lane,-transform.forward,12f,out _)){passing=false;nextPass=Time.time+6;}
                 }
             }
-            if (!clear) desiredSpeed=Mathf.Min(desiredSpeed,Mathf.Max(0f,(obstacle.distance-4f)/profile.followingSeconds));
+            if (!clear)
+            {
+                float leadSpeed=obstacle.rigidbody!=null?Mathf.Max(0f,Vector3.Dot(obstacle.rigidbody.linearVelocity,transform.forward)):0f;
+                float safeDistance=Mathf.Max(0f,obstacle.distance-4f);
+                float safeSpeed=Mathf.Sqrt(leadSpeed*leadSpeed+2f*braking*safeDistance);
+                desiredSpeed=Mathf.Min(desiredSpeed,safeSpeed);
+            }
             if(junction!=cityStop){cityStop=junction;cityStopCompleted=false;cityStoppedAt=0;}
             if(junction!=null)
             {
@@ -227,7 +236,7 @@ namespace KombiShift2.Traffic
                 bool stopRequired=junction.RequiresStop(transform.forward)&&!occasionalRollingStop;
                 if(stopRequired&&!cityStopCompleted)
                 {
-                    if(actualSpeed<.3f){if(cityStoppedAt==0)cityStoppedAt=Time.time;cityStopCompleted=Time.time-cityStoppedAt>.7f;}
+                    if(actualSpeed<.3f){if(cityStoppedAt==0)cityStoppedAt=Time.time;cityStopCompleted=Time.time-cityStoppedAt>.4f;}
                     desiredSpeed=0;
                 }
                 if(stopRequired&&!cityStopCompleted || !junction.MayEnter(body,transform.forward,point+transform.forward*12f))desiredSpeed=0;
@@ -237,17 +246,8 @@ namespace KombiShift2.Traffic
             foreach (var zone in KombiRoadRules.Active)
             {
                 float distance = Vector3.Distance(zone.transform.position, transform.position);
-                if (distance > 25f) { stoppedAt.Remove(zone); continue; }
+                if (distance > 25f) continue;
                 if (zone.rule == RoadRule.SpeedLimit || zone.rule == RoadRule.Crossing || zone.rule == RoadRule.Hump) desiredSpeed = Mathf.Min(desiredSpeed, zone.limit / 3.6f * (profile.personality == RivalPersonality.Aggressive ? 1.15f : 1f));
-                if (zone.rule == RoadRule.Stop && distance < 18f && profile.personality != RivalPersonality.Aggressive)
-                {
-                    if (!stoppedAt.ContainsKey(zone))
-                    {
-                        desiredSpeed = Mathf.Min(desiredSpeed, Mathf.Sqrt(2f * profile.braking * Mathf.Max(0f, distance - 7f)));
-                        if (actualSpeed < .3f) stoppedAt[zone] = Time.time;
-                    }
-                    else if (Time.time - stoppedAt[zone] < 1f) desiredSpeed = 0f;
-                }
                 if (zone.rule == RoadRule.NoEntry)
                 {
                     Vector3 toZone = zone.transform.position - transform.position;

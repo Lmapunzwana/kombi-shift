@@ -6,17 +6,23 @@ namespace KombiShift2.City
     {
         CityRoadNetwork graph;List<int> path=new();int index;Vector3 target;float nextPlan;
         public CityRoadNode Node=>graph!=null&&path.Count>0?graph.Nodes[path[Mathf.Clamp(index,0,path.Count-1)]]:null;
+        public bool HasPath=>graph==null||path.Count>=2;
         public Vector3 Point(Transform service)
         {return Point(service.position,service.forward);}
         Vector3 Point(Vector3 destination,Vector3 heading)
         {
             graph??=CityRoadNetwork.Active;
             if(graph==null)return destination;
-            if(path.Count==0 || (destination-target).sqrMagnitude>16 || Time.time>nextPlan&&Vector3.Distance(transform.position,graph.LanePoint(path,Mathf.Clamp(index,0,path.Count-1)))>20)
+            bool destinationChanged=(destination-target).sqrMagnitude>16f;
+            bool lostPath=path.Count<2&&Time.time>=nextPlan;
+            if(destinationChanged||lostPath)
             {
-                path=graph.FindApproachPath(graph.Nearest(transform.position,0),graph.Nearest(destination,0),heading,transform.forward);index=Mathf.Min(1,path.Count-1);target=destination;nextPlan=Time.time+2;
+                var candidate=graph.FindApproachPath(graph.Nearest(transform.position,0),graph.Nearest(destination,0),heading,transform.forward);
+                target=destination;nextPlan=Time.time+2f;
+                if(candidate.Count>=2){path=candidate;index=1;}
+                else {path.Clear();index=0;}
             }
-            if(path.Count<2)return destination;
+            if(path.Count<2)return transform.position;
             var point=graph.LanePoint(path,index);
             if(Vector3.Distance(transform.position,point)<3.5f && index<path.Count-1){index++;point=graph.LanePoint(path,index);}
             if(index>=path.Count-2&&Vector3.Distance(transform.position,destination)<10)return destination;

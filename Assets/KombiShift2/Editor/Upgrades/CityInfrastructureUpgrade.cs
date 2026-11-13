@@ -274,25 +274,34 @@ public static class KombiCityInfrastructureUpgrade
             }
             projected=new Vector3(point.x,highest+.025f,point.z);return !float.IsNegativeInfinity(highest);
         }
+        bool GroundRoadside(Vector3 point,out Vector3 projected)
+        {
+            int count=Physics.RaycastNonAlloc(point+Vector3.up*3,Vector3.down,paintHits,6f,~0,QueryTriggerInteraction.Ignore);
+            float highest=float.NegativeInfinity,roadHeight=float.NegativeInfinity;
+            for(int i=0;i<count;i++)
+            {
+                var hit=paintHits[i];if(hit.rigidbody!=null||hit.normal.y<.65f||Mathf.Abs(hit.point.y-point.y)>.9f)continue;
+                var renderer=hit.collider.GetComponent<Renderer>();
+                bool isRoad=hit.collider.GetComponent<CityRoadSurface>()!=null||
+                    renderer!=null&&renderer.sharedMaterials.Any(m=>m!=null&&(m.name.Contains("Asphalt")||m.shader.name=="Kombi Shift/Road Surface"));
+                if(isRoad){roadHeight=Mathf.Max(roadHeight,hit.point.y);continue;}
+                highest=Mathf.Max(highest,hit.point.y);
+            }
+            if(float.IsNegativeInfinity(highest)||!float.IsNegativeInfinity(roadHeight)&&Mathf.Abs(roadHeight-(highest+.035f))<=.1f)
+            {projected=default;return false;}
+            projected=new Vector3(point.x,highest+.035f,point.z);return !float.IsNegativeInfinity(highest);
+        }
         void Strip(Vector3 a,Vector3 b,float width,List<Vector3> vertices,List<int> triangles)
         {
             Vector3 right=Vector3.Cross(Vector3.up,(b-a).normalized)*width*.5f;
             if(!GroundPaint(a-right,out var p0)||!GroundPaint(a+right,out var p1)||!GroundPaint(b+right,out var p2)||!GroundPaint(b-right,out var p3))return;
             int n=vertices.Count;vertices.Add(p0);vertices.Add(p1);vertices.Add(p2);vertices.Add(p3);triangles.AddRange(new[]{n,n+2,n+1,n,n+3,n+2});
         }
-        void Dashed(Vector3 a,Vector3 b,float width,List<Vector3> vertices,List<int> triangles)
+        void RoadsideStrip(Vector3 a,Vector3 b,float width)
         {
-            Vector3 direction=b-a;direction.y=0f;float length=direction.magnitude;if(length<.1f)return;direction/=length;
-            float first=Vector3.Dot(a,direction),last=Vector3.Dot(b,direction);
-            Vector3 lowPoint=first<last?a:b,highPoint=first<last?b:a;
-            float low=Mathf.Min(first,last),high=Mathf.Max(first,last);
-            const float period=6f,dashLength=3.6f;
-            for(float dash=Mathf.Floor(low/period)*period;dash<high;dash+=period)
-            {
-                float from=Mathf.Max(low,dash+.4f),to=Mathf.Min(high,dash+dashLength);
-                if(to-from<.2f)continue;
-                Strip(Vector3.Lerp(lowPoint,highPoint,(from-low)/(high-low)),Vector3.Lerp(lowPoint,highPoint,(to-low)/(high-low)),width,vertices,triangles);
-            }
+            Vector3 right=Vector3.Cross(Vector3.up,(b-a).normalized)*width*.5f;
+            if(!GroundRoadside(a-right,out var p0)||!GroundRoadside(a+right,out var p1)||!GroundRoadside(b+right,out var p2)||!GroundRoadside(b-right,out var p3))return;
+            int n=yellowVertices.Count;yellowVertices.Add(p0);yellowVertices.Add(p1);yellowVertices.Add(p2);yellowVertices.Add(p3);yellowTriangles.AddRange(new[]{n,n+2,n+1,n,n+3,n+2});
         }
         var seen=new HashSet<long>();
         for(int i=0;i<network.Nodes.Length;i++)
@@ -304,21 +313,9 @@ public static class KombiCityInfrastructureUpgrade
                 var other=network.Nodes[next];if(node.junction||other.junction||node.roundabout||other.roundabout)continue;
                 Vector3 direction=other.position-node.position;direction.y=0f;if(direction.sqrMagnitude<.01f)continue;direction.Normalize();
                 Vector3 right=Vector3.Cross(Vector3.up,direction);float roadWidth=Mathf.Min(node.width,other.width);
-                float edge=Mathf.Max(.8f,roadWidth*.5f-.35f);
-                Strip(node.position+right*edge,other.position+right*edge,.12f,whiteVertices,whiteTriangles);
-                Strip(node.position-right*edge,other.position-right*edge,.12f,whiteVertices,whiteTriangles);
-                bool passing=node.allowPassing&&other.allowPassing&&roadWidth>=13f;
-                if(passing)Dashed(node.position,other.position,.14f,yellowVertices,yellowTriangles);
-                else
-                {
-                    Strip(node.position+right*.13f,other.position+right*.13f,.13f,yellowVertices,yellowTriangles);
-                    Strip(node.position-right*.13f,other.position-right*.13f,.13f,yellowVertices,yellowTriangles);
-                }
-                if(roadWidth>=13f)
-                {
-                    Dashed(node.position+right*3.1f,other.position+right*3.1f,.1f,whiteVertices,whiteTriangles);
-                    Dashed(node.position-right*3.1f,other.position-right*3.1f,.1f,whiteVertices,whiteTriangles);
-                }
+                float roadside=roadWidth*.5f+.8f;
+                RoadsideStrip(node.position+right*roadside,other.position+right*roadside,.14f);
+                RoadsideStrip(node.position-right*roadside,other.position-right*roadside,.14f);
             }
         }
         foreach(var junction in Object.FindObjectsByType<CityIntersection>())
@@ -355,10 +352,10 @@ public static class KombiCityInfrastructureUpgrade
         white.SetColor("_Color",new Color(.9f,.92f,.9f));white.enableInstancing=true;EditorUtility.SetDirty(white);
         yellow.SetColor("_Color",new Color(1f,.78f,.08f));yellow.enableInstancing=true;EditorUtility.SetDirty(yellow);
         var whiteMesh=SaveMarkingMesh(whiteVertices,whiteTriangles,"City white road markings",Generated+"/CityMarkings.asset");
-        var yellowMesh=SaveMarkingMesh(yellowVertices,yellowTriangles,"City yellow road markings",Generated+"/CityMarkingsYellow.asset");
+        var yellowMesh=SaveMarkingMesh(yellowVertices,yellowTriangles,"City roadside traffic guides",Generated+"/CityMarkingsYellow.asset");
         var whiteObject=new GameObject("Shared white marking mesh",typeof(MeshFilter),typeof(MeshRenderer));whiteObject.transform.SetParent(group,false);
         whiteObject.GetComponent<MeshFilter>().sharedMesh=whiteMesh;whiteObject.GetComponent<MeshRenderer>().sharedMaterial=white;
-        var yellowObject=new GameObject("Shared yellow marking mesh",typeof(MeshFilter),typeof(MeshRenderer));yellowObject.transform.SetParent(group,false);
+        var yellowObject=new GameObject("Roadside traffic guide mesh",typeof(MeshFilter),typeof(MeshRenderer));yellowObject.transform.SetParent(group,false);
         yellowObject.GetComponent<MeshFilter>().sharedMesh=yellowMesh;yellowObject.GetComponent<MeshRenderer>().sharedMaterial=yellow;
     }
     static Mesh SaveMarkingMesh(List<Vector3> vertices,List<int> triangles,string name,string path)

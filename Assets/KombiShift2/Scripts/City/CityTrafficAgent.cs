@@ -10,9 +10,9 @@ namespace KombiShift2.City
         public bool passing;
         public static CityDriverProfile For(CityDriverStyle style)=>style switch
         {
-            CityDriverStyle.Cautious=>new(){acceleration=1.5f,braking=5,headway=2.4f,speedFactor=.85f},
-            CityDriverStyle.Impatient=>new(){acceleration=3.2f,braking=6,headway=1.1f,speedFactor=1.05f,passing=true},
-            CityDriverStyle.Aggressive=>new(){acceleration=4,braking=7,headway=.95f,speedFactor=1.1f,passing=true},
+            CityDriverStyle.Cautious=>new(){acceleration=1.5f,braking=5,headway=2.4f,speedFactor=1},
+            CityDriverStyle.Impatient=>new(){acceleration=3.2f,braking=6,headway=1.1f,speedFactor=1,passing=true},
+            CityDriverStyle.Aggressive=>new(){acceleration=4,braking=7,headway=.95f,speedFactor=1,passing=true},
             _=>new(){acceleration=2.4f,braking=6,headway=1.6f,speedFactor=1,passing=true}
         };
     }
@@ -49,16 +49,21 @@ namespace KombiShift2.City
             if(Time.time>=nextDecision)
             {
                 watch.Restart();nextDecision=Time.time+decisionInterval;
-                desiredSpeed=node.speedLimit/3.6f*profile.speedFactor;
-                if(speedCapKph>0)desiredSpeed=Mathf.Min(desiredSpeed,speedCapKph/3.6f);
+                float legalSpeedKph=speedCapKph>0?Mathf.Min(node.speedLimit,speedCapKph):node.speedLimit;
+                desiredSpeed=legalSpeedKph/3.6f;
                 float angle=Mathf.Abs(Vector3.SignedAngle(transform.forward,heading,Vector3.up));desiredSpeed*=Mathf.Lerp(1,.2f,Mathf.InverseLerp(12,65,angle));
                 float speed=body.linearVelocity.magnitude;
                 Vector3 origin=body.position+transform.forward*1.7f+Vector3.up*.8f;
-                bool blocked=Obstacle(origin,transform.forward,Mathf.Max(9,speed*profile.headway+4),out var hit);
+                float brakingDistance=speed*speed/(2f*Mathf.Max(.5f,profile.braking));
+                float detectionDistance=Mathf.Max(25f,Mathf.Max(speed*profile.headway+8f,brakingDistance+8f));
+                bool blocked=Obstacle(origin,transform.forward,detectionDistance,out var hit);
                 if(blocked)
                 {
                     if(blockedAt<=0)blockedAt=Time.time;
-                    desiredSpeed=Mathf.Min(desiredSpeed,Mathf.Max(0,(hit.distance-2f)/profile.headway));
+                    float leadSpeed=hit.rigidbody!=null?Mathf.Max(0,Vector3.Dot(hit.rigidbody.linearVelocity,heading)):0f;
+                    float stoppingDistance=Mathf.Max(0,hit.distance-2.5f);
+                    float safeSpeed=Mathf.Sqrt(leadSpeed*leadSpeed+2f*profile.braking*stoppingDistance);
+                    desiredSpeed=Mathf.Min(desiredSpeed,safeSpeed);
                     bool nearJunction=false;foreach(var control in CityIntersection.Active)if(Vector3.Distance(origin,control.transform.position)<60f&&Vector3.Dot(transform.forward,control.transform.position-origin)>0){nearJunction=true;break;}
                     bool straight=!nearJunction&&angle<8 && index+3<path.Count && Vector3.Angle(heading,graph.Nodes[path[index+3]].position-node.position)<12;
                     // Passing uses a second lane in the same direction; never the oncoming lane.
@@ -75,7 +80,7 @@ namespace KombiShift2.City
                 {
                     if(Time.time>=passingUntil||!node.allowPassing)
                     {if(!Obstacle(origin-transform.right*3.1f,transform.forward,12,out _)&&!Obstacle(origin-transform.right*3.1f,-transform.forward,12,out _)){passing=false;offset=0;}}
-                    else desiredSpeed=Mathf.Min(node.speedLimit/3.6f*profile.speedFactor,speed+profile.acceleration);
+                else desiredSpeed=Mathf.Min(legalSpeedKph/3.6f,speed+profile.acceleration);
                 }
                 var junction=CityIntersection.Near(target);
                 if(junction!=lastJunction){lastJunction=junction;stopCompleted=false;stoppedSince=0;}
@@ -84,7 +89,7 @@ namespace KombiShift2.City
                     bool stopRequired=junction.RequiresStop(heading);
                     if(stopRequired&&!stopCompleted)
                     {
-                        if(speed<.3f){if(stoppedSince==0)stoppedSince=Time.time;stopCompleted=Time.time-stoppedSince>.6f;}
+                        if(speed<.3f){if(stoppedSince==0)stoppedSince=Time.time;stopCompleted=Time.time-stoppedSince>.4f;}
                         if(!stopCompleted)desiredSpeed=0;
                     }
                     Vector3 exit=index+3<path.Count?graph.LanePoint(path,index+3):target;
@@ -106,9 +111,12 @@ namespace KombiShift2.City
         }
         bool Obstacle(Vector3 origin,Vector3 direction,float distance,out RaycastHit nearest)
         {
-            nearest=default;float closest=float.MaxValue;int count=Physics.SphereCastNonAlloc(origin,.7f,direction,hits,distance,~0,QueryTriggerInteraction.Ignore);
+            nearest=default;float closest=float.MaxValue;
+            int count=Physics.SphereCastNonAlloc(origin,.9f,direction,hits,distance,~0,QueryTriggerInteraction.Ignore);
+            var results=count==hits.Length?Physics.SphereCastAll(origin,.9f,direction,distance,~0,QueryTriggerInteraction.Ignore):hits;
+            if(results!=hits)count=results.Length;
             for(int i=0;i<count;i++)
-            {var hit=hits[i];if(hit.transform.IsChildOf(transform)||hit.normal.y>.6f)continue;if(hit.distance<closest){closest=hit.distance;nearest=hit;}}
+            {var hit=results[i];if(hit.transform.IsChildOf(transform)||hit.normal.y>.6f)continue;if(hit.distance<closest){closest=hit.distance;nearest=hit;}}
             return closest<float.MaxValue;
         }
         void ChooseDestination(int blocked=-1)

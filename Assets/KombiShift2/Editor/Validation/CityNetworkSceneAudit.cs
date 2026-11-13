@@ -14,7 +14,8 @@ public static class KombiCityNetworkSceneAudit
     [Serializable] public class Record
     {
         public int cityRenderers,roadSurfaces,physicalPotholes,nodes,links,unsupportedLaneSamples,blockedLaneSegments;
-        public int markingMeshes,markingTriangles,markingColliders,signalisedJunctions,trafficSignalPosts,misplacedTrafficSignalPosts;
+        public int markingMeshes,markingTriangles,markingColliders,roadsideGuideVertices,unsupportedRoadsideGuideVertices,roadsideGuideVerticesOnRoad;
+        public int signalisedJunctions,trafficSignalHeads,misplacedTrafficSignalHeads;
         public List<string> details=new();
         public List<LaneIssue> laneIssues=new();
         public int reachableTrips;
@@ -38,16 +39,44 @@ public static class KombiCityNetworkSceneAudit
             var markings=markingRoot.GetComponentsInChildren<MeshFilter>();
             report.markingMeshes=markings.Length;report.markingTriangles=markings.Where(m=>m.sharedMesh!=null).Sum(m=>m.sharedMesh.triangles.Length/3);
             report.markingColliders=markings.Count(m=>m.GetComponent<Collider>()!=null);
+            var roadside=markingRoot.transform.Find("Roadside traffic guide mesh");
+            var roadsideMesh=roadside!=null?roadside.GetComponent<MeshFilter>()?.sharedMesh:null;
+            if(roadsideMesh!=null)
+            {
+                var guideHits=new RaycastHit[16];
+                foreach(var vertex in roadsideMesh.vertices)
+                {
+                    report.roadsideGuideVertices++;
+                    Vector3 point=roadside.TransformPoint(vertex);
+                    int count=Physics.RaycastNonAlloc(point+Vector3.up*.15f,Vector3.down,guideHits,.3f,~0,QueryTriggerInteraction.Ignore);
+                    bool supported=false,onRoad=false;
+                    for(int i=0;i<count;i++)
+                    {
+                        var hit=guideHits[i];if(hit.rigidbody!=null||hit.normal.y<.65f||Mathf.Abs(hit.point.y-point.y)>.1f)continue;
+                        if(IsRoad(hit.collider))onRoad=true;else supported=true;
+                    }
+                    if(!supported)report.unsupportedRoadsideGuideVertices++;
+                    if(onRoad)report.roadsideGuideVerticesOnRoad++;
+                }
+            }
         }
+        else report.details.Add("City road marking root is missing.");
         foreach(var junction in Object.FindObjectsByType<CityIntersection>())
         {
             if(!junction.signalised)continue;
             report.signalisedJunctions++;
-            foreach(Transform post in junction.GetComponentsInChildren<Transform>().Where(t=>t.name=="Traffic signal post"))
+            foreach(var arm in junction.arms)
             {
-                report.trafficSignalPosts++;
-                Vector3 delta=post.position-junction.transform.position;delta.y=0f;
-                if(delta.magnitude<junction.radius||Mathf.Min(Mathf.Abs(delta.x),Mathf.Abs(delta.z))<2.5f)report.misplacedTrafficSignalPosts++;
+                if(arm==null||!arm.incoming||arm.control!="Signal")continue;
+                int expectedHeads=1+(arm.width>=16f?1:0);
+                report.trafficSignalHeads+=(arm.lampHead!=null?1:0)+(arm.repeater!=null?1:0);
+                if(arm.lampHead==null||arm.width>=16f&&arm.repeater==null)
+                {report.misplacedTrafficSignalHeads++;continue;}
+                Vector3 outward=arm.Direction,left=Vector3.Cross(Vector3.up,outward);
+                Vector3 expected=junction.transform.position+outward*(junction.radius+1f)+left*(arm.width*.5f+.8f);
+                Vector3 offset=arm.lampHead.transform.position-expected;offset.y=0f;
+                if(offset.magnitude>3f||Vector3.Dot(arm.lampHead.transform.forward,outward)<.8f)report.misplacedTrafficSignalHeads++;
+                if(arm.repeater!=null&&expectedHeads<2)report.misplacedTrafficSignalHeads++;
             }
         }
         foreach(var road in roads)
@@ -89,7 +118,9 @@ public static class KombiCityNetworkSceneAudit
             if(path.Count<2)report.details.Add("Unreachable selected trip "+trip.destination);else report.reachableTrips++;
         }
         if(report.markingMeshes<2||report.markingTriangles==0||report.markingColliders>0)report.details.Add("Road marking meshes are missing, empty, or collidable.");
-        if(report.misplacedTrafficSignalPosts>0||report.trafficSignalPosts!=report.signalisedJunctions*4)report.details.Add("Traffic signals are missing or placed inside the junction/road.");
+        if(report.roadsideGuideVertices==0||report.unsupportedRoadsideGuideVertices>0||report.roadsideGuideVerticesOnRoad>0)
+            report.details.Add("Roadside traffic guides are missing, unsupported, or overlap a road surface.");
+        if(report.misplacedTrafficSignalHeads>0)report.details.Add("Traffic signal heads are missing or misplaced.");
         Directory.CreateDirectory("Docs/Validation/CityInfrastructure");File.WriteAllText("Docs/Validation/CityInfrastructure/scene-road-audit.json",JsonUtility.ToJson(report,true));
         Debug.Log("KOMBI_CITY_SCENE_AUDIT "+JsonUtility.ToJson(report));
     }
