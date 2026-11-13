@@ -31,12 +31,12 @@ namespace KombiShift2.City
         public bool AtJunction=>lastJunction!=null;
         public int RedLightEntries {get;private set;} public int StopSignViolations {get;private set;} public int JunctionEntries {get;private set;}
         public string DenialReason {get;private set;} public string JunctionId=>lastJunction!=null?lastJunction.junctionId:"";
-        CityRoadNetwork graph;Rigidbody body;WheelCollider[] wheels;List<int> path=new();readonly List<LaneSample> lane=new();int laneIndex;
+        CityRoadNetwork graph;Rigidbody body,playerBody;WheelCollider[] wheels;List<int> path=new();readonly List<LaneSample> lane=new();int laneIndex;
         CityRoadSurface[] surfaces=Array.Empty<CityRoadSurface>();float nextPlan,nextDecision,desiredSpeed,blockedAt,passingUntil,offset,currentOffset,stoppedSince,junctionWaitStarted,kinematicSpeed,lastProgressTime;
         bool passing,stopCompleted,insideJunction,junctionAuthorized;Vector3 junctionApproachHeading;CityIntersection lastJunction;readonly RaycastHit[] hits=new RaycastHit[24];readonly Collider[] exitHits=new Collider[24];readonly System.Diagnostics.Stopwatch watch=new();
 
         public void Initialise(CityRoadNetwork value,int start,int destination,List<int> directedPath=null)
-        {graph=value;body=GetComponent<Rigidbody>();wheels=GetComponentsInChildren<WheelCollider>();surfaces=FindObjectsByType<CityRoadSurface>(FindObjectsSortMode.None);path=directedPath??graph.FindDirectedPath(start,destination,transform.forward);BuildLane();desiredSpeed=0;kinematicSpeed=0;passing=false;currentOffset=offset=0;blockedAt=0;lastJunction=null;lastProgressTime=Time.time;}
+        {graph=value;body=GetComponent<Rigidbody>();var director=FindFirstObjectByType<KombiShift2.Gameplay.KombiShiftGameDirector>();playerBody=director!=null&&director.Vehicle!=null?director.Vehicle.GetComponent<Rigidbody>():null;wheels=GetComponentsInChildren<WheelCollider>();surfaces=FindObjectsByType<CityRoadSurface>(FindObjectsSortMode.None);path=directedPath??graph.FindDirectedPath(start,destination,transform.forward);BuildLane();desiredSpeed=0;kinematicSpeed=0;passing=false;currentOffset=offset=0;blockedAt=0;lastJunction=null;lastProgressTime=Time.time;}
         void BuildLane()
         {
             lane.Clear();laneIndex=0;if(path.Count<2)return;
@@ -90,7 +90,10 @@ namespace KombiShift2.City
             if(Leader(origin,transform.forward,Mathf.Max(12,speed*profile.headway+8),out var leader))
             {
                 if(blockedAt<=0)blockedAt=Time.time;float leaderSpeed=leader.rigidbody!=null?leader.rigidbody.linearVelocity.magnitude:0;float gap=Mathf.Max(.2f,leader.distance-2f),dv=speed-leaderSpeed;
-                float desiredGap=profile.minimumGap+2f+speed*profile.headway+speed*dv/(2*Mathf.Sqrt(profile.acceleration*profile.braking));
+                float desiredGap=profile.minimumGap+3f+speed*profile.headway+speed*dv/(2*Mathf.Sqrt(profile.acceleration*profile.braking));
+                float availableGap=Mathf.Max(0f,gap-profile.minimumGap-3f);
+                float safeFollowingSpeed=Mathf.Sqrt(Mathf.Max(0f,leaderSpeed*leaderSpeed+2f*profile.braking*availableGap));
+                targetSpeed=Mathf.Min(targetSpeed,safeFollowingSpeed);
                 float acceleration=profile.acceleration*(1-Mathf.Pow(speed/Mathf.Max(.5f,targetSpeed),4)-Mathf.Pow(desiredGap/gap,2));
                 targetSpeed=Mathf.Clamp(speed+acceleration*decisionInterval,0,targetSpeed);
             } else blockedAt=0;
@@ -201,7 +204,7 @@ namespace KombiShift2.City
             {
                 var hit=found[i];if(hit.transform.IsChildOf(transform))continue;
                 var rb=hit.rigidbody;
-                bool playerCollider=hit.collider.CompareTag("Player");
+                bool playerCollider=hit.collider.CompareTag("Player")||rb==playerBody;
                 if((rb==null||!IsRoadUser(rb))&&!playerCollider)continue;
                 if(hit.distance<closest){closest=hit.distance;nearest=hit;}
             }
