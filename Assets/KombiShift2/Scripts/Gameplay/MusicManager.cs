@@ -89,7 +89,7 @@ public class MusicManager : MonoBehaviour
         if (searchTimer <= 0f)
         {
             searchTimer = 1f;
-            cars = FindObjectsByType<RCCP_CarController>(FindObjectsInactive.Include, FindObjectsSortMode.None);
+            cars = FindObjectsByType<RCCP_CarController>(FindObjectsInactive.Include);
         }
 
         // Use the fastest ACTIVE car (so a parked showcase model doesn't matter)
