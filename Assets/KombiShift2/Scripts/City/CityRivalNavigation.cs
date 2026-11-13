@@ -14,19 +14,34 @@ namespace KombiShift2.City
         {
             graph??=CityRoadNetwork.Active;
             if(graph==null)return destination;
+            int start=graph.Nearest(transform.position,0),end=graph.Nearest(destination,0);
             bool destinationChanged=(destination-target).sqrMagnitude>16f;
-            bool lostPath=path.Count<2&&Time.time>=nextPlan;
-            if(destinationChanged||lostPath)
+            bool lostPath=path.Count<2;
+            bool shouldPlan=(destinationChanged||lostPath)&&Time.time>=nextPlan;
+            if(shouldPlan)
             {
-                var candidate=graph.FindApproachPath(graph.Nearest(transform.position,0),graph.Nearest(destination,0),heading,transform.forward);
-                target=destination;nextPlan=Time.time+2f;
-                if(candidate.Count>=2){path=candidate;index=1;}
-                else {path.Clear();index=0;}
+                nextPlan=Time.time+1f;
+                List<int> candidate=graph.FindApproachPath(start,end,heading,transform.forward);
+                // A strict approach path can fail at intersections when the vehicle is
+                // already turning. Fall back to a directed route, then an unrestricted
+                // connected road path rather than leaving the rival stranded.
+                if(candidate.Count<2)candidate=graph.FindDirectedPath(start,end,transform.forward);
+                if(candidate.Count<2)candidate=graph.FindPath(start,end);
+                if(candidate.Count>=2)
+                {
+                    path=candidate;
+                    index=path.Count>2?1:0;
+                }
+                // Keep following the previous valid path if a temporary replan fails.
+                target=destination;
             }
-            if(path.Count<2)return transform.position;
-            var point=graph.LanePoint(path,index);
-            if(Vector3.Distance(transform.position,point)<3.5f && index<path.Count-1){index++;point=graph.LanePoint(path,index);}
-            if(index>=path.Count-2&&Vector3.Distance(transform.position,destination)<10)return destination;
+            if(path.Count<2)return destination;
+            index=Mathf.Clamp(index,0,path.Count-1);
+            // Advance past nodes that the kombi has already passed, including after a
+            // sharp corner where the nearest node may no longer be directly ahead.
+            while(index<path.Count-1&&Vector3.Distance(transform.position,graph.LanePoint(path,index))<5f)index++;
+            Vector3 point=graph.LanePoint(path,index);
+            if(index>=path.Count-2&&Vector3.Distance(transform.position,destination)<12f)return destination;
             return point;
         }
     }
