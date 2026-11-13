@@ -53,6 +53,7 @@ namespace KombiShift.JaydenStarter
         Vector3 Target=>stops[Mathf.Clamp(stopIndex,0,stops.Length-1)];
         void Start()
         {
+            if(GetComponent<TrafficFineHUD>()==null)gameObject.AddComponent<TrafficFineHUD>();
             diagnosticSession=Array.Exists(Environment.GetCommandLineArgs(),a=>a.StartsWith("--kombi-"));
             musicVolume = PlayerPrefs.GetFloat("KombiJayden.Music.v2", .12f); effectsVolume = PlayerPrefs.GetFloat("KombiJayden.Effects.v2", .75f);
             Application.runInBackground=true;BuildWorld();InitializeSystems();screen=Screen.Menu;gameManager.SetState(GameManager.ShiftState.Menu);Time.timeScale=0;Application.targetFrameRate=60;
@@ -104,7 +105,7 @@ namespace KombiShift.JaydenStarter
         void Begin()
         {
             if(boardingRoutine!=null){StopCoroutine(boardingRoutine);boardingRoutine=null;} Time.timeScale=1; screen=Screen.Playing; Condition=Fuel=100;
-            elapsed=gross=fuelCost=repairCost=0;stopIndex=delivered=missed=0;aboard=boarding=unloading=false;hwindiReadyAt=0;patience=60;hazardAt=nextRivalDecision=0;
+            elapsed=gross=fuelCost=repairCost=0;ResetTrafficFines();stopIndex=delivered=missed=0;aboard=boarding=unloading=false;hwindiReadyAt=0;patience=60;hazardAt=nextRivalDecision=0;
             driver.Body.position=new Vector3(-3,.34f,0);driver.Body.rotation=Quaternion.identity;driver.Body.linearVelocity=Vector3.zero;driver.Body.angularVelocity=Vector3.zero;
             driver.ParkNow();Wear.ResetWear();ConfigureLevel();ResetTraffic();rival.Configure(this,roadGraph,level.aggression,Rainy);tipsTotal=noCrashBonus=0;crashCount=0;stopIndex=BestStop();PositionPassenger();ResetHwindi();ApplyWeather();
             if(rainRoutine!=null)StopCoroutine(rainRoutine);if(Rainy)rainRoutine=StartCoroutine(StartRain());else rain.Stop(true,ParticleSystemStopBehavior.StopEmittingAndClear);
