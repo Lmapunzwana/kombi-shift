@@ -74,11 +74,23 @@ namespace KombiShift2.City
             player.transform.SetPositionAndRotation(stops[0].GetComponent<PassengerStation>().ServicePoint.position+Vector3.up*.14f,stops[0].GetComponent<PassengerStation>().ServicePoint.rotation);
             var rigidbody=player.GetComponent<Rigidbody>();rigidbody.position=player.transform.position;rigidbody.rotation=player.transform.rotation;
             var rivals=FindObjectsByType<RivalKombiAI>();
+            int firstPassengerIndex=selected.stopNodes.Length>1?path.IndexOf(selected.stopNodes[1]):-1;
+            if(firstPassengerIndex<0)firstPassengerIndex=path.Count;
             for(int i=0;i<rivals.Length;i++)
             {
-                int index=Mathf.Min(path.Count-1,Mathf.Max(1,4+i*3));var point=graph.LanePoint(path,index);
+                // Start every rival before the first passenger stop. The old fixed indices
+                // (4, 7, 10...) placed rivals beyond all useful stops on short routes.
+                int preferredIndex=1+i*2;
+                int index=Mathf.Clamp(preferredIndex,0,Mathf.Max(0,firstPassengerIndex-1));
+                var point=graph.LanePoint(path,index);
                 Vector3 forward=points[Mathf.Min(index+1,points.Length-1)].position-points[Mathf.Max(0,index-1)].position;forward.y=0;
+                if(forward.sqrMagnitude<.01f)forward=stops[1].GetComponent<PassengerStation>().ServicePoint.forward;
+                forward.Normalize();
+                float queueOffset=Mathf.Max(0,preferredIndex-index)*7f;
+                point-=forward*queueOffset;
                 rivals[i].transform.SetPositionAndRotation(point+Vector3.up*.14f,Quaternion.LookRotation(forward));
+                var rivalBody=rivals[i].GetComponent<Rigidbody>();
+                if(rivalBody!=null){rivalBody.position=rivals[i].transform.position;rivalBody.rotation=rivals[i].transform.rotation;rivalBody.linearVelocity=Vector3.zero;rivalBody.angularVelocity=Vector3.zero;}
                 rivals[i].Configure(points,stops.Select(x=>x.GetComponent<PassengerStation>()).ToArray(),KombiChallenge.RivalDelay(KombiChallenge.Selected),KombiChallenge.Selected==KombiStage.RushHour?10.5f:7.5f);
             }
             CityTripSelection.Distance=graph.Length(path);
