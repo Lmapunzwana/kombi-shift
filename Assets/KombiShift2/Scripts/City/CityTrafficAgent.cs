@@ -90,7 +90,7 @@ namespace KombiShift2.City
             if(Leader(origin,transform.forward,Mathf.Max(12,speed*profile.headway+8),out var leader))
             {
                 if(blockedAt<=0)blockedAt=Time.time;float leaderSpeed=leader.rigidbody!=null?leader.rigidbody.linearVelocity.magnitude:0;float gap=Mathf.Max(.2f,leader.distance-2f),dv=speed-leaderSpeed;
-                float desiredGap=profile.minimumGap+speed*profile.headway+speed*dv/(2*Mathf.Sqrt(profile.acceleration*profile.braking));
+                float desiredGap=profile.minimumGap+2f+speed*profile.headway+speed*dv/(2*Mathf.Sqrt(profile.acceleration*profile.braking));
                 float acceleration=profile.acceleration*(1-Mathf.Pow(speed/Mathf.Max(.5f,targetSpeed),4)-Mathf.Pow(desiredGap/gap,2));
                 targetSpeed=Mathf.Clamp(speed+acceleration*decisionInterval,0,targetSpeed);
             } else blockedAt=0;
@@ -192,8 +192,19 @@ namespace KombiShift2.City
         }
         bool Leader(Vector3 origin,Vector3 direction,float distance,out RaycastHit nearest)
         {
-            nearest=default;float closest=float.MaxValue;int count=Physics.SphereCastNonAlloc(origin,.7f,direction,hits,distance,~0,QueryTriggerInteraction.Ignore);
-            for(int i=0;i<count;i++){var hit=hits[i];if(hit.transform.IsChildOf(transform))continue;var rb=hit.rigidbody;if(rb==null||!IsRoadUser(rb))continue;if(hit.distance<closest){closest=hit.distance;nearest=hit;}}
+            nearest=default;float closest=float.MaxValue;
+            const float detectionRadius=1.2f;
+            int count=Physics.SphereCastNonAlloc(origin,detectionRadius,direction,hits,distance,~0,QueryTriggerInteraction.Ignore);
+            RaycastHit[] found=count==hits.Length?Physics.SphereCastAll(origin,detectionRadius,direction,distance,~0,QueryTriggerInteraction.Ignore):hits;
+            if(found!=hits)count=found.Length;
+            for(int i=0;i<count;i++)
+            {
+                var hit=found[i];if(hit.transform.IsChildOf(transform))continue;
+                var rb=hit.rigidbody;
+                bool playerCollider=hit.collider.CompareTag("Player");
+                if((rb==null||!IsRoadUser(rb))&&!playerCollider)continue;
+                if(hit.distance<closest){closest=hit.distance;nearest=hit;}
+            }
             return closest<float.MaxValue;
         }
         static bool IsRoadUser(Rigidbody rb)=>rb.GetComponent<CityTrafficAgent>()!=null||rb.GetComponentInParent<KombiShift2.Traffic.RivalKombiAI>()!=null||rb.GetComponentInParent<KombiShift2.Traffic.KombiTrafficVehicle>()!=null||rb.CompareTag("Player");
