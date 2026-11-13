@@ -232,7 +232,7 @@ namespace KombiShift2.Traffic
         {
             if(cityNavigation!=null && target!=null)
             {
-                routeIndex=NearestRouteIndex(transform.position);
+                routeIndex=NearestProgressRouteIndex(transform.position);
                 Vector3 point=cityNavigation.Point(target.ServicePoint);
                 if(!cityNavigation.HasPath){Brake();return;}
                 Drive(point,speed*profile.speedMultiplier);
@@ -441,6 +441,23 @@ namespace KombiShift2.Traffic
             if (route == null) return 0;
             for (int i = 0; i < route.Length; i++) { float d = FlatDistance(point, route[i].position); if (d < best) { best = d; nearest = i; } }
             return nearest;
+        }
+        // In city trips, nearby parallel roads and sharp corners can make a global
+        // nearest-point search jump to a later section of the route. Keep progress
+        // local and forward-moving so rivals do not incorrectly conclude the trip ended.
+        private int NearestProgressRouteIndex(Vector3 point)
+        {
+            if (route == null || route.Length == 0) return 0;
+            int first = Mathf.Max(0, routeIndex - 2);
+            int last = Mathf.Min(route.Length - 1, routeIndex + 12);
+            int nearest = Mathf.Clamp(routeIndex, first, last);
+            float best = float.MaxValue;
+            for (int i = first; i <= last; i++)
+            {
+                float d = FlatDistance(point, route[i].position);
+                if (d < best) { best = d; nearest = i; }
+            }
+            return Mathf.Max(routeIndex, nearest);
         }
         private static float FlatDistance(Vector3 a, Vector3 b) { a.y = b.y; return Vector3.Distance(a, b); }
     }

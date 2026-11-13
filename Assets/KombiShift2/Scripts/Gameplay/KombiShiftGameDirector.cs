@@ -24,6 +24,7 @@ namespace KombiShift2.Gameplay
         private float timeRemaining;
         private bool finished;
         private bool success;
+        private bool crashed;
         private bool paused;
         private bool servicing;
         private string notice;
@@ -70,6 +71,12 @@ namespace KombiShift2.Gameplay
             if (finished || paused == value) return;
             paused = value; Time.timeScale = paused ? 0f : 1f;
             OnPauseChanged?.Invoke(paused);
+        }
+        public void Crash()
+        {
+            if (finished) return;
+            crashed = true;
+            Finish(false);
         }
         public void ReturnToMenu() { Time.timeScale = 1f; SceneManager.LoadScene("KombiMainMenu"); }
         public void RestartShift() { Time.timeScale = 1f; SceneManager.LoadScene(SceneManager.GetActiveScene().name); }
@@ -306,7 +313,9 @@ namespace KombiShift2.Gameplay
                 ? $"Mbare reached. {delivered} passengers delivered; target {MinimumPassengers} reached."
                 : timeRemaining <= 0f
                     ? $"TIME EXPIRED. Mbare was not reached. {delivered} passengers delivered; target {MinimumPassengers}."
-                    : $"TARGET MISSED at Mbare. {delivered} passengers delivered; {MinimumPassengers} required.";
+                    : crashed
+                        ? $"YOUR KOMBI CRASHED. Shift ended. {delivered} passengers delivered."
+                        : $"TARGET MISSED at Mbare. {delivered} passengers delivered; {MinimumPassengers} required.";
             string stats = $"Passengers delivered: {delivered} / {MinimumPassengers}\nRivals collected: {RivalPassengers}   Rivals finished: {RivalsFinished} / {(rivals == null ? 0 : rivals.Length)}\nGross fares: ${GrossEarnings:0.00}  Repairs: ${RepairExpenses}  Fines: ${Law.TotalFines}\nNet + time bonus: ${earnings:0.00}   Best: ${KombiChallenge.Best(Stage)}";
             string message = paused ? $"{KombiChallenge.Name(Stage)}\nDeliver {MinimumPassengers}+ passengers to Mbare.\nEscape — resume    R — restart" : $"{KombiChallenge.Name(Stage)}\n{outcome}\n\n{stats}";
             GUI.Label(new Rect(panel.x + 20, panel.y + 78, width - 40, 155), message, body);
@@ -341,6 +350,8 @@ namespace KombiShift2.Gameplay
                 ? $"{destination} reached. {delivered} passengers delivered; target {MinimumPassengers} reached."
                 : timeRemaining <= 0f
                     ? $"Time expired before reaching {destination}. {delivered} delivered; target {MinimumPassengers}."
+                    : crashed
+                    ? $"Your kombi was involved in a serious crash. Shift ended. {delivered} passengers delivered."
                     : $"Target missed at {destination}. {delivered} delivered; {MinimumPassengers} required.";
             string stats =
                 $"<b>{KombiChallenge.Name(Stage)}</b>\n{outcome}\n\n" +
