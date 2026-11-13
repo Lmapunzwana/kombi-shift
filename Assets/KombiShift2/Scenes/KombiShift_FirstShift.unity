@@ -906134,7 +906134,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::KombiShift2.CameraSystem.KombiDriveCamera
   vehicle: {fileID: 6115432507585903835}
   chaseOffset: {x: 0, y: 3.2, z: -7.2}
-  cabOffset: {x: -0.262, y: 1.18, z: 1.193}
+  cabOffset: {x: 0.262, y: 1.18, z: 1.193}
   positionDamping: 9
 --- !u!81 &2022368936
 AudioListener:

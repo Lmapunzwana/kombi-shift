@@ -9,7 +9,7 @@ namespace KombiShift2.CameraSystem
     {
         [SerializeField] private Transform vehicle;
         [SerializeField] private Vector3 chaseOffset = new(0f,3.2f,-7.2f);
-        [SerializeField] private Vector3 cabOffset = new(-.262f,1.18f,1.193f);
+        [SerializeField] private Vector3 cabOffset = new(.262f,1.18f,1.193f);
         [SerializeField] private float positionDamping = 9f;
         private readonly RaycastHit[] hits = new RaycastHit[96];
         private bool cabView;
