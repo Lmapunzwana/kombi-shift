@@ -15,11 +15,13 @@ namespace KombiShift2.City
         IEnumerator Start()
         {
             graph=GetComponent<CityRoadNetwork>();graph.Load();
-            var legacy=FindObjectsByType<KombiTrafficVehicle>();
+            var legacy = FindObjectsByType<KombiTrafficVehicle>();
             if(legacy.Length==0)yield break;
             var source=legacy[0].gameObject;
             foreach(var car in legacy){car.enabled=false;car.gameObject.SetActive(false);}
-            player=FindFirstObjectByType<KombiShiftGameDirector>().Vehicle.transform;
+            var director = FindAnyObjectByType<KombiShiftGameDirector>();
+            if (director == null || director.Vehicle == null) yield break;
+            player = director.Vehicle.transform;
             yield return null;
             int count=KombiChallenge.Selected==KombiStage.RushHour?rushVehicles:morningVehicles;
             for(int i=0;i<count;i++)

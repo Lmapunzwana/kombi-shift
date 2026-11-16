@@ -36,7 +36,7 @@ namespace KombiShift2.City
         bool passing,stopCompleted,insideJunction,junctionAuthorized;Vector3 junctionApproachHeading;CityIntersection lastJunction;readonly RaycastHit[] hits=new RaycastHit[24];readonly Collider[] exitHits=new Collider[24];readonly System.Diagnostics.Stopwatch watch=new();
 
         public void Initialise(CityRoadNetwork value,int start,int destination,List<int> directedPath=null)
-        {graph=value;body=GetComponent<Rigidbody>();var director=FindFirstObjectByType<KombiShift2.Gameplay.KombiShiftGameDirector>();playerBody=director!=null&&director.Vehicle!=null?director.Vehicle.GetComponent<Rigidbody>():null;wheels=GetComponentsInChildren<WheelCollider>();surfaces=FindObjectsByType<CityRoadSurface>(FindObjectsSortMode.None);path=directedPath??graph.FindDirectedPath(start,destination,transform.forward);BuildLane();desiredSpeed=0;kinematicSpeed=0;passing=false;currentOffset=offset=0;blockedAt=0;lastJunction=null;lastProgressTime=Time.time;}
+        {graph=value;body=GetComponent<Rigidbody>();var director=FindAnyObjectByType<KombiShift2.Gameplay.KombiShiftGameDirector>();playerBody=director!=null&&director.Vehicle!=null?director.Vehicle.GetComponent<Rigidbody>():null;wheels=GetComponentsInChildren<WheelCollider>();surfaces=FindObjectsByType<CityRoadSurface>();path=directedPath??graph.FindDirectedPath(start,destination,transform.forward);BuildLane();desiredSpeed=0;kinematicSpeed=0;passing=false;currentOffset=offset=0;blockedAt=0;lastJunction=null;lastProgressTime=Time.time;}
         void BuildLane()
         {
             lane.Clear();laneIndex=0;if(path.Count<2)return;

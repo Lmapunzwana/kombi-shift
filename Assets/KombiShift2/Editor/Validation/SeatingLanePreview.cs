@@ -30,9 +30,9 @@ public static class KombiSeatingLanePreview
         if(EditorApplication.isPlayingOrWillChangePlaymode)throw new InvalidOperationException("Stop Play mode before inspecting the saved layout.");
         const string folder="Docs/Validation/SeatingLane";Directory.CreateDirectory(folder);
         Physics.SyncTransforms();
-        var route=Object.FindFirstObjectByType<KombiNavigationHud>().RoutePoints;
-        var stations=Object.FindObjectsByType<PassengerStation>(FindObjectsSortMode.None);
-        var actors=Object.FindObjectsByType<StationPassenger>(FindObjectsSortMode.None).GroupBy(x=>x.Persona).Select(x=>x.First()).ToArray();
+        var route=Object.FindAnyObjectByType<KombiNavigationHud>().RoutePoints;
+        var stations=Object.FindObjectsByType<PassengerStation>();
+        var actors=Object.FindObjectsByType<StationPassenger>().GroupBy(x=>x.Persona).Select(x=>x.First()).ToArray();
         var report=new System.Text.StringBuilder();
         foreach(var station in stations)
         {
@@ -49,7 +49,7 @@ public static class KombiSeatingLanePreview
             }
             report.AppendLine(station.name+": left lane "+left.ToString("F2")+"m; supported positions "+supported);
         }
-        foreach(var cabin in Object.FindObjectsByType<KombiPassengerCabin>(FindObjectsSortMode.None))
+        foreach(var cabin in Object.FindObjectsByType<KombiPassengerCabin>())
         {
             if(cabin.Seats.Length!=12 || cabin.Seats.Distinct().Count()!=12)throw new InvalidOperationException("Cabin must have 12 unique seats.");
             report.AppendLine(cabin.name+": twelve unique cabin positions");
@@ -72,7 +72,7 @@ public static class KombiSeatingLanePreview
             }
             Shot(camera,new Vector3(8,4,9),new Vector3(0,.8f,0),folder+"/terminal-supported-benches.png");
             Object.DestroyImmediate(group);
-            var player=Object.FindFirstObjectByType<RCCP_CarController>();
+            var player=Object.FindAnyObjectByType<RCCP_CarController>();
             var bus=Object.Instantiate(player.gameObject);SceneManager.MoveGameObjectToScene(bus,preview);bus.transform.SetPositionAndRotation(Vector3.zero,Quaternion.identity);
             foreach(var behaviour in bus.GetComponentsInChildren<MonoBehaviour>())behaviour.enabled=false;
             var seats=bus.GetComponent<KombiPassengerCabin>().Seats;

@@ -59,7 +59,7 @@ public static class KombiCityNetworkSceneAudit
     {
         EditorSceneManager.OpenScene(KombiProjectWorkbench.Shift);Physics.SyncTransforms();
         CityRoadsidePlacement.RefreshVisualGroundCache();
-        var graph=Object.FindFirstObjectByType<CityRoadNetwork>();graph.Load(true);
+        var graph=Object.FindAnyObjectByType<CityRoadNetwork>();graph.Load(true);
         var report=new Record();
         report.cityRenderers=Object.FindObjectsByType<MeshFilter>().Count(m=>AssetDatabase.GetAssetPath(m.sharedMesh).Contains("Environment/City")||m.GetComponent<CityRoadSurface>()!=null);
         var roads=Object.FindObjectsByType<CityRoadSurface>();report.roadSurfaces=roads.Length;report.physicalPotholes=roads.Sum(r=>r.potholes.Length);report.nodes=graph.Nodes.Length;
@@ -107,7 +107,7 @@ public static class KombiCityNetworkSceneAudit
             }
         }
         else report.details.Add("City road marking root is missing.");
-        foreach(var post in Object.FindObjectsByType<Transform>(FindObjectsSortMode.None))
+        foreach(var post in Object.FindObjectsByType<Transform>())
         {
             bool isSign=post.name.EndsWith(" sign post",StringComparison.Ordinal);
             bool isSignal=post.name=="Traffic signal post";

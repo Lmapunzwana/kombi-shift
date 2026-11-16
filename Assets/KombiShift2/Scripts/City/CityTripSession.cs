@@ -1,3 +1,4 @@
+
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -5,106 +6,322 @@ using KombiShift2.Gameplay;
 using KombiShift2.Traffic;
 using KombiShift2.UI;
 using UnityEngine;
+
 namespace KombiShift2.City
 {
     [DefaultExecutionOrder(-500)]
     public sealed class CityTripSession : MonoBehaviour
     {
         public GameObject stationPrefab;
-        public static bool Active {get;private set;}
-        public static float SelectedDuration {get;private set;}
+
+        public static bool Active { get; private set; }
+        public static float SelectedDuration { get; private set; }
+
         void Awake()
         {
-            Active=false;SelectedDuration=0;
-            var selected=CityTripSelection.Selected;if(selected==null)return;
-            var graph=GetComponent<CityRoadNetwork>();graph.Load();
-            var path=graph.FindTripPath(selected);
-            if(path.Count<2 || stationPrefab==null){Debug.LogError("Selected city trip is not reachable; keeping the existing shift.");CityTripSelection.Selected=null;return;}
-            var director=FindFirstObjectByType<KombiShiftGameDirector>();var player=director.Vehicle;
-            foreach(var station in FindObjectsByType<PassengerStation>())
-            {station.ServicePoint.parent.gameObject.SetActive(false);if(station.transform!=station.ServicePoint.parent)station.gameObject.SetActive(false);}
-            var root=new GameObject("Selected trip — "+selected.destination).transform;root.SetParent(transform,false);
-            var points=new Transform[path.Count];
-            for(int i=0;i<points.Length;i++){points[i]=new GameObject("Route "+i).transform;points[i].SetParent(root,false);points[i].position=graph.Nodes[path[i]].position;}
-            var stops=new List<Transform>();
-            for(int i=0;i<selected.stopNodes.Length;i++)
+            Active = false;
+            SelectedDuration = 0;
+
+            var selected = CityTripSelection.Selected;
+            if (selected == null) return;
+
+            var graph = GetComponent<CityRoadNetwork>();
+            graph.Load();
+
+            var path = graph.FindTripPath(selected);
+
+            if (path.Count < 2 || stationPrefab == null)
             {
-                int node=selected.stopNodes[i],index=path.IndexOf(node);if(index<0)continue;
-                Vector3 forward=graph.Nodes[path[Mathf.Min(path.Count-1,index+1)]].position-graph.Nodes[path[Mathf.Max(0,index-1)]].position;forward.y=0;forward.Normalize();
-                Vector3 left=-Vector3.Cross(Vector3.up,forward);var position=graph.Nodes[node].position;
-                var go=Instantiate(stationPrefab,root);go.name=i==0?selected.origin+" Rank":i==selected.stopNodes.Length-1?selected.destination+" Terminal":selected.destination+" Stop "+i;
-                go.transform.SetPositionAndRotation(Ground(position+left*(graph.Nodes[node].width*.5f+1.5f)),Quaternion.LookRotation(-left));
-                var station=go.GetComponent<PassengerStation>();var service=station.ServicePoint;
-                service.SetPositionAndRotation(Ground(graph.LanePoint(path,index)),Quaternion.LookRotation(forward));
-                var people=station.People;
-                bool terminal=i==selected.stopNodes.Length-1;
-                // Busy stops: enough waiting people for both rival kombis plus the player
-                // (Rush Hour 28, Morning 16). Benches fill first; the rest stand on the pavement.
-                int wanted=KombiChallenge.Selected==KombiStage.RushHour?28:16;
-                if(!terminal&&people.Length>0&&people.Length<wanted)
+                Debug.LogError("Selected city trip is not reachable; keeping the existing shift.");
+                CityTripSelection.Selected = null;
+                return;
+            }
+
+            var director = FindAnyObjectByType<KombiShiftGameDirector>();
+            var player = director.Vehicle;
+
+            foreach (var station in FindObjectsByType<PassengerStation>())
+            {
+                station.ServicePoint.parent.gameObject.SetActive(false);
+
+                if (station.transform != station.ServicePoint.parent)
+                    station.gameObject.SetActive(false);
+            }
+
+            var root = new GameObject("Selected trip — " + selected.destination).transform;
+            root.SetParent(transform, false);
+
+            var points = new Transform[path.Count];
+
+            for (int i = 0; i < points.Length; i++)
+            {
+                points[i] = new GameObject("Route " + i).transform;
+                points[i].SetParent(root, false);
+                points[i].position = graph.Nodes[path[i]].position;
+            }
+
+            var stops = new List<Transform>();
+
+            for (int i = 0; i < selected.stopNodes.Length; i++)
+            {
+                int node = selected.stopNodes[i];
+                int index = path.IndexOf(node);
+
+                if (index < 0) continue;
+
+                Vector3 forward =
+                    graph.Nodes[path[Mathf.Min(path.Count - 1, index + 1)]].position -
+                    graph.Nodes[path[Mathf.Max(0, index - 1)]].position;
+
+                forward.y = 0;
+                forward.Normalize();
+
+                Vector3 left = -Vector3.Cross(Vector3.up, forward);
+                var position = graph.Nodes[node].position;
+
+                var go = Instantiate(stationPrefab, root);
+
+                go.name = i == 0
+                    ? selected.origin + " Rank"
+                    : i == selected.stopNodes.Length - 1
+                        ? selected.destination + " Terminal"
+                        : selected.destination + " Stop " + i;
+
+                go.transform.SetPositionAndRotation(
+                    Ground(position + left * (graph.Nodes[node].width * 0.5f + 1.5f)),
+                    Quaternion.LookRotation(-left)
+                );
+
+                var station = go.GetComponent<PassengerStation>();
+                var service = station.ServicePoint;
+
+                service.SetPositionAndRotation(
+                    Ground(graph.LanePoint(path, index)),
+                    Quaternion.LookRotation(forward)
+                );
+
+                var people = station.People;
+
+                bool terminal = i == selected.stopNodes.Length - 1;
+
+                // Busy stops: enough waiting people for both rival kombis plus the player.
+                // Rush Hour 28, Morning 16.
+                // Benches fill first; the rest stand on the pavement.
+                int wanted = KombiChallenge.Selected == KombiStage.RushHour ? 28 : 16;
+
+                if (!terminal && people.Length > 0 && people.Length < wanted)
                 {
-                    var demand=new List<StationPassenger>(people);
-                    int benches=Mathf.Min(12,station.ArrivalSeats.Length);
-                    var stationRoot=go.transform;
-                    for(int n=people.Length;n<wanted;n++)
+                    var demand = new List<StationPassenger>(people);
+
+                    int benches = Mathf.Min(12, station.ArrivalSeats.Length);
+                    var stationRoot = go.transform;
+
+                    for (int n = people.Length; n < wanted; n++)
                     {
-                        Transform spot;bool standing=n>=benches;
-                        if(!standing)spot=station.ArrivalSeats[n];
+                        Transform spot;
+                        bool standing = n >= benches;
+
+                        if (!standing)
+                        {
+                            spot = station.ArrivalSeats[n];
+                        }
                         else
                         {
-                            int k=n-benches,row=k/8,col=k%8;
-                            spot=new GameObject("Standing passenger spot "+k).transform;spot.SetParent(stationRoot,false);
-                            spot.position=Ground(stationRoot.position-stationRoot.forward*(1.3f+row*.9f)+stationRoot.right*((col-3.5f)*.75f));
-                            spot.rotation=stationRoot.rotation;
+                            int k = n - benches;
+                            int row = k / 8;
+                            int col = k % 8;
+
+                            spot = new GameObject("Standing passenger spot " + k).transform;
+                            spot.SetParent(stationRoot, false);
+
+                            spot.position = Ground(
+                                stationRoot.position -
+                                stationRoot.forward * (1.3f + row * 0.9f) +
+                                stationRoot.right * ((col - 3.5f) * 0.75f)
+                            );
+
+                            spot.rotation = stationRoot.rotation;
                         }
-                        var actor=Instantiate(people[n%people.Length].gameObject,spot,false).GetComponent<StationPassenger>();
-                        actor.transform.localPosition=Vector3.zero;actor.transform.localRotation=Quaternion.identity;
-                        if(standing)actor.SetStandingSpot(spot);else{actor.SetWaitingSeat(spot);actor.PoseSeatedPreview();}
+
+                        var actor = Instantiate(
+                            people[n % people.Length].gameObject,
+                            spot,
+                            false
+                        ).GetComponent<StationPassenger>();
+
+                        actor.transform.localPosition = Vector3.zero;
+                        actor.transform.localRotation = Quaternion.identity;
+
+                        if (standing)
+                        {
+                            actor.SetStandingSpot(spot);
+                        }
+                        else
+                        {
+                            actor.SetWaitingSeat(spot);
+                            actor.PoseSeatedPreview();
+                        }
+
                         demand.Add(actor);
                     }
-                    people=demand.ToArray();
+
+                    people = demand.ToArray();
                 }
-                if(terminal){foreach(var person in people)Destroy(person.gameObject);people=Array.Empty<StationPassenger>();}
-                station.Configure(people,service,station.ArrivalSeats,terminal);
-                foreach(var text in go.GetComponentsInChildren<TextMesh>())text.text=go.name.ToUpperInvariant();
+
+                if (terminal)
+                {
+                    foreach (var person in people)
+                        Destroy(person.gameObject);
+
+                    people = Array.Empty<StationPassenger>();
+                }
+
+                station.Configure(people, service, station.ArrivalSeats, terminal);
+
+                foreach (var text in go.GetComponentsInChildren<TextMesh>())
+                    text.text = go.name.ToUpperInvariant();
+
                 stops.Add(station.transform);
             }
-            if(stops.Count<2)throw new InvalidOperationException("Selected trip needs at least two valid stops.");
-            director.Configure(player,stops.ToArray(),4f);director.SetRoutePath(points);FindFirstObjectByType<KombiNavigationHud>().Configure(player,points,director);
-            player.transform.SetPositionAndRotation(stops[0].GetComponent<PassengerStation>().ServicePoint.position+Vector3.up*.14f,stops[0].GetComponent<PassengerStation>().ServicePoint.rotation);
-            var rigidbody=player.GetComponent<Rigidbody>();rigidbody.position=player.transform.position;rigidbody.rotation=player.transform.rotation;
-            var rivals=FindObjectsByType<RivalKombiAI>();
-            int firstPassengerIndex=selected.stopNodes.Length>1?path.IndexOf(selected.stopNodes[1]):-1;
-            if(firstPassengerIndex<0)firstPassengerIndex=path.Count;
-            for(int i=0;i<rivals.Length;i++)
+
+            if (stops.Count < 2)
+                throw new InvalidOperationException("Selected trip needs at least two valid stops.");
+
+            director.Configure(player, stops.ToArray(), 4f);
+            director.SetRoutePath(points);
+
+            FindAnyObjectByType<KombiNavigationHud>().Configure(player, points, director);
+
+            player.transform.SetPositionAndRotation(
+                stops[0].GetComponent<PassengerStation>().ServicePoint.position + Vector3.up * 0.14f,
+                stops[0].GetComponent<PassengerStation>().ServicePoint.rotation
+            );
+
+            var rigidbody = player.GetComponent<Rigidbody>();
+            rigidbody.position = player.transform.position;
+            rigidbody.rotation = player.transform.rotation;
+            
+            var rivals = FindObjectsByType<RivalKombiAI>();
+            var rivalStations = stops
+                .Select(x => x.GetComponent<PassengerStation>())
+                .ToArray();
+
+            int firstPassengerIndex = selected.stopNodes.Length > 1
+                ? path.IndexOf(selected.stopNodes[1])
+                : -1;
+
+            if (firstPassengerIndex < 0)
+                firstPassengerIndex = path.Count;
+
+            for (int i = 0; i < rivals.Length; i++)
             {
-                // Start every rival before the first passenger stop. The old fixed indices
-                // (4, 7, 10...) placed rivals beyond all useful stops on short routes.
-                int preferredIndex=1+i*2;
-                int index=Mathf.Clamp(preferredIndex,0,Mathf.Max(0,firstPassengerIndex-1));
-                var point=graph.LanePoint(path,index);
-                Vector3 forward=points[Mathf.Min(index+1,points.Length-1)].position-points[Mathf.Max(0,index-1)].position;forward.y=0;
-                if(forward.sqrMagnitude<.01f)forward=stops[1].GetComponent<PassengerStation>().ServicePoint.forward;
+                // Start every rival before the first passenger stop.
+                // The old fixed indices (4, 7, 10...) placed rivals beyond
+                // all useful stops on short routes.
+                int preferredIndex = 1 + i * 2;
+
+                int index = Mathf.Clamp(
+                    preferredIndex,
+                    0,
+                    Mathf.Max(0, firstPassengerIndex - 1)
+                );
+
+                var point = graph.LanePoint(path, index);
+
+                Vector3 forward =
+                    points[Mathf.Min(index + 1, points.Length - 1)].position -
+                    points[Mathf.Max(0, index - 1)].position;
+
+                forward.y = 0;
+
+                if (forward.sqrMagnitude < 0.01f)
+                {
+                    forward = stops[1]
+                        .GetComponent<PassengerStation>()
+                        .ServicePoint.forward;
+                }
+
                 forward.Normalize();
-                float queueOffset=Mathf.Max(0,preferredIndex-index)*7f;
-                point-=forward*queueOffset;
-                rivals[i].transform.SetPositionAndRotation(point+Vector3.up*.14f,Quaternion.LookRotation(forward));
-                var rivalBody=rivals[i].GetComponent<Rigidbody>();
-                if(rivalBody!=null){rivalBody.position=rivals[i].transform.position;rivalBody.rotation=rivals[i].transform.rotation;rivalBody.linearVelocity=Vector3.zero;rivalBody.angularVelocity=Vector3.zero;}
-                rivals[i].Configure(points,stops.Select(x=>x.GetComponent<PassengerStation>()).ToArray(),KombiChallenge.RivalDelay(KombiChallenge.Selected),KombiChallenge.Selected==KombiStage.RushHour?10.5f:7.5f);
+
+                float queueOffset = Mathf.Max(0, preferredIndex - index) * 7f;
+                point -= forward * queueOffset;
+
+                rivals[i].transform.SetPositionAndRotation(
+                    point + Vector3.up * 0.14f,
+                    Quaternion.LookRotation(forward)
+                );
+
+                var rivalBody = rivals[i].GetComponent<Rigidbody>();
+
+                if (rivalBody != null)
+                {
+                    rivalBody.position = rivals[i].transform.position;
+                    rivalBody.rotation = rivals[i].transform.rotation;
+
+                    // Only reset velocity on non-kinematic rigidbodies.
+                    if (!rivalBody.isKinematic)
+                    {
+                        rivalBody.linearVelocity = Vector3.zero;
+                        rivalBody.angularVelocity = Vector3.zero;
+                    }
+                }  
+                rivals[i].Configure(
+                points,
+                rivalStations,
+                rivals[i].DepartureDelay,
+                rivals[i].Speed
+                );
+
             }
-            CityTripSelection.Distance=graph.Length(path);
-            SelectedDuration=Mathf.Max(KombiChallenge.Seconds(KombiChallenge.Selected),graph.Length(path)/(KombiChallenge.Selected==KombiStage.RushHour?7f:6f)+stops.Count*40f+150f);
-            Active=true;Physics.SyncTransforms();
+
+            CityTripSelection.Distance = graph.Length(path);
+
+            SelectedDuration = Mathf.Max(
+                KombiChallenge.Seconds(KombiChallenge.Selected),
+                graph.Length(path) /
+                (KombiChallenge.Selected == KombiStage.RushHour ? 7f : 6f)
+                + stops.Count * 40f + 150f
+            );
+
+            Active = true;
+            Physics.SyncTransforms();
         }
+
         static Vector3 Ground(Vector3 p)
         {
-            var hits=Physics.RaycastAll(p+Vector3.up*1.5f,Vector3.down,5f,~0,QueryTriggerInteraction.Ignore);float y=float.NegativeInfinity;
-            foreach(var hit in hits)
-                if(hit.rigidbody==null&&hit.normal.y>.7f&&Mathf.Abs(hit.point.y-p.y)<1.5f&&hit.collider.GetComponentInParent<PassengerStation>()==null&&hit.collider.GetComponentInParent<CityIntersection>()==null)
-                    y=Mathf.Max(y,hit.point.y+.025f);
-            if(!float.IsNegativeInfinity(y))p.y=y;return p;
+            var hits = Physics.RaycastAll(
+                p + Vector3.up * 1.5f,
+                Vector3.down,
+                5f,
+                ~0,
+                QueryTriggerInteraction.Ignore
+            );
+
+            float y = float.NegativeInfinity;
+
+            foreach (var hit in hits)
+            {
+                if (
+                    hit.rigidbody == null &&
+                    hit.normal.y > 0.7f &&
+                    Mathf.Abs(hit.point.y - p.y) < 1.5f &&
+                    hit.collider.GetComponentInParent<PassengerStation>() == null &&
+                    hit.collider.GetComponentInParent<CityIntersection>() == null
+                )
+                {
+                    y = Mathf.Max(y, hit.point.y + 0.025f);
+                }
+            }
+
+            if (!float.IsNegativeInfinity(y))
+                p.y = y;
+
+            return p;
         }
-        void OnDestroy(){Active=false;}
+
+        void OnDestroy()
+        {
+            Active = false;
+        }
     }
 }

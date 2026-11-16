@@ -12,7 +12,7 @@ namespace KombiShift2.City
         public string Instruction {get;private set;}="Follow the route";
         public float Remaining {get;private set;}
         public int Recalculations {get;private set;}
-        void Start(){graph=GetComponent<CityRoadNetwork>();director=FindFirstObjectByType<KombiShiftGameDirector>();}
+        void Start(){graph=GetComponent<CityRoadNetwork>();director=FindAnyObjectByType<KombiShiftGameDirector>();}
         void Update()
         {
             if(graph==null||director==null||director.Finished||director.Paused||Time.time<next)return;next=Time.time+1;

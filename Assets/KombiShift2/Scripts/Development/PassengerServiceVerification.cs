@@ -19,13 +19,13 @@ public static class KombiPassengerVerification
     {
         SessionState.SetBool("Kombi.VerifyVisualOnly",false);
         EditorSceneManager.OpenScene("Assets/KombiShift2/Scenes/KombiShift_FirstShift.unity");
-        var bootstrap=UnityEngine.Object.FindFirstObjectByType<RccHiaceTestBootstrap>();bootstrap.enabled=false;
-        foreach(var rival in UnityEngine.Object.FindObjectsByType<RivalKombiAI>(FindObjectsSortMode.None))
+        var bootstrap=UnityEngine.Object.FindAnyObjectByType<RccHiaceTestBootstrap>();bootstrap.enabled=false;
+        foreach(var rival in UnityEngine.Object.FindObjectsByType<RivalKombiAI>())
         {
             rival.enabled=false;
             var data=new SerializedObject(rival);data.FindProperty("departureDelay").floatValue=0f;data.ApplyModifiedPropertiesWithoutUndo();
         }
-        foreach(var traffic in UnityEngine.Object.FindObjectsByType<KombiTrafficVehicle>(FindObjectsSortMode.None)) traffic.gameObject.SetActive(false);
+        foreach(var traffic in UnityEngine.Object.FindObjectsByType<KombiTrafficVehicle>()) traffic.gameObject.SetActive(false);
         new GameObject("Passenger service verification",typeof(PassengerServiceVerificationRunner));
         EditorSettings.enterPlayModeOptionsEnabled=true;EditorSettings.enterPlayModeOptions=EnterPlayModeOptions.DisableDomainReload;
         EditorApplication.isPlaying=true;
@@ -58,8 +58,8 @@ public sealed class PassengerServiceVerificationRunner : MonoBehaviour
     IEnumerator Run()
     {
         yield return null;yield return null;
-        var director=FindFirstObjectByType<KombiShiftGameDirector>();
-        var car=FindFirstObjectByType<RCCP_CarController>();
+        var director=FindAnyObjectByType<KombiShiftGameDirector>();
+        var car=FindAnyObjectByType<RCCP_CarController>();
         var body=car.GetComponent<Rigidbody>();body.isKinematic=true;
         var stations=director.Stations;var rivals=director.Rivals;
         Check(stations.Length==7,"Seven expanded route stations configured");
@@ -76,7 +76,7 @@ public sealed class PassengerServiceVerificationRunner : MonoBehaviour
         var rival=rivals[0];Vector3 originalRivalPosition=rival.transform.position;rival.transform.position=first.ServicePoint.position+Vector3.forward*3f;
         Check(!first.TryReserve(rival.transform),"Rival cannot reserve passengers already claimed by player");first.Release(car.transform);rival.transform.position=originalRivalPosition;
         // Frame the first bench, player and door for an actual rendered inspection.
-        var camera=Camera.main??FindFirstObjectByType<Camera>();
+        var camera=Camera.main??FindAnyObjectByType<Camera>();
         var follow=camera.GetComponent<KombiShift2.CameraSystem.KombiDriveCamera>();if(follow!=null)follow.enabled=false;
         var seat=first.ArrivalSeats[2];
         camera.transform.position=seat.position+seat.forward*7f+seat.right*4f+Vector3.up*3f;
@@ -121,7 +121,7 @@ public sealed class PassengerServiceVerificationRunner : MonoBehaviour
         }
         // Let a real AI drive along waypoints to the next station and collect its queue.
         var next=stations[1];
-        var hud=FindFirstObjectByType<KombiNavigationHud>();var route=hud.RoutePoints;
+        var hud=FindAnyObjectByType<KombiNavigationHud>();var route=hud.RoutePoints;
         int nearest=0;float best=float.MaxValue;
         for(int i=0;i<route.Length;i++){float d=(route[i].position-next.ServicePoint.position).sqrMagnitude;if(d<best){best=d;nearest=i;}}
         int begin=Mathf.Max(0,nearest-2);rival.transform.position=route[begin].position+Vector3.up*.08f;
@@ -162,7 +162,7 @@ public sealed class PassengerServiceVerificationRunner : MonoBehaviour
         var texture=(Texture2D)typeof(KombiNavigationHud).GetField("map",System.Reflection.BindingFlags.Instance|System.Reflection.BindingFlags.NonPublic).GetValue(hud);
         Check(texture.GetPixel(0,0).a==0&&texture.GetPixel(texture.width/2,texture.height/2).a>0,"Minimap has transparent corners and a circular visible area");
         File.WriteAllBytes(Path.Combine(output,"circular-minimap.png"),texture.EncodeToPNG());
-        Check(QualitySettings.shadows==ShadowQuality.Disable&&QualitySettings.shadowDistance==0&&FindObjectsByType<Light>(FindObjectsSortMode.None).All(x=>x.shadows==LightShadows.None),"Game lighting has no cast shadows");
+        Check(QualitySettings.shadows==ShadowQuality.Disable&&QualitySettings.shadowDistance==0&&FindObjectsByType<Light>().All(x=>x.shadows==LightShadows.None),"Game lighting has no cast shadows");
         car.transform.SetPositionAndRotation(third.ServicePoint.position,third.ServicePoint.rotation);
         deadline=Time.time+85f;
         while((third.WaitingCount>0||director.Servicing)&&Time.time<deadline)yield return null;

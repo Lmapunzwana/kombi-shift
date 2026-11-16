@@ -24,7 +24,7 @@ namespace KombiShift2.CameraSystem
         public float Distance => distance;
         public Vector3 FocusPoint => vehicle != null ? vehicle.position + Vector3.up*1.05f : transform.position;
         public void SetVehicle(Transform value) { vehicle=value;ResetView(); }
-        void Awake() { shelterParts=System.Array.FindAll(Object.FindObjectsByType<Renderer>(FindObjectsSortMode.None), r=>r.name.StartsWith("Shelter ")); OwnGameView();director=Object.FindFirstObjectByType<KombiShiftGameDirector>();distance=PlayerPrefs.GetFloat("Kombi.CameraDistance",7.6f);ResetView(); }
+        void Awake() { shelterParts=System.Array.FindAll(Object.FindObjectsByType<Renderer>(), r=>r.name.StartsWith("Shelter ")); OwnGameView();director=Object.FindAnyObjectByType<KombiShiftGameDirector>();distance=PlayerPrefs.GetFloat("Kombi.CameraDistance",7.6f);ResetView(); }
         public void ResetView()
         {
             if(vehicle==null)return;

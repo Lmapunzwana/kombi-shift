@@ -1,3 +1,4 @@
+
 using System;
 using KombiShift2.Gameplay;
 using UnityEngine;
@@ -8,52 +9,146 @@ namespace KombiShift2.Vehicle
     {
         [SerializeField] private float harmlessImpact = 2.5f, severeImpact = 12f, damageScale = 2f;
         [SerializeField] private float repairCostPerPoint = .15f;
+
         private float nextImpact;
         private KombiShiftGameDirector director;
+
         public float Health { get; private set; } = 100f;
         public float SuspensionHealth { get; private set; } = 100f;
         public float WheelHealth { get; private set; } = 100f;
-        public float AlignmentPull => WheelHealth<85f?(100f-WheelHealth)*.0015f:0f;
-        public float SteeringFactor => Mathf.Lerp(.65f,1f,WheelHealth/100f);
+
+        public float AlignmentPull => WheelHealth < 85f ? (100f - WheelHealth) * .0015f : 0f;
+        public float SteeringFactor => Mathf.Lerp(.65f, 1f, WheelHealth / 100f);
+
         public void ApplyRoadWear(float severity)
         {
-            SuspensionHealth=Mathf.Max(20f,SuspensionHealth-severity);
-            WheelHealth=Mathf.Max(25f,WheelHealth-severity*.65f);
-            ApplyDamage(severity*.35f);
+            SuspensionHealth = Mathf.Max(20f, SuspensionHealth - severity);
+            WheelHealth = Mathf.Max(25f, WheelHealth - severity * .65f);
+            ApplyDamage(severity * .35f);
         }
-        public float MaximumSpeed => Mathf.Lerp(55f,105f,Health/100f);
+
+        public float MaximumSpeed => Mathf.Lerp(55f, 105f, Health / 100f);
         public float PowerFactor => Mathf.Lerp(.45f, 1f, Health / 100f);
         public float BrakeFactor => Mathf.Lerp(.75f, 1f, Health / 100f);
+
         public event Action<float> Damaged;
+
         public void Configure(KombiShiftGameDirector value) => director = value;
-        public static float ImpactDamage(float speed, float impulsePerMass, float threshold = 2.5f, float scale = 2f)
-        { return speed <= threshold || impulsePerMass < .5f ? 0f : Mathf.Clamp((speed - threshold) * scale, 0f, 35f); }
+
+        public static float ImpactDamage(
+            float speed,
+            float impulsePerMass,
+            float threshold = 2.5f,
+            float scale = 2f)
+        {
+            return speed <= threshold || impulsePerMass < .5f
+                ? 0f
+                : Mathf.Clamp((speed - threshold) * scale, 0f, 35f);
+        }
+
         public void ApplyDamage(float amount)
         {
             if (amount <= 0f) return;
-            Health = Mathf.Max(10f, Health - amount); Damaged?.Invoke(amount);
+
+            Health = Mathf.Max(10f, Health - amount);
+            Damaged?.Invoke(amount);
         }
+
+        private static bool IsRoadUser(Collider other)
+        {
+            if (other == null) return false;
+
+            if (other.CompareTag("Player") ||
+                (other.attachedRigidbody != null &&
+                 other.attachedRigidbody.CompareTag("Player")))
+            {
+                return true;
+            }
+
+            return other.GetComponentInParent<KombiShift2.City.CityTrafficAgent>() != null
+                || other.GetComponentInParent<KombiShift2.Traffic.RivalKombiAI>() != null
+                || other.GetComponentInParent<KombiShift2.Traffic.KombiTrafficVehicle>() != null;
+        }
+
         private void OnCollisionEnter(Collision collision)
         {
-            if ((director != null && (director.Paused || director.Finished)) || Time.time < nextImpact) return;
-            var rb = GetComponent<Rigidbody>();
+            if (director != null && (director.Paused || director.Finished))
+                return;
+
             float speed = collision.relativeVelocity.magnitude;
-            float amount = ImpactDamage(speed, collision.impulse.magnitude / Mathf.Max(1f, rb.mass), harmlessImpact, damageScale);
-            if (amount <= 0f) return;
+
+            // Assess traffic fines independently of vehicle damage.
+            if (director != null && IsRoadUser(collision.collider))
+            {
+                int fine = speed >= 15f ? 20
+                         : speed >= 10f ? 10
+                         : speed >= 6f ? 5
+                         : 2;
+
+                director.Law.Record(
+                    "collision",
+                    "Collision with another vehicle",
+                    fine,
+                    1f,
+                    0f
+                );
+            }
+
+            // Preserve the existing vehicle damage cooldown.
+            if (Time.time < nextImpact)
+                return;
+
+            var rb = GetComponent<Rigidbody>();
+
+            float amount = ImpactDamage(
+                speed,
+                collision.impulse.magnitude / Mathf.Max(1f, rb.mass),
+                harmlessImpact,
+                damageScale
+            );
+
+            if (amount <= 0f)
+                return;
+
             nextImpact = Time.time + 1f;
+
             if (speed >= severeImpact)
             {
                 if (director != null) director.Crash();
                 return;
             }
+
             ApplyDamage(amount);
-            if(director!=null)director.Quality.Apply("collision", "Passenger: Please drive carefully!", -amount * .5f, -Mathf.CeilToInt(amount * .3f), 1f);
+
+            if (director != null)
+            {
+                director.Quality.Apply(
+                    "collision",
+                    "Passenger: Please drive carefully!",
+                    -amount * .5f,
+                    -Mathf.CeilToInt(amount * .3f),
+                    1f
+                );
+            }
         }
-        public int RepairPrice => Mathf.CeilToInt((100f - Health) * repairCostPerPoint);
+
+        public int RepairPrice =>
+            Mathf.CeilToInt((100f - Health) * repairCostPerPoint);
+
         public bool Repair()
         {
-            if (director == null || director.Finished || Health >= 100f || director.Vehicle.absoluteSpeed >= 2f || !director.AtServicePoint || !director.TrySpend(RepairPrice)) return false;
-            Health = SuspensionHealth = WheelHealth = 100f; return true;
+            if (director == null ||
+                director.Finished ||
+                Health >= 100f ||
+                director.Vehicle.absoluteSpeed >= 2f ||
+                !director.AtServicePoint ||
+                !director.TrySpend(RepairPrice))
+            {
+                return false;
+            }
+
+            Health = SuspensionHealth = WheelHealth = 100f;
+            return true;
         }
     }
 }

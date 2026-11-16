@@ -49,7 +49,7 @@ public static class KombiProjectWorkbench
             if (missing != 0) throw new Exception(path + ": " + missing + " missing scripts.");
             string[] dependencies = AssetDatabase.GetDependencies(path, true);
             if (dependencies.Any(x => x.StartsWith("Assets/BusModel/") || x.Contains("KombiDrive.unity"))) throw new Exception("Old bus dependency remains.");
-            if (path == Shift && UnityEngine.Object.FindObjectsByType<RCCP_CarController>(FindObjectsInactive.Include, FindObjectsSortMode.None).Length == 0) throw new Exception("Player vehicle missing.");
+            if (path == Shift && UnityEngine.Object.FindObjectsByType<RCCP_CarController>(FindObjectsInactive.Include).Length == 0) throw new Exception("Player vehicle missing.");
             report += path + ": loaded; missing scripts = " + missing + "; dependencies = " + dependencies.Length + "\n";
         }
         EditorBuildSettings.scenes = scenes.Select(x => new EditorBuildSettingsScene(x, true)).ToArray();

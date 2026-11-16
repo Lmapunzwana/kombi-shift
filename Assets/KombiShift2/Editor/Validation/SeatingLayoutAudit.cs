@@ -11,14 +11,14 @@ public static class KombiSeatingLayoutAudit
     {
         if(Application.isBatchMode)EditorSceneManager.OpenScene(KombiProjectWorkbench.Shift);
         else if(UnityEngine.SceneManagement.SceneManager.GetActiveScene().path!=KombiProjectWorkbench.Shift)throw new System.InvalidOperationException("Open the driving scene for the seating audit.");
-        var car=Object.FindFirstObjectByType<RCCP_CarController>();
+        var car=Object.FindAnyObjectByType<RCCP_CarController>();
         var log=new System.Text.StringBuilder();
         foreach(var renderer in car.GetComponentsInChildren<Renderer>())
         {
             var b=renderer.bounds;
             log.AppendLine(renderer.name+" localCentre="+car.transform.InverseTransformPoint(b.center).ToString("F3")+" size="+b.size.ToString("F3"));
         }
-        foreach(var person in Object.FindObjectsByType<StationPassenger>(FindObjectsSortMode.None).Take(6))
+        foreach(var person in Object.FindObjectsByType<StationPassenger>().Take(6))
         {
             if(Application.isBatchMode)person.PoseSeatedPreview();
             var hip=person.GetComponentInChildren<Animator>().GetBoneTransform(HumanBodyBones.Hips);

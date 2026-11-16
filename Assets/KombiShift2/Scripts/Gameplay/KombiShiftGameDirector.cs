@@ -127,13 +127,13 @@ namespace KombiShift2.Gameplay
             shiftSeconds = CityTripSession.Active ? CityTripSession.SelectedDuration : KombiChallenge.Seconds(Stage);
             timeRemaining = shiftSeconds;
             var stageSettings = KombiStageSettings.Load(Stage);
-            var traffic = FindObjectsByType<KombiTrafficVehicle>(FindObjectsSortMode.None);
+            var traffic = FindObjectsByType<KombiTrafficVehicle>();
             Array.Sort(traffic, (a,b) => string.CompareOrdinal(a.name,b.name));
             float fraction = stageSettings != null ? stageSettings.trafficFraction : Stage == KombiStage.Morning ? .6f : 1f;
             for (int i = Mathf.CeilToInt(traffic.Length * fraction); i < traffic.Length; i++) traffic[i].gameObject.SetActive(false);
             cabin = vehicle != null ? vehicle.GetComponent<KombiPassengerCabin>() : null;
             stations = stops == null ? Array.Empty<PassengerStation>() : stops.Select(x => x != null ? x.GetComponent<PassengerStation>() : null).ToArray();
-            rivals = FindObjectsByType<RivalKombiAI>(FindObjectsSortMode.None);
+            rivals = FindObjectsByType<RivalKombiAI>();
             for (int i = 0; i < rivals.Length; i++)
             {
                 rivals[i].SetPersonality(Stage==KombiStage.Morning ? (i%2==0?RivalPersonality.Aggressive:RivalPersonality.Competitive) : RivalPersonality.Aggressive, i % 2 == 0 ? new Color(.95f,.35f,.22f) : new Color(.35f,.6f,1f));

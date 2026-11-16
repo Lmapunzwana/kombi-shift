@@ -90,7 +90,7 @@ namespace KombiShift2.Weather
 
         private void Awake()
         {
-            foreach (Light light in FindObjectsByType<Light>(FindObjectsInactive.Exclude, FindObjectsSortMode.None))
+            foreach (Light light in FindObjectsByType<Light>(FindObjectsInactive.Exclude))
             {
                 if (light.type == LightType.Directional && (sun == null || light.intensity > sun.intensity))
                     sun = light;

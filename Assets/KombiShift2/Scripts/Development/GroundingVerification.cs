@@ -31,16 +31,16 @@ public sealed class KombiGroundingRunner:MonoBehaviour
  IEnumerator Start()
  {
   began=Time.realtimeSinceStartup;output=Path.GetFullPath(Path.Combine(Application.dataPath,"../../../Builds/Expansion2026/GroundingEvidence"));Directory.CreateDirectory(output);
-  yield return new WaitForSeconds(2);car=Object.FindFirstObjectByType<RCCP_CarController>();driver=Object.FindFirstObjectByType<RccHiaceTestBootstrap>();body=car.GetComponent<Rigidbody>();wheels=car.GetComponentsInChildren<WheelCollider>();mounts=wheels.Select(w=>w.transform.localPosition).ToArray();
+  yield return new WaitForSeconds(2);car=Object.FindAnyObjectByType<RCCP_CarController>();driver=Object.FindAnyObjectByType<RccHiaceTestBootstrap>();body=car.GetComponent<Rigidbody>();wheels=car.GetComponentsInChildren<WheelCollider>();mounts=wheels.Select(w=>w.transform.localPosition).ToArray();
   yield return new WaitForSeconds(3);Check(wheels.Count(w=>w.isGrounded)==4,"All four wheels settle on the actual city road");
   Check(car.GetComponentsInChildren<Rigidbody>(true).Length==1,"Player has one physics body and no old camera joint");
   var rear=car.GetComponentsInChildren<RCCP_Axle>().First(a=>a.name.Contains("Rear"));Check(rear.isPower,"Rear axle receives engine power");
   Check(car.direction>0,"Parking does not request reverse gear");
   Vector3 start=body.position;Quaternion rotation=body.rotation;
-  var director=Object.FindFirstObjectByType<KombiShift2.Gameplay.KombiShiftGameDirector>();
+  var director=Object.FindAnyObjectByType<KombiShift2.Gameplay.KombiShiftGameDirector>();
   // Isolate handling from background vehicles; explicit impact fixtures below still exercise collision physics.
   foreach(var rival in director.Rivals)rival.gameObject.SetActive(false);
-  foreach(var traffic in Object.FindObjectsByType<KombiShift2.Traffic.KombiTrafficVehicle>(FindObjectsSortMode.None))traffic.gameObject.SetActive(false);
+  foreach(var traffic in Object.FindObjectsByType<KombiShift2.Traffic.KombiTrafficVehicle>())traffic.gameObject.SetActive(false);
   Vector3 service=director.Stations[0].ServicePoint.position;service.y=Ground(service)+.13f;ResetAt(service,rotation);
   float boardDeadline=Time.time+25;while(director.Passengers<6&&Time.time<boardDeadline)yield return null;
   Check(director.Passengers>=6,"Six passengers board while the kombi uses dynamic physics");
@@ -66,7 +66,7 @@ public sealed class KombiGroundingRunner:MonoBehaviour
   measure=false;result.recoveries=car.GetComponent<KombiVehicleStability>().Recoveries;
   Check(result.minimumUpright>.995f,"Body stays upright during turns, kerb crossing and impact");Check(result.maximumSpeed<111,"Speed stays within the configured emergency ceiling");Check(result.maximumAirborneSeconds<.8f,"No sustained loss of wheel contact");Check(result.maximumWheelMountDrift<.005f,"Wheel collider mounts do not move during steering");Check(result.recoveries==0,"Driving tests complete without recovery teleporting");Finish();
  }
- void ResetAt(Vector3 p,Quaternion q){body.position=p;body.rotation=q;body.linearVelocity=body.angularVelocity=Vector3.zero;throttle=steer=0;park=true;Object.FindFirstObjectByType<KombiShift2.CameraSystem.KombiDriveCamera>().ResetView();}
+ void ResetAt(Vector3 p,Quaternion q){body.position=p;body.rotation=q;body.linearVelocity=body.angularVelocity=Vector3.zero;throttle=steer=0;park=true;Object.FindAnyObjectByType<KombiShift2.CameraSystem.KombiDriveCamera>().ResetView();}
  float Ground(Vector3 p){float y=p.y-.1f;foreach(var h in Physics.RaycastAll(p+Vector3.up,Vector3.down,3,~0,QueryTriggerInteraction.Ignore))if(h.rigidbody==null&&h.normal.y>.8f&&Mathf.Abs(h.point.y-y)<.5f)y=Mathf.Max(y,h.point.y);return y;}
  IEnumerator Shot(string name){ScreenCapture.CaptureScreenshot(Path.Combine(output,name+".png"));yield return new WaitForSeconds(.3f);}
  void Record(string name){telemetry.AppendLine($"{name}: pos={body.position}; angles={body.rotation.eulerAngles}; speed={car.absoluteSpeed}; contacts={wheels.Count(w=>w.isGrounded)}; COM={body.centerOfMass}");foreach(var w in wheels){bool g=w.GetGroundHit(out var h);telemetry.AppendLine($" {w.name} mount={w.transform.localPosition} contact={(g?h.collider.name:"none")} motorTorque={w.motorTorque}");}}

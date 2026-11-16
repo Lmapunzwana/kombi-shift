@@ -28,7 +28,7 @@ public static class KombiCityInfrastructureAudit
         Directory.CreateDirectory("Docs/Validation/CityInfrastructure");File.WriteAllText("Docs/Validation/CityInfrastructure/mesh-inventory.txt",log.ToString());
         var geometry=new Geometry();
         geometry.cityRenderers=Object.FindObjectsByType<MeshFilter>().Count(x=>AssetDatabase.GetAssetPath(x.sharedMesh).Contains("Environment/City")||x.GetComponent<CityRoadSurface>()!=null);
-        geometry.itinerary=Object.FindFirstObjectByType<KombiNavigationHud>().RoutePoints.Select(x=>x.position).ToArray();
+        geometry.itinerary=Object.FindAnyObjectByType<KombiNavigationHud>().RoutePoints.Select(x=>x.position).ToArray();
         foreach(var filter in Object.FindObjectsByType<MeshFilter>())
         {
             var renderer=filter.GetComponent<MeshRenderer>();if(renderer==null || filter.sharedMesh==null)continue;

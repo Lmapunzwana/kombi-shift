@@ -153,7 +153,7 @@ namespace KombiShift2.Vehicle
 #if UNITY_EDITOR
             if(verificationInput)inputs.handbrakeInput=verificationPark?1f:0f;
 #endif
-            director??=FindFirstObjectByType<KombiShift2.Gameplay.KombiShiftGameDirector>();
+            director??=FindAnyObjectByType<KombiShift2.Gameplay.KombiShiftGameDirector>();
             if(director!=null&&director.Alighting){inputs.throttleInput=0;inputs.brakeInput=1;inputs.handbrakeInput=1;}
             if(inputs.handbrakeInput>.1f)inputs.throttleInput=0f;
             vehicle.Inputs.OverrideInputs(inputs);
@@ -168,7 +168,7 @@ namespace KombiShift2.Vehicle
                 brakeInput = brake,
                 handbrakeInput = 0f
             };
-            director??=FindFirstObjectByType<KombiShift2.Gameplay.KombiShiftGameDirector>();
+            director??=FindAnyObjectByType<KombiShift2.Gameplay.KombiShiftGameDirector>();
             if(director!=null&&director.Alighting){inputs.throttleInput=0;inputs.brakeInput=1;inputs.handbrakeInput=1;}
             if(inputs.handbrakeInput>.1f)inputs.throttleInput=0f;
             vehicle.Inputs.OverrideInputs(inputs);

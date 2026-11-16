@@ -33,9 +33,9 @@ public static class KombiPassengerSeatingLaneRepair
             throw new InvalidOperationException("Stop Play mode and save the driving scene before repairing it. Unity may stay open.");
         string backup="Review/BeforeSeatingLane-"+DateTime.Now.ToString("yyyyMMdd-HHmmss");
         Directory.CreateDirectory(backup);File.Copy(scene.path,backup+"/KombiShift_FirstShift.unity");
-        var route=Object.FindFirstObjectByType<KombiNavigationHud>().RoutePoints;
+        var route=Object.FindAnyObjectByType<KombiNavigationHud>().RoutePoints;
         var report=new System.Text.StringBuilder("Passenger seating and left-lane scene repair\n");
-        foreach(var station in Object.FindObjectsByType<PassengerStation>(FindObjectsSortMode.None))
+        foreach(var station in Object.FindObjectsByType<PassengerStation>())
         {
             var service=station.ServicePoint;var group=service.parent;
             var people=station.People ?? Array.Empty<StationPassenger>();
@@ -83,9 +83,9 @@ public static class KombiPassengerSeatingLaneRepair
             station.Configure(people,service,seats,station.Terminal);EditorUtility.SetDirty(station);
             report.AppendLine(station.name+": 12 supported bench positions, left service offset "+Vector3.Dot(service.position-route[index].position,left).ToString("F2")+"m, waiting "+people.Length);
         }
-        foreach(var cabin in Object.FindObjectsByType<KombiPassengerCabin>(FindObjectsSortMode.None))
+        foreach(var cabin in Object.FindObjectsByType<KombiPassengerCabin>())
         { RepairCabin(cabin.gameObject);report.AppendLine(cabin.name+": 12 cabin seats"); }
-        foreach(var rival in Object.FindObjectsByType<RivalKombiAI>(FindObjectsSortMode.None))
+        foreach(var rival in Object.FindObjectsByType<RivalKombiAI>())
         {var data=new SerializedObject(rival);data.FindProperty("profile").FindPropertyRelative("allowOvertaking").boolValue=false;data.ApplyModifiedPropertiesWithoutUndo();}
         const string prefabPath="Assets/KombiShift2/Prefabs/Vehicles/Player/Hiace_Player.prefab";
         File.Copy(prefabPath,backup+"/Hiace_Player.prefab");

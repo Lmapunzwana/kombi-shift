@@ -20,14 +20,14 @@ public static class KombiDrivingMenuUpgrade
    if(importer.importCameras||importer.importLights){importer.importCameras=false;importer.importLights=false;importer.SaveAndReimport();}
   }
   EditorSceneManager.OpenScene(KombiProjectWorkbench.Shift);
-  var car=Object.FindFirstObjectByType<RCCP_CarController>();
+  var car=Object.FindAnyObjectByType<RCCP_CarController>();
   if(car.GetComponent<KombiVehicleStability>()==null)car.gameObject.AddComponent<KombiVehicleStability>();
   var body=car.GetComponent<Rigidbody>();body.centerOfMass=new Vector3(0,.24f,.04f);body.constraints|=RigidbodyConstraints.FreezeRotationX|RigidbodyConstraints.FreezeRotationZ;body.collisionDetectionMode=CollisionDetectionMode.ContinuousDynamic;
   int paint=0;
-  foreach(var collider in Object.FindObjectsByType<MeshCollider>(FindObjectsSortMode.None))
+  foreach(var collider in Object.FindObjectsByType<MeshCollider>())
    if(collider.name.StartsWith("Centre Line")){collider.enabled=false;EditorUtility.SetDirty(collider);paint++;}
-  var follow=Object.FindFirstObjectByType<KombiShift2.CameraSystem.KombiDriveCamera>();
-  foreach(var extra in Object.FindObjectsByType<Camera>(FindObjectsInactive.Include,FindObjectsSortMode.None))
+  var follow=Object.FindAnyObjectByType<KombiShift2.CameraSystem.KombiDriveCamera>();
+  foreach(var extra in Object.FindObjectsByType<Camera>(FindObjectsInactive.Include))
   {
    if(extra==follow.GetComponent<Camera>()||extra.targetTexture!=null)continue;
    var listener=extra.GetComponent<AudioListener>();if(listener!=null)Object.DestroyImmediate(listener);

@@ -23,9 +23,9 @@ public static class KombiShiftExpansionUpgrade
         var scene = EditorSceneManager.OpenScene(KombiProjectWorkbench.Shift);
         if (GameObject.Find(RootName) != null) throw new Exception("Expansion already applied; refusing to duplicate route/stations.");
         var root = new GameObject(RootName).transform;
-        var hud = Object.FindFirstObjectByType<KombiNavigationHud>();
-        var director = Object.FindFirstObjectByType<KombiShiftGameDirector>();
-        var splines = Object.FindObjectsByType<BezierSpline>(FindObjectsSortMode.None).OrderBy(x => x.name).ToArray();
+        var hud = Object.FindAnyObjectByType<KombiNavigationHud>();
+        var director = Object.FindAnyObjectByType<KombiShiftGameDirector>();
+        var splines = Object.FindObjectsByType<BezierSpline>().OrderBy(x => x.name).ToArray();
         var prefix = new List<Transform>();
         foreach (var road in splines.Where(x => x.name == "bz0" || x.name == "bz1"))
         {
@@ -69,14 +69,14 @@ public static class KombiShiftExpansionUpgrade
         Vector3 heading = route[2].position - route[1].position; heading.y = 0;
         player.SetPositionAndRotation(route[1].position + RivalKombiAI.LeftOffset(heading, 1.55f) + Vector3.up * .12f, Quaternion.LookRotation(heading));
         int rivalIndex = 0;
-        foreach (var rival in Object.FindObjectsByType<RivalKombiAI>(FindObjectsSortMode.None))
+        foreach (var rival in Object.FindObjectsByType<RivalKombiAI>())
         {
             int index = rivalIndex == 0 ? 34 : 75;
             Vector3 forward = route[index + 1].position - route[index].position; forward.y = 0;
             rival.transform.SetPositionAndRotation(route[index].position + RivalKombiAI.LeftOffset(forward, 1.55f) + Vector3.up * .12f, Quaternion.LookRotation(forward));
             rival.Configure(route, stations, 18f + rivalIndex * 18f, 7.5f); rivalIndex++;
         }
-        foreach (var traffic in Object.FindObjectsByType<KombiTrafficVehicle>(FindObjectsSortMode.None))
+        foreach (var traffic in Object.FindObjectsByType<KombiTrafficVehicle>())
         {
             var data = new SerializedObject(traffic);
             var path = data.FindProperty("route"); path.arraySize = route.Length;
@@ -96,14 +96,14 @@ public static class KombiShiftExpansionUpgrade
     public static void PositionRivalsBehindPlayer()
     {
         var scene = EditorSceneManager.OpenScene(KombiProjectWorkbench.Shift);
-        var hud = Object.FindFirstObjectByType<KombiNavigationHud>();
-        var director = Object.FindFirstObjectByType<KombiShiftGameDirector>();
+        var hud = Object.FindAnyObjectByType<KombiNavigationHud>();
+        var director = Object.FindAnyObjectByType<KombiShiftGameDirector>();
         var old = hud.RoutePoints;
         var first = GameObject.Find("Rival head start route point");
         var route = old;
         if (first == null)
         {
-            var road = Object.FindObjectsByType<BezierSpline>(FindObjectsSortMode.None).First(x => x.name == "bz0");
+            var road = Object.FindObjectsByType<BezierSpline>().First(x => x.name == "bz0");
             first = new GameObject("Rival head start route point"); first.transform.SetParent(GameObject.Find(RootName).transform);
             first.transform.position = Ground(road.GetPoint(.15f));
             route = new[] { first.transform }.Concat(old).ToArray();
@@ -112,14 +112,14 @@ public static class KombiShiftExpansionUpgrade
         var stations = Enumerable.Range(0,stops.arraySize).Select(i => ((Transform)stops.GetArrayElementAtIndex(i).objectReferenceValue).GetComponent<PassengerStation>()).ToArray();
         hud.Configure(director.Vehicle,route,director);
         int n = 0;
-        foreach (var rival in Object.FindObjectsByType<RivalKombiAI>(FindObjectsSortMode.None).OrderBy(x => x.name))
+        foreach (var rival in Object.FindObjectsByType<RivalKombiAI>().OrderBy(x => x.name))
         {
             int index = n++ == 0 ? 1 : 0;
             Vector3 forward = route[index+1].position-route[index].position; forward.y=0f;
             rival.transform.SetPositionAndRotation(route[index].position+RivalKombiAI.LeftOffset(forward,1.55f)+Vector3.up*.12f,Quaternion.LookRotation(forward));
             rival.Configure(route,stations,rival.DepartureDelay,rival.Speed);
         }
-        if (route != old) foreach (var traffic in Object.FindObjectsByType<KombiTrafficVehicle>(FindObjectsSortMode.None))
+        if (route != old) foreach (var traffic in Object.FindObjectsByType<KombiTrafficVehicle>())
         {
             var serialized = new SerializedObject(traffic); var path = serialized.FindProperty("route"); path.arraySize=route.Length;
             for(int i=0;i<route.Length;i++)path.GetArrayElementAtIndex(i).objectReferenceValue=route[i];
@@ -133,10 +133,10 @@ public static class KombiShiftExpansionUpgrade
     public static void RepairRouteTreeColliders()
     {
         var scene = EditorSceneManager.OpenScene(KombiProjectWorkbench.Shift);
-        var hud = Object.FindFirstObjectByType<KombiNavigationHud>();
+        var hud = Object.FindAnyObjectByType<KombiNavigationHud>();
         var route = hud.RoutePoints;
         int repaired = 0; var details = new List<string>();
-        foreach (var collider in Object.FindObjectsByType<MeshCollider>(FindObjectsSortMode.None))
+        foreach (var collider in Object.FindObjectsByType<MeshCollider>())
         {
             string name = collider.name.ToLowerInvariant();
             if (!collider.enabled || !name.Contains("tree") || !name.Contains("plane")) continue;
@@ -150,7 +150,7 @@ public static class KombiShiftExpansionUpgrade
             // Alpha-cutout leaves are not solid walls. Preserve the art and collide with its trunk.
             collider.enabled = false;
             var trunkPosition = new Vector3(bounds.center.x, bounds.min.y + 1.5f, bounds.center.z);
-            bool hasTrunk = Object.FindObjectsByType<CapsuleCollider>(FindObjectsSortMode.None)
+            bool hasTrunk = Object.FindObjectsByType<CapsuleCollider>()
                 .Any(x => x.name == "Route tree trunk collider" && HorizontalDistance(x.transform.position, trunkPosition) < 1f);
             if (!hasTrunk)
             {
@@ -171,7 +171,7 @@ public static class KombiShiftExpansionUpgrade
     }
     static int RemoveDuplicateTreeTrunks()
     {
-        var trunks = Object.FindObjectsByType<CapsuleCollider>(FindObjectsSortMode.None)
+        var trunks = Object.FindObjectsByType<CapsuleCollider>()
             .Where(x => x.name == "Route tree trunk collider")
             .OrderBy(x => x.transform.position.x).ThenBy(x => x.transform.position.z).ToArray();
         var kept = new List<CapsuleCollider>();
@@ -202,13 +202,13 @@ public static class KombiShiftExpansionUpgrade
     public static int RepositionRoadSignsInOpenScene()
     {
         int moved = 0;
-        var hud = Object.FindFirstObjectByType<KombiNavigationHud>();
+        var hud = Object.FindAnyObjectByType<KombiNavigationHud>();
         if (hud == null) throw new InvalidOperationException("The saved driving scene is missing its navigation route.");
-        var network = Object.FindFirstObjectByType<CityRoadNetwork>();
+        var network = Object.FindAnyObjectByType<CityRoadNetwork>();
         if (network == null) throw new InvalidOperationException("The saved driving scene is missing its city road network.");
         network.Load(true);
         Physics.SyncTransforms();
-        foreach (var zone in Object.FindObjectsByType<KombiRoadRuleZone>(FindObjectsSortMode.None)
+        foreach (var zone in Object.FindObjectsByType<KombiRoadRuleZone>()
                      .OrderBy(x => Nearest(hud.RoutePoints, x.transform.position)))
         {
             var post = zone.transform.Find(zone.rule + " sign post");
@@ -231,8 +231,8 @@ public static class KombiShiftExpansionUpgrade
         var scene = EditorSceneManager.OpenScene(KombiProjectWorkbench.Shift);
         var root = GameObject.Find(RootName);
         if (root == null) throw new Exception("Shift expansion root is missing; cannot rebuild road signs.");
-        var hud = Object.FindFirstObjectByType<KombiNavigationHud>();
-        var director = Object.FindFirstObjectByType<KombiShiftGameDirector>();
+        var hud = Object.FindAnyObjectByType<KombiNavigationHud>();
+        var director = Object.FindAnyObjectByType<KombiShiftGameDirector>();
         var stops = new SerializedObject(director).FindProperty("stops");
         var stations = Enumerable.Range(0, stops.arraySize)
             .Select(i => stops.GetArrayElementAtIndex(i).objectReferenceValue as Transform)
@@ -241,12 +241,12 @@ public static class KombiShiftExpansionUpgrade
             .Where(x => x != null)
             .ToArray();
         BuildOrderedRoadRules(root.transform, hud.RoutePoints, stations);
-        foreach (var zone in Object.FindObjectsByType<KombiRoadRuleZone>(FindObjectsSortMode.None))
+        foreach (var zone in Object.FindObjectsByType<KombiRoadRuleZone>())
             if ((int)zone.rule == 2) Object.DestroyImmediate(zone.gameObject);
         EditorSceneManager.MarkSceneDirty(scene);
         EditorSceneManager.SaveScene(scene);
         AssetDatabase.SaveAssets();
-        int humps = Object.FindObjectsByType<KombiRoadRuleZone>(FindObjectsSortMode.None).Count(x => x.rule == RoadRule.Hump);
+        int humps = Object.FindObjectsByType<KombiRoadRuleZone>().Count(x => x.rule == RoadRule.Hump);
         Debug.Log("KOMBI_ORDERED_ROAD_RULES_REBUILT stations=" + stations.Length + " humps=" + humps + " giveWay=0");
     }
     static void BuildOrderedRoadRules(Transform root, Transform[] route, PassengerStation[] stations)
@@ -354,7 +354,7 @@ public static class KombiShiftExpansionUpgrade
     public static void RefreshRoadCarriageMarkings()
     {
         var scene = EditorSceneManager.OpenScene(KombiProjectWorkbench.Shift);
-        var hud = Object.FindFirstObjectByType<KombiNavigationHud>();
+        var hud = Object.FindAnyObjectByType<KombiNavigationHud>();
         var root = GameObject.Find(RootName);
         if (root == null) throw new Exception("Shift expansion root is missing; cannot place road markings.");
         MakeRoadCarriageMarkings(root.transform, hud.RoutePoints);
@@ -367,7 +367,7 @@ public static class KombiShiftExpansionUpgrade
     {
         var scene = EditorSceneManager.OpenScene(KombiProjectWorkbench.Shift);
         int removed = 0;
-        foreach (var renderer in Object.FindObjectsByType<MeshRenderer>(FindObjectsSortMode.None))
+        foreach (var renderer in Object.FindObjectsByType<MeshRenderer>())
         {
             if (!renderer.gameObject.name.StartsWith("Centre Line bz", StringComparison.Ordinal)) continue;
             renderer.enabled = false;
@@ -381,8 +381,8 @@ public static class KombiShiftExpansionUpgrade
     {
         var scene = EditorSceneManager.OpenScene(KombiProjectWorkbench.Shift);
         Physics.SyncTransforms();
-        var hud = Object.FindFirstObjectByType<KombiNavigationHud>();
-        var director = Object.FindFirstObjectByType<KombiShiftGameDirector>();
+        var hud = Object.FindAnyObjectByType<KombiNavigationHud>();
+        var director = Object.FindAnyObjectByType<KombiShiftGameDirector>();
         var old = hud.RoutePoints; var points = new List<Transform>();
         for (int i = 0; i < old.Length; i++)
         {
@@ -401,8 +401,8 @@ public static class KombiShiftExpansionUpgrade
         var data = new SerializedObject(director); var stops = data.FindProperty("stops");
         var stations = Enumerable.Range(0,stops.arraySize).Select(i => ((Transform)stops.GetArrayElementAtIndex(i).objectReferenceValue).GetComponent<PassengerStation>()).ToArray();
         hud.Configure(director.Vehicle, route,director);
-        foreach (var rival in Object.FindObjectsByType<RivalKombiAI>(FindObjectsSortMode.None)) rival.Configure(route,stations,rival.DepartureDelay,rival.Speed);
-        foreach (var traffic in Object.FindObjectsByType<KombiTrafficVehicle>(FindObjectsSortMode.None))
+        foreach (var rival in Object.FindObjectsByType<RivalKombiAI>()) rival.Configure(route,stations,rival.DepartureDelay,rival.Speed);
+        foreach (var traffic in Object.FindObjectsByType<KombiTrafficVehicle>())
         {
             var serialized = new SerializedObject(traffic); var path = serialized.FindProperty("route");
             int oldIndex = serialized.FindProperty("targetIndex").intValue;
@@ -413,7 +413,7 @@ public static class KombiShiftExpansionUpgrade
         }
         EditorSceneManager.MarkSceneDirty(scene); EditorSceneManager.SaveScene(scene);
         // Directional controls apply to their signed left lane, not legal opposing traffic.
-        foreach (var zone in Object.FindObjectsByType<KombiRoadRuleZone>(FindObjectsSortMode.None))
+        foreach (var zone in Object.FindObjectsByType<KombiRoadRuleZone>())
         {
             if (zone.rule != RoadRule.Direction && zone.rule != RoadRule.Stop) continue;
             var box = zone.GetComponent<BoxCollider>();
@@ -463,7 +463,7 @@ public static class KombiShiftExpansionUpgrade
         }
         var group = new GameObject(RoadMarkingRootName);
         group.transform.SetParent(parent, false);
-        var restricted = Object.FindObjectsByType<KombiRoadRuleZone>(FindObjectsSortMode.None)
+        var restricted = Object.FindObjectsByType<KombiRoadRuleZone>()
             .Where(x => x.rule == RoadRule.NoOvertaking).ToArray();
         CreateMarking(group.transform, "Road edge lines", BuildEdgeMarkings(route), RoadMarkingMaterial("RoadMarkingWhite", Color.white));
         CreateMarking(group.transform, "Dashed centre line", BuildDashedCentreLine(route, restricted), RoadMarkingMaterial("RoadMarkingWhite", Color.white));
@@ -599,7 +599,7 @@ public static class KombiShiftExpansionUpgrade
         text.transform.SetParent(zone.transform, true); text.transform.localScale = Vector3.one;
         var label = text.AddComponent<TextMesh>(); label.text = RoadSignText(rule, limit);
         label.fontSize = 48; label.characterSize = .09f; label.anchor = TextAnchor.MiddleCenter; label.color = Color.yellow;
-        var network = Object.FindFirstObjectByType<CityRoadNetwork>();
+        var network = Object.FindAnyObjectByType<CityRoadNetwork>();
         if (network == null) throw new InvalidOperationException("The city road network is required to place roadside signs.");
         network.Load();
         PlaceRoadSign(behaviour, post.transform, text.transform, network);

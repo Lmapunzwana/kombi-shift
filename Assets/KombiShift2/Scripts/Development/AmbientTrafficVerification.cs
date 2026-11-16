@@ -40,9 +40,9 @@ public sealed class AmbientTrafficVerification:MonoBehaviour
         AudioListener.pause=true;foreach(var source in FindObjectsByType<AudioSource>())source.enabled=false;foreach(var animator in FindObjectsByType<Animator>())animator.enabled=false;
         QualitySettings.vSyncCount=0;Application.targetFrameRate=-1;
         realStart=Time.realtimeSinceStartup;report.utc=DateTime.UtcNow.ToString("o");report.stage=stage.ToString();report.baselineAvailable=false;report.baselineNote="No pre-Phase-3 executable baseline was retained; current throughput is reported without fabricating a comparison.";
-        Time.timeScale=1f;Time.fixedDeltaTime=.02f;yield return null;var fleet=FindFirstObjectByType<CityTrafficFleet>();report.requestedFleet=stage==KombiStage.RushHour?fleet.rushVehicles:fleet.morningVehicles;
+        Time.timeScale=1f;Time.fixedDeltaTime=.02f;yield return null;var fleet=FindAnyObjectByType<CityTrafficFleet>();report.requestedFleet=stage==KombiStage.RushHour?fleet.rushVehicles:fleet.morningVehicles;
         float warmupDeadline=Time.realtimeSinceStartup+30f;while(fleet.ActiveCount<report.requestedFleet&&Time.realtimeSinceStartup<warmupDeadline)yield return null;
-        var director=FindFirstObjectByType<KombiShiftGameDirector>();if(director!=null)director.enabled=false;
+        var director=FindAnyObjectByType<KombiShiftGameDirector>();if(director!=null)director.enabled=false;
         Time.timeScale=50f;Time.fixedDeltaTime=.25f;Time.maximumDeltaTime=.5f;
         float start=Time.time,nextCheckpoint=60f;
         while(Time.time-start<Duration)

@@ -12,7 +12,7 @@ public static class KombiProjectGroundingAudit
  public static void Run()
  {
   EditorSceneManager.OpenScene(KombiProjectWorkbench.Shift);
-  var car=Object.FindFirstObjectByType<RCCP_CarController>();var b=new StringBuilder();
+  var car=Object.FindAnyObjectByType<RCCP_CarController>();var b=new StringBuilder();
   foreach(var component in car.GetComponentsInChildren<Component>(true))
   {
    if(component==null)continue;

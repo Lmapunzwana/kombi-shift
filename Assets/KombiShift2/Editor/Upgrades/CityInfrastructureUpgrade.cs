@@ -143,7 +143,7 @@ public static class KombiCityInfrastructureUpgrade
         if(root.GetComponent<CityTrafficFleet>()==null)root.AddComponent<CityTrafficFleet>();
         var culling=root.GetComponent<CityDistanceCulling>()??root.AddComponent<CityDistanceCulling>();
         culling.cityRenderers=Object.FindObjectsByType<MeshFilter>().Where(m=>AssetDatabase.GetAssetPath(m.sharedMesh).Contains("Environment/City")||m.GetComponent<CityRoadSurface>()!=null).Select(m=>m.GetComponent<Renderer>()).Where(r=>r!=null).ToArray();
-        var director=Object.FindFirstObjectByType<KombiShift2.Gameplay.KombiShiftGameDirector>();
+        var director=Object.FindAnyObjectByType<KombiShift2.Gameplay.KombiShiftGameDirector>();
         if(director.GetComponent<KombiShift2.UI.KombiDropoffMarker>()==null)director.gameObject.AddComponent<KombiShift2.UI.KombiDropoffMarker>();
         foreach(var car in Object.FindObjectsByType<KombiPassengerCabin>())
         {

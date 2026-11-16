@@ -10,7 +10,7 @@ public static class CityRoadsidePlacement
 
     public static void RefreshVisualGroundCache()
     {
-        visualGroundMeshes = Object.FindObjectsByType<MeshFilter>(FindObjectsSortMode.None);
+        visualGroundMeshes = Object.FindObjectsByType<MeshFilter>();
         visualGroundTerrains = Terrain.activeTerrains;
     }
 

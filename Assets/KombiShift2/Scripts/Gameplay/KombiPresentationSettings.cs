@@ -11,9 +11,9 @@ namespace KombiShift2.Gameplay
         {
             QualitySettings.shadows = ShadowQuality.Disable;
             QualitySettings.shadowDistance = 0f;
-            foreach(var light in Object.FindObjectsByType<Light>(FindObjectsInactive.Include,FindObjectsSortMode.None)) light.shadows=LightShadows.None;
-            foreach(var renderer in Object.FindObjectsByType<Renderer>(FindObjectsInactive.Include,FindObjectsSortMode.None))
-            { renderer.shadowCastingMode=ShadowCastingMode.Off;renderer.receiveShadows=false; }
+            foreach(var light in Object.FindObjectsByType<Light>(FindObjectsInactive.Include)) light.shadows=LightShadows.None;
+            foreach(var renderer in Object.FindObjectsByType<Renderer>(FindObjectsInactive.Include))
+           { renderer.shadowCastingMode=ShadowCastingMode.Off;renderer.receiveShadows=false; }
         }
     }
 }

@@ -22,16 +22,16 @@ public sealed class CityMenuVerification : MonoBehaviour
     IEnumerator Scenario()
     {
         yield return null;yield return null;
-        var menu=FindFirstObjectByType<KombiMainMenu>();menu.Activate(0);yield return null;
-        var market=FindFirstObjectByType<KombiTripMarket>();Check(market!=null&&market.IsOpen,"Main menu opens the actual Trip Market");
+        var menu=FindAnyObjectByType<KombiMainMenu>();menu.Activate(0);yield return null;
+        var market=FindAnyObjectByType<KombiTripMarket>();Check(market!=null&&market.IsOpen,"Main menu opens the actual Trip Market");
         foreach(var trip in CityTripCatalog.Load().trips)Check(market.SelectTrip(trip.id),"Market validates and previews "+trip.destination);
         market.SelectTrip("borrowdale");KombiChallenge.Selected=KombiStage.RushHour;
         ScreenCapture.CaptureScreenshot(Path.GetFullPath("Docs/Validation/CityInfrastructure/trip-market.png"));yield return new WaitForSecondsRealtime(.5f);
         bool accepted=market.StartSelected();Check(accepted,"Start Trip accepts the selected reachable itinerary");if(!accepted){Finish();yield break;}
         float until=Time.realtimeSinceStartup+45;
-        while(FindFirstObjectByType<KombiShiftGameDirector>()==null&&Time.realtimeSinceStartup<until)yield return null;
+        while(FindAnyObjectByType<KombiShiftGameDirector>()==null&&Time.realtimeSinceStartup<until)yield return null;
         yield return null;yield return null;
-        var director=FindFirstObjectByType<KombiShiftGameDirector>();
+        var director=FindAnyObjectByType<KombiShiftGameDirector>();
         Check(director!=null&&CityTripSession.Active,"Trip Market start loads actual city gameplay");
         if(director!=null)
         {

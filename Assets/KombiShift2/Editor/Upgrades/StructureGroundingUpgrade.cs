@@ -12,7 +12,7 @@ public static class KombiStructureGroundingUpgrade
  {
   var prefab=PrefabUtility.LoadPrefabContents(Player);Configure(prefab);PrefabUtility.SaveAsPrefabAsset(prefab,Player);PrefabUtility.UnloadPrefabContents(prefab);
   EditorSceneManager.OpenScene(KombiProjectWorkbench.Shift);
-  var car=Object.FindFirstObjectByType<RCCP_CarController>();Configure(car.gameObject);
+  var car=Object.FindAnyObjectByType<RCCP_CarController>();Configure(car.gameObject);
   var roots=EditorSceneManager.GetActiveScene().GetRootGameObjects();
   var systems=Group("00 Systems and Lighting");var environment=Group("01 Environment");var roads=Group("02 Roads and Route");var player=Group("03 Player and Camera");var stops=Group("04 Passenger Stations");var traffic=Group("05 Traffic and Rivals");
   foreach(var root in roots)

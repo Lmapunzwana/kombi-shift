@@ -22,7 +22,7 @@ public sealed class CityRoadPhysicsVerification : MonoBehaviour
         CityTripSelection.Selected=null;KombiChallenge.Selected=KombiStage.Morning;
         EditorSceneManager.OpenScene("Assets/KombiShift2/Scenes/KombiShift_FirstShift.unity");
         foreach(var traffic in UnityEngine.Object.FindObjectsByType<KombiTrafficVehicle>())traffic.gameObject.SetActive(false);
-        UnityEngine.Object.FindFirstObjectByType<CityTrafficFleet>().enabled=false;
+        UnityEngine.Object.FindAnyObjectByType<CityTrafficFleet>().enabled=false;
         EditorSettings.enterPlayModeOptionsEnabled=true;EditorSettings.enterPlayModeOptions=EnterPlayModeOptions.DisableDomainReload;
         new GameObject("Actual city pothole physics verification",typeof(CityRoadPhysicsVerification));EditorApplication.isPlaying=true;
     }
@@ -32,9 +32,9 @@ public sealed class CityRoadPhysicsVerification : MonoBehaviour
     IEnumerator Scenario()
     {
         yield return null;yield return null;
-        var director=FindFirstObjectByType<KombiShiftGameDirector>();var car=director.Vehicle;var body=car.GetComponent<Rigidbody>();
+        var director=FindAnyObjectByType<KombiShiftGameDirector>();var car=director.Vehicle;var body=car.GetComponent<Rigidbody>();
         foreach(var rival in director.Rivals){rival.enabled=false;rival.GetComponent<Rigidbody>().isKinematic=true;}
-        var input=FindFirstObjectByType<RccHiaceTestBootstrap>();input.verificationInput=true;input.verificationThrottle=input.verificationBrake=input.verificationSteering=0;
+        var input=FindAnyObjectByType<RccHiaceTestBootstrap>();input.verificationInput=true;input.verificationThrottle=input.verificationBrake=input.verificationSteering=0;
         var road=FindObjectsByType<CityRoadSurface>().First(r=>r.condition==RoadCondition.Severe&&r.potholes.Length>0);var hole=road.potholes[0];
         Check(Physics.Raycast(hole.centre+Vector3.up*.5f,Vector3.down,out var contact,2f)&&hole.centre.y-contact.point.y>.1f,"Pothole has an actual depressed collision surface");
         var wheels=car.GetComponentsInChildren<WheelCollider>();var wear=car.GetComponent<KombiRoadWear>();

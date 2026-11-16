@@ -32,7 +32,7 @@ public static class KombiCityOverview
         if (Application.isBatchMode || EditorApplication.isPlayingOrWillChangePlaymode) return;
         var scene = SceneManager.GetActiveScene();
         if (scene.path != KombiProjectWorkbench.Shift) return;
-        foreach (var camera in Object.FindObjectsByType<KombiDriveCamera>(FindObjectsSortMode.None))
+        foreach (var camera in Object.FindObjectsByType<KombiDriveCamera>())
             camera.ResetView();
         var roots = scene.GetRootGameObjects();
         var city = roots.Where(x => x.name.StartsWith("NYBlock"));

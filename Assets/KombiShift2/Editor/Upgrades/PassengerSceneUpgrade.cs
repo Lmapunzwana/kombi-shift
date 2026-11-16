@@ -26,13 +26,13 @@ public static class KombiPassengerSceneUpgrade
         wood = Material("Bench wood",new Color(.32f,.23f,.14f));
         metal = Material("Station metal",new Color(.24f,.28f,.27f));
         roof = Material("Station roof",new Color(.47f,.48f,.43f));
-        var director = Object.FindFirstObjectByType<KombiShiftGameDirector>();
-        var hud = Object.FindFirstObjectByType<KombiNavigationHud>();
+        var director = Object.FindAnyObjectByType<KombiShiftGameDirector>();
+        var hud = Object.FindAnyObjectByType<KombiNavigationHud>();
         var data = new SerializedObject(director);
         var stopArray = data.FindProperty("stops");
         Transform[] stops = Enumerable.Range(0,stopArray.arraySize).Select(i => (Transform)stopArray.GetArrayElementAtIndex(i).objectReferenceValue).ToArray();
         Transform[] route = hud.RoutePoints;
-        var player = Object.FindFirstObjectByType<RCCP_CarController>();
+        var player = Object.FindAnyObjectByType<RCCP_CarController>();
         foreach (string name in new[] {"Passenger Stations","Competing Kombis"})
         { var old=GameObject.Find(name);if (old!=null) Object.DestroyImmediate(old); }
         var stationsRoot = new GameObject("Passenger Stations").transform;
@@ -84,7 +84,7 @@ public static class KombiPassengerSceneUpgrade
             rival.transform.position-=rival.transform.forward*(i+1)*9f;
             rival.GetComponent<RivalKombiAI>().Configure(route,stations,18f+i*18f,7.5f+i*.7f);
         }
-        foreach(var renderer in Object.FindObjectsByType<Renderer>(FindObjectsInactive.Include,FindObjectsSortMode.None)) renderer.shadowCastingMode=ShadowCastingMode.Off;
+        foreach(var renderer in Object.FindObjectsByType<Renderer>(FindObjectsInactive.Include)) renderer.shadowCastingMode=ShadowCastingMode.Off;
         EditorSceneManager.MarkSceneDirty(scene);EditorSceneManager.SaveScene(scene);AssetDatabase.SaveAssets();
         KombiPassengerSeatingLaneRepair.Apply();
         Directory.CreateDirectory("Docs");

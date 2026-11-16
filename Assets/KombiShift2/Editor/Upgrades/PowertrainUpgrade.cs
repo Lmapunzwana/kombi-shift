@@ -11,7 +11,7 @@ public static class KombiPowertrainUpgrade
  {
   const string path="Assets/KombiShift2/Prefabs/Vehicles/Player/Hiace_Player.prefab";
   var prefab=PrefabUtility.LoadPrefabContents(path);Configure(prefab);PrefabUtility.SaveAsPrefabAsset(prefab,path);PrefabUtility.UnloadPrefabContents(prefab);
-  EditorSceneManager.OpenScene(KombiProjectWorkbench.Shift);Configure(Object.FindFirstObjectByType<RCCP_CarController>().gameObject);EditorSceneManager.MarkSceneDirty(EditorSceneManager.GetActiveScene());EditorSceneManager.SaveScene(EditorSceneManager.GetActiveScene());AssetDatabase.SaveAssets();
+  EditorSceneManager.OpenScene(KombiProjectWorkbench.Shift);Configure(Object.FindAnyObjectByType<RCCP_CarController>().gameObject);EditorSceneManager.MarkSceneDirty(EditorSceneManager.GetActiveScene());EditorSceneManager.SaveScene(EditorSceneManager.GetActiveScene());AssetDatabase.SaveAssets();
   KombiProjectWorkbench.Validate();Debug.Log("KOMBI_POWERTRAIN_UPGRADED");
  }
  static void Configure(GameObject car)

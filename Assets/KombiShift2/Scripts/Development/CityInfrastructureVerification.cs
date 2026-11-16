@@ -70,7 +70,7 @@ public sealed class CityInfrastructureVerification : MonoBehaviour
     {
         yield return null;yield return null;
         int expectedQueue=KombiChallenge.Selected==KombiStage.RushHour?8:6;
-        var graph=FindFirstObjectByType<CityRoadNetwork>();var director=FindFirstObjectByType<KombiShiftGameDirector>();var player=director.Vehicle;
+        var graph=FindAnyObjectByType<CityRoadNetwork>();var director=FindAnyObjectByType<KombiShiftGameDirector>();var player=director.Vehicle;
         Check(graph.Nodes.Length>4000,"Existing city graph is loaded in actual gameplay");
         yield return VerifySignalReservations(player.GetComponent<Rigidbody>());
         Check(CityTripSession.Active&&director.Stations.Last().name.Contains("Mbare"),"Selected Trip Market destination controls actual stops");
@@ -78,7 +78,7 @@ public sealed class CityInfrastructureVerification : MonoBehaviour
         Check(director.Duration>=CityTripSelection.Distance/7f,"Selected trip timer accounts for route distance and stops");
         foreach(var trip in CityTripCatalog.Load().trips)Check(graph.FindPath(trip.originNode,trip.destinationNode).Count>1,"Reachable city trip: "+trip.destination);
         Check(CityTripCatalog.Load().trips.All(t=>t.Fare(1000,KombiStage.RushHour)>=t.Fare(1000,KombiStage.Morning)),"Peak fares and limits apply to configured routes");
-        var fleet=FindFirstObjectByType<CityTrafficFleet>();
+        var fleet=FindAnyObjectByType<CityTrafficFleet>();
         yield return new WaitForSeconds(8);
         Check(fleet.ActiveCount>0,"Pooled civilian traffic spawns on the selected city network");
         Check(FindObjectsByType<CityTrafficAgent>().All(a=>a.GetComponentsInChildren<WheelCollider>().Length==4&&(Vector3.Distance(a.transform.position,player.transform.position)>=fleet.fullPhysicsDistance || !a.GetComponent<Rigidbody>().isKinematic)),"Nearby civilian traffic uses physical suspension and solid bodies");
@@ -98,7 +98,7 @@ public sealed class CityInfrastructureVerification : MonoBehaviour
         var requested=director.Trips.First();var destination=director.Stations[requested.destination];
         player.transform.SetPositionAndRotation(destination.ServicePoint.position-destination.ServicePoint.forward*45,destination.ServicePoint.rotation);
         yield return new WaitForSeconds(.8f);Check(director.Trips.Any(t=>t.requested),"Approaching a selected destination raises an individual drop-off request");
-        Check(FindFirstObjectByType<KombiDropoffMarker>()!=null,"Circular stopping marker is integrated into actual gameplay");
+        Check(FindAnyObjectByType<KombiDropoffMarker>()!=null,"Circular stopping marker is integrated into actual gameplay");
         player.transform.SetPositionAndRotation(destination.ServicePoint.position,destination.ServicePoint.rotation);
         deadline=Time.time+70;
         while((director.Delivered==0||director.Servicing)&&Time.time<deadline)yield return null;
@@ -118,7 +118,7 @@ public sealed class CityInfrastructureVerification : MonoBehaviour
         foreach(bool optimized in new[]{false,true})
         {
             foreach(var agent in FindObjectsByType<CityTrafficAgent>())agent.decisionInterval=optimized?.12f:.02f;
-            var culling=FindFirstObjectByType<CityDistanceCulling>();if(culling!=null)culling.optimize=optimized;
+            var culling=FindAnyObjectByType<CityDistanceCulling>();if(culling!=null)culling.optimize=optimized;
             var samples=new List<float>();double physicsTotal=0;int physicsSamples=0;float end=Time.realtimeSinceStartup+15;
             while(Time.realtimeSinceStartup<end){samples.Add(Time.unscaledDeltaTime*1000);if(physics.Valid&&physics.LastValue>0){physicsTotal+=physics.LastValue;physicsSamples++;}yield return null;}
             samples.Sort();var agents=FindObjectsByType<CityTrafficAgent>();

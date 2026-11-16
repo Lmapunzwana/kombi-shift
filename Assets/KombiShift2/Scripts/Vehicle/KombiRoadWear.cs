@@ -10,7 +10,7 @@ namespace KombiShift2.Vehicle
         WheelCollider[] wheels;JointSpring[] baseSprings;float nextSpringUpdate;float[] previousDepth,nextImpact;Rigidbody body;KombiVehicleCondition condition;KombiShiftGameDirector director;
         public int RecordedImpacts {get;private set;}
         void Awake(){wheels=GetComponentsInChildren<WheelCollider>();previousDepth=new float[wheels.Length];nextImpact=new float[wheels.Length];body=GetComponent<Rigidbody>();condition=GetComponent<KombiVehicleCondition>();}
-        void Start(){wheels=GetComponentsInChildren<WheelCollider>();previousDepth=new float[wheels.Length];nextImpact=new float[wheels.Length];director=FindFirstObjectByType<KombiShiftGameDirector>();baseSprings=new JointSpring[wheels.Length];for(int i=0;i<wheels.Length;i++)baseSprings[i]=wheels[i].suspensionSpring;}
+        void Start(){wheels=GetComponentsInChildren<WheelCollider>();previousDepth=new float[wheels.Length];nextImpact=new float[wheels.Length];director=FindAnyObjectByType<KombiShiftGameDirector>();baseSprings=new JointSpring[wheels.Length];for(int i=0;i<wheels.Length;i++)baseSprings[i]=wheels[i].suspensionSpring;}
         void FixedUpdate()
         {
             if(baseSprings!=null&&condition!=null&&Time.time>=nextSpringUpdate)

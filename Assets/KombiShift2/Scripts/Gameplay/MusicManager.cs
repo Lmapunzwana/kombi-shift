@@ -22,9 +22,9 @@ public class MusicManager : MonoBehaviour
     public bool showDebugMessages = true;
 
     [Header("On-screen controls")]
-    public bool showControls = true;
+    public bool showControls = false;
     [Tooltip("Small status box at the top-left. Untick when everything works.")]
-    public bool showDebugOnScreen = true;
+    public bool showDebugOnScreen = false;
 
     static MusicManager instance;
 
@@ -108,7 +108,7 @@ public class MusicManager : MonoBehaviour
         {
             searchTimer = 1f;
             cars = FindObjectsByType<RCCP_CarController>(FindObjectsInactive.Include);
-            busStops = FindObjectsByType<PassengerStation>(FindObjectsSortMode.None);
+            busStops = FindObjectsByType<PassengerStation>();
         }
 
         // Use the fastest ACTIVE car (so a parked showcase model doesn't matter)

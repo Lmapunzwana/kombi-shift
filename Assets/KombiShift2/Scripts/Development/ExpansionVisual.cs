@@ -24,7 +24,7 @@ public sealed class KombiExpansionVisual : MonoBehaviour
         ScreenCapture.CaptureScreenshot(Path.GetFullPath("Docs/Validation/Expansion/Visual/01-menu.png"));yield return new WaitForSeconds(.5f);
         yield return SceneManager.LoadSceneAsync("KombiShift_FirstShift");yield return new WaitForSeconds(3f);
         ScreenCapture.CaptureScreenshot(Path.GetFullPath("Docs/Validation/Expansion/Visual/02-expanded-start-hud.png"));yield return new WaitForSeconds(.5f);
-        var director=FindFirstObjectByType<KombiShiftGameDirector>();
+        var director=FindAnyObjectByType<KombiShiftGameDirector>();
         director.Vehicle.transform.SetPositionAndRotation(director.Stations[0].ServicePoint.position,director.Stations[0].ServicePoint.rotation);
         director.Vehicle.GetComponent<Rigidbody>().linearVelocity=Vector3.zero;
         yield return new WaitForSeconds(3f);

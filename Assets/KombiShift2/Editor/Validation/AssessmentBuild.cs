@@ -54,7 +54,7 @@ public static class KombiAssessmentBuild
     public static void ProfileTraffic()
     {
         EditorSceneManager.OpenScene(KombiProjectWorkbench.Shift);
-        var traffic = UnityEngine.Object.FindObjectsByType<KombiTrafficVehicle>(FindObjectsSortMode.None);
+        var traffic = UnityEngine.Object.FindObjectsByType<KombiTrafficVehicle>();
         if (traffic.Length == 0) throw new Exception("No traffic for fixture");
         Physics.SyncTransforms();
         foreach (var vehicle in traffic) { vehicle.ProfileQueries(true); vehicle.ProfileQueries(false); }

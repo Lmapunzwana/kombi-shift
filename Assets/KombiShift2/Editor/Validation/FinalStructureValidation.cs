@@ -10,7 +10,7 @@ public static class KombiFinalStructureValidation
  {
   EditorSceneManager.OpenScene(KombiProjectWorkbench.Menu);Prune(GameObject.Find("Hiace Showcase"),true);EditorSceneManager.MarkSceneDirty(EditorSceneManager.GetActiveScene());EditorSceneManager.SaveScene(EditorSceneManager.GetActiveScene());
   EditorSceneManager.OpenScene(KombiProjectWorkbench.Shift);
-  foreach(var rival in Object.FindObjectsByType<RivalKombiAI>(FindObjectsSortMode.None))Prune(rival.gameObject,false);
+  foreach(var rival in Object.FindObjectsByType<RivalKombiAI>())Prune(rival.gameObject,false);
   EditorSceneManager.MarkSceneDirty(EditorSceneManager.GetActiveScene());EditorSceneManager.SaveScene(EditorSceneManager.GetActiveScene());
   KombiProjectWorkbench.Validate();Debug.Log("KOMBI_FINAL_STRUCTURE_VALIDATED");
  }

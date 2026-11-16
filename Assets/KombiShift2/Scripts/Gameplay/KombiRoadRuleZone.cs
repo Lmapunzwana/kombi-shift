@@ -30,7 +30,7 @@ namespace KombiShift2.Gameplay
                 if (speed > limit)
                 {
                     float severity = Mathf.Clamp((speed - limit) / 10f, 1f, 5f);
-                    var director = FindFirstObjectByType<KombiShiftGameDirector>();
+                    var director = FindAnyObjectByType<KombiShiftGameDirector>();
                     director.Quality.Apply("hump", "Passenger: Slow down for the hump!", -severity * 2f, -2);
                     law.GetComponent<KombiVehicleCondition>().ApplyDamage(speed > limit + 20f ? severity : 0f);
                 }

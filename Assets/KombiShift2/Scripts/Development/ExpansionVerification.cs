@@ -47,9 +47,9 @@ public sealed class KombiExpansionVerification : MonoBehaviour
         result.utc = DateTime.UtcNow.ToString("o"); result.unity = Application.unityVersion;
         result.scope = "Actual scene physics/rival observation, then staged passenger, offence and reset integration. Staged positions are test fixtures; not human driving.";
         yield return new WaitForSeconds(2f);
-        var director = FindFirstObjectByType<KombiShiftGameDirector>();
+        var director = FindAnyObjectByType<KombiShiftGameDirector>();
         var car = director.Vehicle;
-        var hud = FindFirstObjectByType<KombiNavigationHud>();
+        var hud = FindAnyObjectByType<KombiNavigationHud>();
         Check(director.Stations.Length == 7 && hud.RoutePoints.Length > 100, "expanded stations and navigation references");
         float length = 0f; bool contiguous = true, grounded = true;
         for (int i = 1; i < hud.RoutePoints.Length; i++)
@@ -61,7 +61,7 @@ public sealed class KombiExpansionVerification : MonoBehaviour
         Check(director.Rivals.All(x => !x.GetComponent<Rigidbody>().isKinematic && x.GetComponentsInChildren<WheelCollider>().Length == 4), "rivals use dynamic rigidbodies and four suspension wheels");
         Check(director.Rivals.Select(x => x.MarkerColor).Distinct().Count() == 2, "rival identifiers differ");
         // Give the rivals a clear test approach; a stationary player now correctly starts ahead of them.
-        FindFirstObjectByType<RccHiaceTestBootstrap>().enabled=false;
+        FindAnyObjectByType<RccHiaceTestBootstrap>().enabled=false;
         car.GetComponent<Rigidbody>().isKinematic=true; car.transform.position+=car.transform.right*8f; Physics.SyncTransforms();
         var rival = director.Rivals[0]; var start = rival.transform.position;
         foreach (var item in director.Rivals) { Set(item,"departureDelay",0f); }
@@ -82,10 +82,10 @@ public sealed class KombiExpansionVerification : MonoBehaviour
         }
         // Start a fresh scene for isolated service tests, without removing rival passengers artificially.
         yield return SceneManager.LoadSceneAsync("KombiShift_FirstShift"); yield return null; yield return null;
-        director = FindFirstObjectByType<KombiShiftGameDirector>(); car = director.Vehicle;
+        director = FindAnyObjectByType<KombiShiftGameDirector>(); car = director.Vehicle;
         foreach (var item in director.Rivals) { item.enabled = false; item.GetComponent<Rigidbody>().isKinematic = true; }
-        foreach (var traffic in FindObjectsByType<KombiTrafficVehicle>(FindObjectsSortMode.None)) traffic.gameObject.SetActive(false);
-        FindFirstObjectByType<RccHiaceTestBootstrap>().enabled = false;
+        foreach (var traffic in FindObjectsByType<KombiTrafficVehicle>()) traffic.gameObject.SetActive(false);
+        FindAnyObjectByType<RccHiaceTestBootstrap>().enabled = false;
         car.GetComponent<KombiVehicleStability>().enabled = false;
         var rb = car.GetComponent<Rigidbody>(); rb.isKinematic = true;
         float fareEvents = 0; director.OnFareEarned += amount => fareEvents += amount;
@@ -128,7 +128,7 @@ public sealed class KombiExpansionVerification : MonoBehaviour
         while (!director.Finished && Time.realtimeSinceStartup < deadline) yield return null;
         Check(director.Success && director.Delivered >= 6, "intermediate plus terminal deliveries complete Morning stage");
         Time.timeScale=1f; yield return SceneManager.LoadSceneAsync("KombiShift_FirstShift"); yield return null; yield return null;
-        director=FindFirstObjectByType<KombiShiftGameDirector>();
+        director=FindAnyObjectByType<KombiShiftGameDirector>();
         Check(director.Trips.Count==0 && director.Delivered==0 && director.Earnings==0 && director.Quality.XP==0 && director.Condition.Health==100f && director.Law.TotalFines==0, "restart clears trips XP condition and violations");
         Set(director,"timeRemaining",.01f); yield return new WaitForSecondsRealtime(.2f);
         Check(director.Finished && !director.Success,"timeout produces failure");

@@ -79,8 +79,7 @@ namespace KombiShift2.UI
             if(graph.Nodes.Length==0)return;
             Bounds bounds=mapBounds;
             float factor=Mathf.Min((rect.width-35)/Mathf.Max(1,bounds.size.x),(rect.height-35)/Mathf.Max(1,bounds.size.z))*zoom;
-            Vector2 Map(Vector3 p)=>rect.center+pan+new Vector2(p.x-bounds.center.x,-p.z+bounds.center.z)*factor;
-            GUI.BeginGroup(rect);Vector2 Local(Vector3 p)=>Map(p)-rect.position;
+            GUI.BeginGroup(rect);
             GUI.DrawTexture(new Rect(rect.width*.5f+pan.x-bounds.size.x*factor*.5f,rect.height*.5f+pan.y-bounds.size.z*factor*.5f,bounds.size.x*factor,bounds.size.z*factor),topology);
             GUI.EndGroup();
         }

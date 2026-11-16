@@ -27,14 +27,14 @@ public static class KombiExpansionValidation
     public static void Audit()
     {
         EditorSceneManager.OpenScene(KombiProjectWorkbench.Shift);
-        var hud = UnityEngine.Object.FindFirstObjectByType<KombiNavigationHud>();
+        var hud = UnityEngine.Object.FindAnyObjectByType<KombiNavigationHud>();
         var report = new System.Text.StringBuilder();
         report.AppendLine("Route points");
         for (int i = 0; i < hud.RoutePoints.Length; i++) report.AppendLine(i + ": " + hud.RoutePoints[i].position.ToString("F2"));
         report.AppendLine("Stations");
-        foreach (var station in UnityEngine.Object.FindObjectsByType<PassengerStation>(FindObjectsSortMode.None)) report.AppendLine(station.name + ": " + station.ServicePoint.position.ToString("F2") + " waiting=" + station.WaitingCount);
+        foreach (var station in UnityEngine.Object.FindObjectsByType<PassengerStation>()) report.AppendLine(station.name + ": " + station.ServicePoint.position.ToString("F2") + " waiting=" + station.WaitingCount);
         report.AppendLine("Road splines");
-        foreach (var road in UnityEngine.Object.FindObjectsByType<BezierSolution.BezierSpline>(FindObjectsSortMode.None)) report.AppendLine(road.name + ": " + road.GetPoint(0).ToString("F2") + " -> " + road.GetPoint(1).ToString("F2"));
+        foreach (var road in UnityEngine.Object.FindObjectsByType<BezierSolution.BezierSpline>()) report.AppendLine(road.name + ": " + road.GetPoint(0).ToString("F2") + " -> " + road.GetPoint(1).ToString("F2"));
         Directory.CreateDirectory("Docs/Validation/Expansion");
         File.WriteAllText("Docs/Validation/Expansion/map-audit.txt", report.ToString());
         Debug.Log("KOMBI_EXPANSION_AUDIT_COMPLETE");

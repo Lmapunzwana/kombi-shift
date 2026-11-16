@@ -63,7 +63,7 @@ public sealed class KombiAssessmentVerification : MonoBehaviour
         KombiChallenge.Selected=stage;
         if(SceneManager.GetActiveScene().name!="KombiShift_FirstShift") { yield return SceneManager.LoadSceneAsync("KombiShift_FirstShift"); }
         yield return null;yield return null;yield return new WaitForSeconds(.5f);
-        var director=FindFirstObjectByType<KombiShiftGameDirector>();
+        var director=FindAnyObjectByType<KombiShiftGameDirector>();
         var car=director != null ? director.Vehicle : null;
         Check(director!=null&&car!=null,"Gameplay scene has director and vehicle");
         if(director==null||car==null){Complete();yield break;}
@@ -79,8 +79,8 @@ public sealed class KombiAssessmentVerification : MonoBehaviour
         director.SetPaused(false);Check(pauseEvents==2&&Time.timeScale==1,"Resume and pause events");
         // Isolate service/outcomes; rival movement is covered by the separate service suite.
         foreach(var rival in director.Rivals) rival.enabled=false;
-        foreach(var traffic in FindObjectsByType<KombiTrafficVehicle>(FindObjectsSortMode.None))traffic.enabled=false;
-        var input=FindFirstObjectByType<RccHiaceTestBootstrap>();if(input!=null)input.enabled=false;
+        foreach(var traffic in FindObjectsByType<KombiTrafficVehicle>())traffic.enabled=false;
+        var input=FindAnyObjectByType<RccHiaceTestBootstrap>();if(input!=null)input.enabled=false;
         var stability=car.GetComponent<KombiVehicleStability>();if(stability!=null)stability.enabled=false;
         var body=car.GetComponent<Rigidbody>();body.isKinematic=true;
         var first=director.Stations[0];car.transform.SetPositionAndRotation(first.ServicePoint.position,first.ServicePoint.rotation);
@@ -100,10 +100,10 @@ public sealed class KombiAssessmentVerification : MonoBehaviour
         Check(KombiChallenge.Best(stage)>=director.Earnings,"Successful stage score persists");
         // A fresh scene must clear manifests and fail an empty delivery.
         Time.timeScale=1;yield return SceneManager.LoadSceneAsync("KombiShift_FirstShift");yield return null;yield return null;
-        director=FindFirstObjectByType<KombiShiftGameDirector>();car=director.Vehicle;
+        director=FindAnyObjectByType<KombiShiftGameDirector>();car=director.Vehicle;
         Check(director.Passengers==0&&director.Earnings==0&&!director.Finished,"Replay starts with clean passenger and fare state");
         foreach(var rival in director.Rivals)rival.enabled=false;
-        input=FindFirstObjectByType<RccHiaceTestBootstrap>();if(input!=null)input.enabled=false;
+        input=FindAnyObjectByType<RccHiaceTestBootstrap>();if(input!=null)input.enabled=false;
         stability=car.GetComponent<KombiVehicleStability>();if(stability!=null)stability.enabled=false;
         car.GetComponent<Rigidbody>().isKinematic=true;
         // Stage at terminal and point route progress there without pretending it was driven.
@@ -113,12 +113,12 @@ public sealed class KombiAssessmentVerification : MonoBehaviour
         while(!director.Finished&&Time.realtimeSinceStartup<deadline)yield return null;
         Check(director.Finished&&!director.Success,"Empty terminal delivery fails");
         Time.timeScale=1;yield return SceneManager.LoadSceneAsync("KombiShift_FirstShift");yield return null;yield return null;
-        director=FindFirstObjectByType<KombiShiftGameDirector>();
+        director=FindAnyObjectByType<KombiShiftGameDirector>();
         typeof(KombiShiftGameDirector).GetField("timeRemaining",BindingFlags.Instance|BindingFlags.NonPublic).SetValue(director,.01f);
         yield return new WaitForSecondsRealtime(.1f);
         Check(director.Finished&&!director.Success,"Timer expiry fails the shift");
         Time.timeScale=1;yield return SceneManager.LoadSceneAsync("KombiMainMenu");yield return null;
-        Check(FindFirstObjectByType<KombiMainMenu>()!=null&&Time.timeScale==1,"Return to menu restores running time");
+        Check(FindAnyObjectByType<KombiMainMenu>()!=null&&Time.timeScale==1,"Return to menu restores running time");
         Complete();
     }
     void Check(bool ok,string label) { if(report==null)return;(ok?report.passed:report.failed).Add(label);Debug.Log("KOMBI_ASSESSMENT_CHECK "+(ok?"PASS ":"FAIL ")+label); }

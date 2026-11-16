@@ -35,10 +35,12 @@ public sealed class KombiRoadPhysicsVerification : MonoBehaviour
         report.utc=DateTime.UtcNow.ToString("o");report.unity=Application.unityVersion;
         report.scope="Headless actual RCC suspension/hump physics at staged approach positions and initial velocities; no human driving or rendered comfort claim.";
         yield return new WaitForSeconds(2f);
-        var director=FindFirstObjectByType<KombiShiftGameDirector>();var car=director.Vehicle;var body=car.GetComponent<Rigidbody>();
+        var director=FindAnyObjectByType<KombiShiftGameDirector>();
+        var car=director.Vehicle;
+        var body=car.GetComponent<Rigidbody>();
         foreach(var rival in director.Rivals){rival.enabled=false;rival.gameObject.SetActive(false);}
-        foreach(var traffic in FindObjectsByType<KombiTrafficVehicle>(FindObjectsSortMode.None))traffic.gameObject.SetActive(false);
-        FindFirstObjectByType<RccHiaceTestBootstrap>().enabled=false;
+        foreach(var traffic in FindObjectsByType<KombiTrafficVehicle>())traffic.gameObject.SetActive(false);
+        FindAnyObjectByType<RccHiaceTestBootstrap>().enabled=false;
         var inputs=new RCCP_Inputs { throttleInput=0,brakeInput=0,handbrakeInput=0,steerInput=0 };car.Inputs.OverrideInputs(inputs);
         var hump=KombiRoadRules.Active.Where(x=>x.rule==RoadRule.Hump).OrderBy(x=>Vector3.Distance(x.transform.position,car.transform.position)).First();
         var wheels=car.GetComponentsInChildren<WheelCollider>();

@@ -83,7 +83,22 @@ namespace KombiShift2.Traffic
         public string Activity { get; private set; } = "Waiting for shift";
         public event Action<RivalKombiAI, string> ActivityChanged;
         public void Configure(Transform[] points, PassengerStation[] waitingStops, float delay, float cruisingSpeed)
-        { route = points; stations = waitingStops; departureDelay = delay; speed = cruisingSpeed; }
+     {
+                if (target != null)
+                    target.Release(transform);
+
+                target = null;
+                riders.Clear();
+                route = points;
+                stations = waitingStops;
+                departureDelay = delay;
+                speed = cruisingSpeed;
+                destinationIndex = -1;
+                routeIndex = NearestRouteIndex(transform.position);
+                State = RivalState.Cruise;
+                nextDeparture = 0f;
+                shiftEnded = false;
+            }
         public void SetChallenge(float metresPerSecond, float delay) { speed = metresPerSecond; departureDelay = delay; }
         public void SetPersonality(RivalPersonality value, Color color)
         {
@@ -125,7 +140,7 @@ namespace KombiShift2.Traffic
         private void Start()
         {
             routeIndex = NearestRouteIndex(transform.position); startedAt = Time.time;
-            director = FindFirstObjectByType<KombiShiftGameDirector>();
+            director = FindAnyObjectByType<KombiShiftGameDirector>();
             if(CityTripSession.Active)cityNavigation=gameObject.AddComponent<CityRivalNavigation>();
         }
         private void FixedUpdate()

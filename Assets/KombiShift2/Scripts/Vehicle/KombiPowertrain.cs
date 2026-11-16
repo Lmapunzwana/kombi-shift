@@ -23,7 +23,7 @@ namespace KombiShift2.Vehicle
             for(int i=0;i<gearbox.gearRPMs.Length&&i<gearbox.gearRatios.Length;i++)
                 gearbox.gearRPMs[i] = engine.maxEngineRPM / gearbox.gearRatios[i];
             gearbox.shiftingTime = .28f;
-            gearbox.automaticTransmission = true;
+            gearbox.transmissionType = RCCP_Gearbox.TransmissionType.Automatic;
         }
         public static float ThrottleFactor(float speed, bool reversing)
         {
