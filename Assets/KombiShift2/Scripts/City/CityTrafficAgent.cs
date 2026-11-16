@@ -58,15 +58,16 @@ namespace KombiShift2.City
             Vector3 heading=delta.sqrMagnitude>.01f?delta.normalized:transform.forward;
             if(Time.time>=nextDecision)Decide(profile,sample.node,target,heading);
             currentOffset=Mathf.MoveTowards(currentOffset,offset,Time.fixedDeltaTime*1.2f);target+=-Vector3.Cross(Vector3.up,heading)*currentOffset;delta=target-body.position;delta.y=0;
-            if(body.isKinematic){KinematicMove(delta,profile);return;}
-            // Recovery: flipped for 2 s, or wanting to move but stuck for 8 s -> back onto its lane further ahead.
+            // Recovery must also run while distant cars use kinematic movement.
+            // Previously the kinematic return skipped both stuck and gridlock recovery.
             flippedFor=CityRoadRecovery.IsFlipped(transform)?flippedFor+Time.fixedDeltaTime:0f;
-            stuckFor=desiredSpeed>.5f&&body.linearVelocity.magnitude<.3f?stuckFor+Time.fixedDeltaTime:0f;
-            if(flippedFor>2f||stuckFor>8f){RecoverOnLane();return;}
-            // Gridlock breaker: under 5 m of movement in 40 s (longer than any red light) -> leave the road;
-            // the fleet respawns the car elsewhere, which clears jams.
+            float movementSpeed=body.isKinematic?kinematicSpeed:body.linearVelocity.magnitude;
+            stuckFor=desiredSpeed>.5f&&movementSpeed<.3f?stuckFor+Time.fixedDeltaTime:0f;
+            // Gridlock breaker: under 5 m of movement in 40 s -> leave the road for fleet respawn.
             if(jamSince==0f||(body.position-jamAnchor).sqrMagnitude>25f){jamAnchor=body.position;jamSince=Time.time;}
+            if(flippedFor>2f||stuckFor>8f){RecoverOnLane();return;}
             if(Time.time-jamSince>40f){jamSince=0f;gameObject.SetActive(false);return;}
+            if(body.isKinematic){KinematicMove(delta,profile);return;}
             float steering=Vector3.SignedAngle(transform.forward,delta,Vector3.up),error=desiredSpeed-body.linearVelocity.magnitude;
             for(int i=0;i<wheels.Length;i++){wheels[i].steerAngle=i<2?Mathf.Clamp(steering,-34,34):0;wheels[i].motorTorque=error>.05f?Mathf.Min(error,profile.acceleration)*body.mass*wheels[i].radius/4:0;wheels[i].brakeTorque=desiredSpeed<.1f||error<-.25f?Mathf.Min(profile.braking,Mathf.Max(.8f,-error))*body.mass*wheels[i].radius/4:0;}
         }
@@ -76,7 +77,7 @@ namespace KombiShift2.City
             flippedFor=stuckFor=0f;laneIndex=Mathf.Min(laneIndex+2,lane.Count-1);lastProgressTime=Time.time;
             Vector3 point=lane[laneIndex].point,next=lane[Mathf.Min(laneIndex+1,lane.Count-1)].point,forward=next-point;forward.y=0;
             if(forward.sqrMagnitude<.01f)forward=transform.forward;forward.y=0;
-            body.linearVelocity=Vector3.zero;body.angularVelocity=Vector3.zero;
+            if(body.isKinematic)kinematicSpeed=0f;else{body.linearVelocity=Vector3.zero;body.angularVelocity=Vector3.zero;}
             body.position=point+Vector3.up*.35f;body.rotation=Quaternion.LookRotation(forward.normalized,Vector3.up);
             transform.SetPositionAndRotation(body.position,body.rotation);
         }

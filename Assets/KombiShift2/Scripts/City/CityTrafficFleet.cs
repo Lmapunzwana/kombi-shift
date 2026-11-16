@@ -8,7 +8,7 @@ namespace KombiShift2.City
     public sealed class CityTrafficFleet : MonoBehaviour
     {
         public int morningVehicles=28,rushVehicles=48;
-        public float fullPhysicsDistance=350f,spawnDistance=450f;
+        public float fullPhysicsDistance=350f,minimumSpawnDistance=140f,spawnDistance=450f;
         readonly List<CityTrafficAgent> pool=new();readonly Collider[] spawnHits=new Collider[24];CityRoadNetwork graph;Transform player;float next;
         public int ActiveCount {get;private set;}
         public float MeanDecisionMilliseconds {get;private set;}
@@ -75,7 +75,7 @@ namespace KombiShift2.City
             for(int attempt=0;attempt<200;attempt++)
             {
                 int start=Random.Range(0,graph.Nodes.Length);var node=graph.Nodes[start];if(node.component!=0||node.junction||node.links.Length<2)continue;
-                float distance=Vector3.Distance(node.position,player.position);if(distance<80||distance>spawnDistance)continue;
+                float distance=Vector3.Distance(node.position,player.position);if(distance<minimumSpawnDistance||distance>spawnDistance)continue;
                 int end=Random.Range(0,graph.Nodes.Length);if(graph.Nodes[end].component!=0)continue;
                 Vector3 preferred=(node.links.Length>0?graph.Nodes[node.links[0]].position-node.position:player.forward);preferred.y=0;
                 var path=graph.FindDirectedPath(start,end,preferred);if(path.Count<3)continue;
@@ -85,7 +85,7 @@ namespace KombiShift2.City
                 for(int hit=0;hit<nearby;hit++)if(spawnHits[hit].attachedRigidbody!=null&&(spawnHits[hit].attachedRigidbody.GetComponent<CityTrafficAgent>()!=null||spawnHits[hit].attachedRigidbody.CompareTag("Player"))){occupied=true;break;}
                 if(occupied)continue;
                 var camera=Camera.main;
-                if(camera!=null){var viewport=camera.WorldToViewportPoint(point);if(viewport.z>0&&viewport.x>-.1f&&viewport.x<1.1f&&viewport.y>-.1f&&viewport.y<1.1f)continue;}
+                if(camera!=null){var viewport=camera.WorldToViewportPoint(point);if(viewport.z>0&&viewport.x>-.25f&&viewport.x<1.25f&&viewport.y>-.25f&&viewport.y<1.25f)continue;}
                 agent.transform.SetPositionAndRotation(point+Vector3.up*.12f,Quaternion.LookRotation(forward));
                 agent.gameObject.SetActive(true);var body=agent.GetComponent<Rigidbody>();body.isKinematic=false;body.position=agent.transform.position;body.rotation=agent.transform.rotation;body.linearVelocity=Vector3.zero;body.angularVelocity=Vector3.zero;
                 agent.Initialise(graph,start,end,path);return;
