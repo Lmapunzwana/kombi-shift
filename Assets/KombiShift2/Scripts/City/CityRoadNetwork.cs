@@ -125,7 +125,7 @@ namespace KombiShift2.City
         {
             var node=Nodes[path[index]];
             Vector3 direction=Nodes[path[Mathf.Min(index+1,path.Count-1)]].position-Nodes[path[Mathf.Max(0,index-1)]].position;direction.y=0;
-            float offset=(node.width>=13f?4.65f:Mathf.Min(node.width*.22f,1.55f))+lane*3.1f;
+            float offset=(node.width>=13f?4.65f:Mathf.Min(node.width*.30f,2.25f))+lane*3.1f;
             return node.position-Vector3.Cross(Vector3.up,direction.normalized)*offset;
         }
         public float Length(IReadOnlyList<int> path){float length=0;for(int i=1;i<path.Count;i++)length+=Vector3.Distance(Nodes[path[i-1]].position,Nodes[path[i]].position);return length;}
